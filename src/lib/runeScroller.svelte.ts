@@ -3,17 +3,24 @@ import type { AnimationType } from './animations';
 export interface RuneScrollerOptions {
 	animation?: AnimationType;
 	duration?: number;
+	repeat?: boolean;
 }
 
 /**
  * Action pour animer un élément au scroll avec un sentinel invisible juste en dessous
  * @param element - L'élément à animer
- * @param options - Options d'animation (animation type et duration)
+ * @param options - Options d'animation (animation type, duration, et repeat)
  * @returns Objet action Svelte
  *
  * @example
  * ```svelte
+ * <!-- Animation une seule fois -->
  * <div use:runeScroller={{ animation: 'fade-in-up', duration: 1000 }}>
+ *   Content
+ * </div>
+ *
+ * <!-- Animation répétée à chaque scroll -->
+ * <div use:runeScroller={{ animation: 'fade-in-up', duration: 1000, repeat: true }}>
  *   Content
  * </div>
  * ```
@@ -45,10 +52,17 @@ export function runeScroller(element: HTMLElement, options?: RuneScrollerOptions
 	// Observer le sentinel
 	const observer = new IntersectionObserver(
 		(entries) => {
-			if (entries[0].isIntersecting) {
+			const isIntersecting = entries[0].isIntersecting;
+			if (isIntersecting) {
 				// Ajouter la classe is-visible à l'élément
 				element.classList.add('is-visible');
-				observer.disconnect();
+				// Déconnecter si pas en mode repeat
+				if (!options?.repeat) {
+					observer.disconnect();
+				}
+			} else if (options?.repeat) {
+				// En mode repeat, retirer la classe quand le sentinel sort
+				element.classList.remove('is-visible');
 			}
 		},
 		{ threshold: 0 }
@@ -63,6 +77,10 @@ export function runeScroller(element: HTMLElement, options?: RuneScrollerOptions
 			}
 			if (newOptions?.duration) {
 				element.style.setProperty('--duration', `${newOptions.duration}ms`);
+			}
+			// Update repeat option
+			if (newOptions?.repeat !== undefined && newOptions.repeat !== options?.repeat) {
+				options = { ...options, repeat: newOptions.repeat };
 			}
 		},
 		destroy() {

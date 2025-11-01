@@ -59,6 +59,7 @@ rune-scroller-lib/
 ├── src/lib/
 │   ├── Rs.svelte                      # Main animation component (one-time or repeat)
 │   ├── BaseAnimated.svelte            # Base animation implementation
+│   ├── runeScroller.svelte.ts         # Sentinel-based animation action (recommended)
 │   ├── useIntersection.svelte.ts      # IntersectionObserver composables
 │   ├── animate.svelte.ts              # Animation action for direct DOM control
 │   ├── animations.ts                  # Animation configuration & validation
@@ -154,6 +155,107 @@ The `Rs` component is the unified API for all scroll animations:
 	Content
 </Rs>
 ```
+
+---
+
+## 🎯 Sentinel-Based Animation Triggering with `runeScroller`
+
+For more precise control over animation timing, use the `runeScroller` action. This approach uses an invisible **sentinel element** positioned below your content to trigger animations at exactly the right moment.
+
+### Why Sentinels?
+
+- **Accurate Timing** - Instead of triggering when the element enters, sentinel triggers slightly earlier
+- **Consistent Behavior** - Same timing across all screen sizes and content heights
+- **Simple API** - No complex offset calculations needed
+- **Performance** - Minimal overhead, pure CSS animations
+
+### How Sentinels Work
+
+1. An invisible 20px sentinel element is automatically placed **below** your animated element
+2. When the sentinel enters the viewport, it triggers the animation
+3. This ensures content animates in perfectly as it becomes visible
+
+```svelte
+<div use:runeScroller={{ animation: 'fade-in-up', duration: 1000 }}>
+  <!-- Your content here -->
+  <!-- Invisible sentinel is automatically placed below -->
+</div>
+```
+
+### Basic Usage
+
+```svelte
+<script>
+	import { runeScroller } from 'rune-scroller';
+	import 'rune-scroller/animations.css';
+</script>
+
+<!-- Simple fade in with sentinel triggering -->
+<div use:runeScroller={{ animation: 'fade-in' }}>
+	<h2>Animated Heading</h2>
+	<p>Animates when sentinel enters viewport</p>
+</div>
+
+<!-- With duration control -->
+<div use:runeScroller={{ animation: 'fade-in-up', duration: 1500 }}>
+	<div class="card">Smooth animation</div>
+</div>
+```
+
+### Sentinel-Based Examples
+
+**Staggered animations with sentinels:**
+
+```svelte
+<script>
+	import { runeScroller } from 'rune-scroller';
+</script>
+
+<div class="grid">
+	{#each items as item, i}
+		<div use:runeScroller={{ animation: 'fade-in-up', duration: 800 }}>
+			<h3>{item.title}</h3>
+			<p>{item.description}</p>
+		</div>
+	{/each}
+</div>
+```
+
+**Hero section with sentinel triggering:**
+
+```svelte
+<div use:runeScroller={{ animation: 'fade-in-down', duration: 1000 }}>
+	<h1>Welcome to Our Site</h1>
+</div>
+
+<div use:runeScroller={{ animation: 'fade-in-up', duration: 1200 }}>
+	<p>Engaging content appears as you scroll</p>
+</div>
+
+<div use:runeScroller={{ animation: 'zoom-in', duration: 1000 }}>
+	<button class="cta">Get Started</button>
+</div>
+```
+
+### `runeScroller` Options
+
+```typescript
+interface RuneScrollerOptions {
+	animation?: AnimationType; // Animation type (e.g., 'fade-in-up')
+	duration?: number;         // Duration in milliseconds (default: 2000)
+	repeat?: boolean;          // Repeat animation on each scroll (default: false)
+}
+```
+
+### Comparing: `Rs` Component vs `runeScroller` Action
+
+| Feature | `Rs` Component | `runeScroller` Action |
+|---------|---|---|
+| **Usage** | `<Rs>` wrapper | `use:` directive |
+| **Triggering** | IntersectionObserver on element | IntersectionObserver on sentinel |
+| **Timing Control** | offset, threshold props | Automatic sentinel placement |
+| **Repeat Support** | Yes (via `repeat` prop) | Yes (via `repeat` option) |
+| **Best For** | Complex layouts, component isolation | Direct DOM control, simple/mixed elements |
 
 ---
 
@@ -524,6 +626,96 @@ Animate cards with progressive delays:
 ---
 
 ## 🔧 Composables & Actions
+
+### runeScroller (Recommended)
+
+The `runeScroller` action provides sentinel-based animation triggering for precise timing control:
+
+```typescript
+function runeScroller(
+	element: HTMLElement,
+	options?: {
+		animation?: AnimationType;  // Animation type
+		duration?: number;          // Duration in ms (default: 2000)
+		repeat?: boolean;           // Repeat animation on each scroll (default: false)
+	}
+): { update?: (newOptions) => void; destroy?: () => void }
+```
+
+**Key Features:**
+- Automatically creates an invisible 20px sentinel element below your content
+- Triggers animation when sentinel enters viewport
+- Provides consistent timing across all screen sizes
+- Minimal configuration needed
+- Supports both one-time and repeating animations
+
+**Basic Example (One-time animation):**
+
+```svelte
+<script>
+	import { runeScroller } from 'rune-scroller';
+</script>
+
+<!-- Animation plays once when sentinel enters viewport -->
+<div use:runeScroller={{ animation: 'fade-in-up', duration: 1000 }}>
+	Animated content with sentinel-based triggering
+</div>
+```
+
+**Repeating Animation:**
+
+```svelte
+<!-- Animation repeats each time sentinel enters viewport -->
+<div use:runeScroller={{ animation: 'bounce-in', duration: 800, repeat: true }}>
+	This animates every time you scroll past it
+</div>
+```
+
+**Complete Examples:**
+
+```svelte
+<script>
+	import { runeScroller } from 'rune-scroller';
+</script>
+
+<!-- Fade in once on scroll -->
+<div use:runeScroller={{ animation: 'fade-in', duration: 600 }}>
+	<h2>Section Title</h2>
+	<p>Fades in when scrolled into view</p>
+</div>
+
+<!-- Zoom in with longer duration -->
+<div use:runeScroller={{ animation: 'zoom-in-up', duration: 1200 }}>
+	<div class="card">
+		<h3>Card Title</h3>
+		<p>Zooms in from below</p>
+	</div>
+</div>
+
+<!-- Repeating animation for interactive effect -->
+<div use:runeScroller={{ animation: 'bounce-in', duration: 700, repeat: true }}>
+	<button class="interactive-button">Bounces on each scroll</button>
+</div>
+
+<!-- Complex staggered layout -->
+<div class="grid">
+	{#each items as item, i}
+		<div use:runeScroller={{ animation: 'fade-in-up', duration: 800 }}>
+			<h3>{item.title}</h3>
+			<p>{item.description}</p>
+		</div>
+	{/each}
+</div>
+```
+
+**When to use:**
+- ✅ Simple element animations
+- ✅ Consistent timing across layouts
+- ✅ Minimal overhead applications
+- ✅ Both one-time and repeating animations
+- ❌ Complex layout with component isolation (use `Rs` component instead)
+
+---
 
 ### useIntersectionOnce
 
