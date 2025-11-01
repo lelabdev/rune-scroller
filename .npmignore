@@ -1,0 +1,39 @@
+# Development
+src/
+.svelte-kit/
+.vercel
+.netlify
+.wrangler
+vite.config.ts
+tsconfig.json
+svelte.config.js
+prettier.config.js
+eslint.config.js
+
+# Build outputs to exclude
+build/
+.output/
+
+# Demo/Documentation
+node_modules/
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+.github/
+.gitignore
+CLAUDE.md
+
+# Development files
+.env
+.env.local
+.env.*.local

@@ -1,0 +1,170 @@
+/**
+ * Reusable scroll animation styles
+ * These styles define animation effects for scroll-triggered elements
+ */
+
+/* Base animation container */
+.scroll-animate,
+.animated-element {
+	opacity: 0;
+	transition: all var(--duration, 800ms) cubic-bezier(0.34, 1.56, 0.64, 1);
+	transition-delay: var(--delay, 0ms);
+}
+
+.scroll-animate.is-visible,
+.animated-element.is-visible {
+	opacity: 1;
+	/* GPU acceleration only for visible elements to reduce initial memory pressure */
+	will-change: transform, opacity;
+}
+
+/* Animation states - transform-specific initial states */
+/* (opacity: 0 is already set in .scroll-animate base class) */
+
+/* Fade In Up */
+[data-animation='fade-in-up'] {
+	transform: translateY(300px);
+}
+
+[data-animation='fade-in-up'].is-visible {
+	transform: translateY(0);
+}
+
+/* Fade In Down */
+[data-animation='fade-in-down'] {
+	transform: translateY(-300px);
+}
+
+[data-animation='fade-in-down'].is-visible {
+	transform: translateY(0);
+}
+
+/* Fade In Left */
+[data-animation='fade-in-left'] {
+	transform: translateX(-300px);
+}
+
+[data-animation='fade-in-left'].is-visible {
+	transform: translateX(0);
+}
+
+/* Fade In Right */
+[data-animation='fade-in-right'] {
+	transform: translateX(300px);
+}
+
+[data-animation='fade-in-right'].is-visible {
+	transform: translateX(0);
+}
+
+/* Zoom In */
+[data-animation='zoom-in'] {
+	transform: scale(0.3);
+}
+
+[data-animation='zoom-in'].is-visible {
+	transform: scale(1);
+}
+
+/* Zoom Out */
+[data-animation='zoom-out'] {
+	transform: scale(2);
+}
+
+[data-animation='zoom-out'].is-visible {
+	transform: scale(1);
+}
+
+/* Zoom In Up */
+[data-animation='zoom-in-up'] {
+	transform: scale(0.5) translateY(300px);
+}
+
+[data-animation='zoom-in-up'].is-visible {
+	transform: scale(1) translateY(0);
+}
+
+/* Zoom In Left */
+[data-animation='zoom-in-left'] {
+	transform: scale(0.5) translateX(-300px);
+}
+
+[data-animation='zoom-in-left'].is-visible {
+	transform: scale(1) translateX(0);
+}
+
+/* Zoom In Right */
+[data-animation='zoom-in-right'] {
+	transform: scale(0.5) translateX(300px);
+}
+
+[data-animation='zoom-in-right'].is-visible {
+	transform: scale(1) translateX(0);
+}
+
+/* Flip */
+[data-animation='flip'] {
+	transform: perspective(1000px) rotateY(90deg);
+}
+
+[data-animation='flip'].is-visible {
+	transform: perspective(1000px) rotateY(0deg);
+}
+
+/* Flip X */
+[data-animation='flip-x'] {
+	transform: perspective(1000px) rotateX(90deg);
+}
+
+[data-animation='flip-x'].is-visible {
+	transform: perspective(1000px) rotateX(0deg);
+}
+
+/* Slide Rotate */
+[data-animation='slide-rotate'] {
+	transform: translateX(-300px) rotate(-45deg);
+}
+
+[data-animation='slide-rotate'].is-visible {
+	transform: translateX(0) rotate(0deg);
+}
+
+/* Bounce In */
+[data-animation='bounce-in'] {
+	transform: scale(0);
+}
+
+[data-animation='bounce-in'].is-visible {
+	transform: scale(1);
+	animation: bounce var(--duration, 800ms) cubic-bezier(0.68, -0.55, 0.265, 1.55);
+	animation-delay: var(--delay, 0ms);
+}
+
+@keyframes bounce {
+	0% {
+		transform: scale(0);
+	}
+	50% {
+		transform: scale(1.1);
+	}
+	100% {
+		transform: scale(1);
+	}
+}
+
+/* Accessibility: Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+	.scroll-animate,
+	.animated-element {
+		/* Disable animations for users who prefer reduced motion */
+		transition: none;
+		animation: none !important;
+	}
+
+	/* Still show final state without animation */
+	.scroll-animate.is-visible,
+	.animated-element.is-visible {
+		opacity: 1;
+		transform: none !important;
+	}
+}
