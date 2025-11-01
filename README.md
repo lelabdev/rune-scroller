@@ -786,14 +786,16 @@ function animate(
 
 **Bottom Layer - Browser APIs & Utilities:**
 1. **animations.ts** - Animation type definitions, validation, and utilities
-2. **useIntersection.svelte.ts** - IntersectionObserver composables for element visibility detection
+2. **dom-utils.svelte.ts** - Reusable DOM manipulation utilities (CSS variables, animation setup, sentinel creation)
+3. **useIntersection.svelte.ts** - IntersectionObserver composables for element visibility detection
 
 **Middle Layer - Base Implementation:**
-3. **animate.svelte.ts** - Action for direct DOM node animation control
-4. **BaseAnimated.svelte** - Base component handling intersection observer + animation logic
+4. **animate.svelte.ts** - Action for direct DOM node animation control
+5. **runeScroller.svelte.ts** - **Recommended** - Sentinel-based action for precise animation timing
+6. **BaseAnimated.svelte** - Base component handling intersection observer + animation logic
 
 **Top Layer - Consumer API:**
-5. **Rs.svelte** - Main unified component (supports one-time & repeating via `repeat` prop)
+7. **Rs.svelte** - Main unified component (supports one-time & repeating via `repeat` prop)
 
 **Styles:**
 - **animations.css** - All animation keyframes & styles (14 animations, GPU-accelerated)
@@ -804,6 +806,45 @@ function animate(
 - **CSS-Based** : Animations use CSS transforms + transitions (hardware-accelerated)
 - **Type-Safe** : Full TypeScript support
 - **Composable** : Use hooks directly or wrapped components
+- **DRY (Don't Repeat Yourself)** : Utility functions eliminate code duplication
+- **Optimal DOM Manipulation** : Uses `cssText` for efficient single-statement styling
+
+---
+
+## 🚀 Optimizations
+
+### Recent Improvements (v1.1.0)
+
+**DOM Utility Extraction**
+- Extracted repeated DOM manipulation patterns into reusable utilities (`dom-utils.svelte.ts`)
+- `setCSSVariables()` - Centralizes CSS custom property management
+- `setupAnimationElement()` - Consistent animation class/attribute setup
+- `createSentinel()` - Optimized sentinel creation using single `cssText` statement
+- **Result**: Reduced code duplication, improved maintainability, cleaner codebase
+
+**Memory Leak Fixes**
+- Fixed potential memory leaks in repeat mode by tracking observer connection state
+- Observer now properly disconnects in destroy lifecycle
+- Prevents accumulation of observers on long-scroll pages
+- **Result**: Better performance on content-heavy sites with many animations
+
+**Observer Logic Improvements**
+- Fixed `animate.svelte.ts` to properly handle dynamic threshold/rootMargin changes
+- Observer now recreates when trigger options change at runtime
+- Maintains correct state throughout component lifecycle
+- **Result**: More reliable dynamic animation updates
+
+**Bundle Size Optimization**
+- Updated `.npmignore` to exclude test files from npm distribution
+- Removes `*.test.ts`, `*.test.js` and built test files
+- **Result**: ~3.6 KB reduction in package size
+
+### Performance Impact
+
+- **Code Size**: Reduced duplication without sacrificing readability
+- **Runtime Performance**: Fewer DOM operations via optimized `cssText` usage
+- **Memory Efficiency**: Proper observer cleanup prevents memory leaks
+- **Bundle Size**: Test files excluded from distribution
 
 ---
 
