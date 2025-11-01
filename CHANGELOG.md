@@ -5,6 +5,38 @@ All notable changes to Rune Scroller will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.0] - 2025-11-02
+
+### Added
+
+- `runeScroller` action as recommended API for sentinel-based animation triggering
+- `dom-utils.svelte.ts` module with reusable DOM manipulation utilities
+- `repeat` option for `runeScroller` action to support repeating animations
+- Memory leak prevention for animations in repeat mode
+- Updated `.npmignore` to exclude test files from npm distribution
+
+### Improved
+
+- Extracted repeated DOM manipulation patterns into utility functions
+- Fixed observer lifecycle management to properly clean up in all cases
+- Enhanced `animate.svelte.ts` to handle dynamic threshold/rootMargin changes
+- Optimized sentinel creation using single `cssText` statement
+- Reduced code duplication throughout the library
+
+### Performance
+
+- Bundle size further optimized (~3.6 KB reduction from test file exclusion)
+- Fewer DOM operations via optimized utility functions
+- Better memory efficiency on content-heavy pages with many animations
+
+### Documentation
+
+- Updated README with architecture improvements
+- Added section documenting optimizations and performance impact
+- Clarified "14 animations" (was previously listed as "14+" or "26+")
+
+---
+
 ## [0.0.1] - 2024-10-30
 
 ### Added
