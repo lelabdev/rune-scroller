@@ -15,7 +15,7 @@
 - ✅ **Svelte 5 Runes** : `$state`, `$props()` with snippets
 - ✅ **Zero Dependencies** : Pure Svelte 5 + IntersectionObserver
 - ✅ **Native Performance** : GPU-accelerated CSS animations
-- ✅ **14 Built-in Animations** : Fade (5), Zoom (5), Flip (2), Slide, Bounce variants
+- ✅ **14 Built-in Animations** : Fade (5), Zoom (5), Flip (2), Slide Rotate, Bounce
 - ✅ **TypeScript** : Full type coverage with strict mode
 - ✅ **Customizable** : Duration, delay, threshold, offset per element
 - ✅ **Play Once or Repeat** : Control animation behavior
