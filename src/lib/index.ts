@@ -4,6 +4,8 @@ export { default as rs } from './Rs.svelte';
 // Actions
 export { animate } from './animate.svelte';
 export type { AnimateOptions } from './animate.svelte';
+export { runeScroller } from './runeScroller.svelte';
+export type { RuneScrollerOptions } from './runeScroller.svelte';
 
 // Composables
 export { useIntersection, useIntersectionOnce } from './useIntersection.svelte';

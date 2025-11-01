@@ -15,7 +15,7 @@
 - ✅ **Svelte 5 Runes** : `$state`, `$props()` with snippets
 - ✅ **Zero Dependencies** : Pure Svelte 5 + IntersectionObserver
 - ✅ **Native Performance** : GPU-accelerated CSS animations
-- ✅ **26+ Animations** : Fade, Zoom, Flip, Slide, Bounce, and more
+- ✅ **14 Built-in Animations** : Fade (5), Zoom (5), Flip (2), Slide, Bounce variants
 - ✅ **TypeScript** : Full type coverage with strict mode
 - ✅ **Customizable** : Duration, delay, threshold, offset per element
 - ✅ **Play Once or Repeat** : Control animation behavior
@@ -55,19 +55,23 @@ For a typical SvelteKit app:
 ## 📦 Project Structure
 
 ```
-rune-scroller/
+rune-scroller-lib/
 ├── src/lib/
 │   ├── Rs.svelte                      # Main animation component (one-time or repeat)
-│   ├── BaseAnimated.svelte            # Base component (internal)
-│   ├── useIntersection.svelte.ts      # IntersectionObserver composable
-│   ├── animations.ts                  # Animation configuration
-│   ├── animations.css                 # Animation styles
+│   ├── BaseAnimated.svelte            # Base animation implementation
+│   ├── useIntersection.svelte.ts      # IntersectionObserver composables
+│   ├── animate.svelte.ts              # Animation action for direct DOM control
+│   ├── animations.ts                  # Animation configuration & validation
+│   ├── animations.css                 # Animation styles (14 animations)
+│   ├── animations.test.ts             # Animation configuration tests
+│   ├── scroll-animate.test.ts         # Component behavior tests
 │   └── index.ts                       # Library entry point
-├── src/routes/
-│   ├── +layout.svelte
-│   ├── +page.svelte                   # Demo/landing page
-│   └── test/+page.svelte              # Test page
-└── package.json
+├── dist/                              # Built library (created by pnpm build)
+├── package.json                       # npm package configuration
+├── svelte.config.js                   # SvelteKit configuration
+├── vite.config.ts                     # Vite build configuration
+├── tsconfig.json                      # TypeScript configuration
+└── eslint.config.js                   # ESLint configuration
 ```
 
 ---
@@ -303,7 +307,7 @@ Fades in while moving right 100px.
 
 ---
 
-### Zoom (2 variants)
+### Zoom (5 variants)
 
 #### `zoom-in`
 
@@ -327,6 +331,45 @@ Scales from 150% to 100% while fading in.
 	<div class="card">
 		<h2>Zoom Out</h2>
 		<p>Shrinks into view</p>
+	</div>
+</Rs>
+```
+
+#### `zoom-in-up`
+
+Scales from 50% while translating up 50px.
+
+```svelte
+<Rs animation="zoom-in-up">
+	<div class="card">
+		<h2>Zoom In Up</h2>
+		<p>Grows while moving up</p>
+	</div>
+</Rs>
+```
+
+#### `zoom-in-left`
+
+Scales from 50% while translating left 50px.
+
+```svelte
+<Rs animation="zoom-in-left">
+	<div class="card">
+		<h2>Zoom In Left</h2>
+		<p>Grows while moving left</p>
+	</div>
+</Rs>
+```
+
+#### `zoom-in-right`
+
+Scales from 50% while translating right 50px.
+
+```svelte
+<Rs animation="zoom-in-right">
+	<div class="card">
+		<h2>Zoom In Right</h2>
+		<p>Grows while moving right</p>
 	</div>
 </Rs>
 ```
@@ -480,65 +523,25 @@ Animate cards with progressive delays:
 
 ---
 
-## 🎨 Theming
-
-The project includes a modern **Granite + Electric Blue** theme in `src/lib/viking-theme.css`.
-
-### Color Palette
-
-```css
---granite-dark: #0f1419;
---granite-medium: #1a1f2e;
---granite-light: #252d3d;
---electric-blue: #00d9ff;
---text-primary: #f0f2f5;
---text-secondary: #a8b0be;
-```
-
-### Using Animations with Custom CSS Classes
-
-```svelte
-<script>
-	import Rs from '$lib/Rs.svelte';
-</script>
-
-<!-- Apply custom classes to animated content -->
-<Rs animation="fade-in-up" class="my-custom-card">
-	<div>
-		<h2>Title</h2>
-		<p>Content</p>
-	</div>
-</Rs>
-
-<!-- Combine with HTML attributes like data-* -->
-<Rs animation="zoom-in" data-section="features" id="feature-1">
-	<div class="card">
-		<h3>Feature</h3>
-	</div>
-</Rs>
-```
-
----
-
-## 🔧 Composables
+## 🔧 Composables & Actions
 
 ### useIntersectionOnce
 
-For animations that play only once (used by `ScrollAnimate`):
+For one-time animations:
 
 ```typescript
 function useIntersectionOnce(options?: {
 	threshold?: number;
 	rootMargin?: string;
 	root?: Element | null;
-});
+}): { element: HTMLElement | null; isVisible: boolean }
 ```
 
-Returns `{ element, isVisible }` — bind `element` to your target, `isVisible` becomes `true` once.
+Returns `{ element, isVisible }` — bind `element` to your target, `isVisible` becomes `true` once, then observer unobserves.
 
 ### useIntersection
 
-For repeating animations (used by `AnimatedElements`):
+For repeating animations:
 
 ```typescript
 function useIntersection(
@@ -548,22 +551,60 @@ function useIntersection(
 		root?: Element | null;
 	},
 	onVisible?: (isVisible: boolean) => void
-);
+): { element: HTMLElement | null; isVisible: boolean }
 ```
 
-Returns `{ element, isVisible }` — `isVisible` toggles on each scroll.
+Returns `{ element, isVisible }` — `isVisible` toggles `true`/`false` on each scroll pass.
+
+### animate Action
+
+For direct DOM animation control without component wrapper:
+
+```typescript
+function animate(
+	node: HTMLElement,
+	options?: {
+		animation?: AnimationType;    // Default: 'fade-in'
+		duration?: number;             // Default: 800
+		delay?: number;                // Default: 0
+		offset?: number;               // Optional trigger offset
+		threshold?: number;            // Default: 0
+		rootMargin?: string;           // Optional custom margin
+	}
+): { update?: (newOptions) => void; destroy?: () => void }
+```
+
+**Example:**
+
+```svelte
+<script>
+	import { animate } from 'rune-scroller';
+</script>
+
+<div use:animate={{ animation: 'fade-in-up', duration: 1000, delay: 200 }}>
+	Animated content
+</div>
+```
 
 ---
 
 ## 🏗️ Architecture
 
-### Animation System
+### Core Layer Architecture
 
-1. **animations.ts** - Configuration and validation
-2. **animations.css** - Reusable animation styles (exported via npm)
-3. **useIntersection.svelte.ts** - IntersectionObserver logic
-4. **BaseAnimated.svelte** - Base animation implementation
-5. **Rs.svelte** - Main component (one-time or repeating based on `repeat` prop)
+**Bottom Layer - Browser APIs & Utilities:**
+1. **animations.ts** - Animation type definitions, validation, and utilities
+2. **useIntersection.svelte.ts** - IntersectionObserver composables for element visibility detection
+
+**Middle Layer - Base Implementation:**
+3. **animate.svelte.ts** - Action for direct DOM node animation control
+4. **BaseAnimated.svelte** - Base component handling intersection observer + animation logic
+
+**Top Layer - Consumer API:**
+5. **Rs.svelte** - Main unified component (supports one-time & repeating via `repeat` prop)
+
+**Styles:**
+- **animations.css** - All animation keyframes & styles (14 animations, GPU-accelerated)
 
 ### Key Principles
 
@@ -596,10 +637,22 @@ pnpm dev
 # Type checking
 pnpm check
 
+# Type checking in watch mode
+pnpm check:watch
+
 # Format code
 pnpm format
 
-# Preview build
+# Lint code
+pnpm lint
+
+# Build library for npm
+pnpm build
+
+# Run tests
+pnpm test
+
+# Preview built library
 pnpm preview
 ```
 
@@ -608,9 +661,10 @@ pnpm preview
 ## 📝 Notes
 
 - **Why "Rune"?** Svelte 5 uses **Runes** (`$state`, `$props()`) as core reactivity primitives
-- **Theme Name** : Granite + Electric Blue = Modern, minimalist aesthetic
-- **No Dependencies** : Pure Svelte 5 + Browser APIs
+- **Zero Dependencies** : Pure Svelte 5 + Native Browser APIs (IntersectionObserver)
 - **Extensible** : Add new animations by extending `animations.ts` and `animations.css`
+- **Library Only** : This is the library repository. The demo website is in `rune-scroller-site`
+- **Published as npm Package** : `rune-scroller` on npm registry
 
 ---
 

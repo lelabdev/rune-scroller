@@ -11,8 +11,9 @@ It provides reusable components and composables for adding scroll-triggered anim
 ### What This Library Provides
 
 - **Rs Component** - Unified scroll animation component (one-time or repeating via `repeat` prop)
+- **animate Action** - Direct DOM node animation control without component wrapper
 - **useIntersection Composables** - For custom scroll detection
-- **26+ Built-in Animations** - Fade, zoom, flip, slide, bounce variants
+- **14 Built-in Animations** - Fade (5), Zoom (5), Flip (2), Slide, Bounce variants
 - **Zero Dependencies** - Pure Svelte 5 + IntersectionObserver API
 - **TypeScript Support** - Full type safety with strict mode
 - **HTML Attribute Support** - Accept any HTML attributes like `data-*`, `class`, `id`, etc.
@@ -53,7 +54,7 @@ pnpm format
 # Lint code
 pnpm lint
 
-# Build for npm
+# Build library for npm
 pnpm build
 
 # Run tests
@@ -139,17 +140,24 @@ This library uses Svelte 5's new runes syntax:
 
 **Animations Config** (`src/lib/animations.ts`):
 
-- Centralized animation definitions
-- `isValidAnimation()` function for validation
+- Centralized animation definitions (AnimationType type with 14 variants)
+- `calculateRootMargin()` utility function for offset → rootMargin conversion
 - Default options for timing and easing
-- Supports 26+ animation types
+- Full type coverage with strict TypeScript
 
 **Animation Styles** (`src/lib/animations.css`):
 
-- All animation keyframes and styles (26+ animations)
+- All animation keyframes and styles (14 animations)
 - CSS custom properties (`--duration`, `--delay`) for dynamic animation timing
 - GPU-accelerated animations with `will-change` hints
 - Accessibility support: `prefers-reduced-motion` media query
+
+**animate Action** (`src/lib/animate.svelte.ts`):
+
+- Svelte action for direct DOM node animation control
+- Supports all animation options without component wrapper
+- Single-use animation triggering with IntersectionObserver
+- Dynamic update support via action's `update()` method
 
 ### Library Entry Point
 
@@ -166,7 +174,7 @@ The library is exported via `src/lib/index.ts` which exports:
 **Key package.json fields:**
 
 - `name`: `rune-scroller`
-- `version`: Semantic versioning (currently 0.0.1)
+- `version`: Semantic versioning (currently 0.0.2)
 - `type`: `module` (ES modules)
 - `exports`: Configured for both ES and CommonJS
 - `main`: Points to built library entry point

@@ -24,7 +24,7 @@ export type AnimationType =
 
 /**
  * Calculate rootMargin for IntersectionObserver from offset or custom rootMargin
- * @param offset - Viewport offset (0-100). 0 = bottom trigger, 100 = top trigger
+ * @param offset - Viewport offset (0-100). 0 = bottom of viewport touches top of element, 100 = top of viewport touches top of element
  * @param rootMargin - Custom rootMargin string (takes precedence over offset)
  * @returns rootMargin string for IntersectionObserver
  */
