@@ -1,4 +1,5 @@
 import type { AnimationType } from './animations';
+import { setCSSVariables, setupAnimationElement, createSentinel } from './dom-utils.svelte';
 
 export interface RuneScrollerOptions {
 	animation?: AnimationType;
@@ -26,30 +27,17 @@ export interface RuneScrollerOptions {
  * ```
  */
 export function runeScroller(element: HTMLElement, options?: RuneScrollerOptions) {
-	// Setup animation classes et variables CSS si options sont fournies
+	// Setup animation classes et variables CSS
 	if (options?.animation || options?.duration) {
-		element.classList.add('scroll-animate');
-		if (options.animation) {
-			element.setAttribute('data-animation', options.animation);
-		}
-		if (options.duration) {
-			element.style.setProperty('--duration', `${options.duration}ms`);
-		}
-		element.style.setProperty('--delay', '0ms');
+		setupAnimationElement(element, options.animation!);
+		setCSSVariables(element, options.duration);
 	}
 
 	// Créer le sentinel invisible juste en dessous
-	const sentinel = document.createElement('div');
-	sentinel.style.height = '20px';
-	sentinel.style.margin = '0';
-	sentinel.style.padding = '0';
-	sentinel.style.marginTop = '0.5rem';
-	sentinel.style.visibility = 'hidden';
+	const sentinel = createSentinel(element);
 
-	// Insérer le sentinel après l'élément
-	element.parentNode?.insertBefore(sentinel, element.nextSibling);
-
-	// Observer le sentinel
+	// Observer le sentinel avec cleanup tracking
+	let observerConnected = true;
 	const observer = new IntersectionObserver(
 		(entries) => {
 			const isIntersecting = entries[0].isIntersecting;
@@ -59,6 +47,7 @@ export function runeScroller(element: HTMLElement, options?: RuneScrollerOptions
 				// Déconnecter si pas en mode repeat
 				if (!options?.repeat) {
 					observer.disconnect();
+					observerConnected = false;
 				}
 			} else if (options?.repeat) {
 				// En mode repeat, retirer la classe quand le sentinel sort
@@ -76,7 +65,7 @@ export function runeScroller(element: HTMLElement, options?: RuneScrollerOptions
 				element.setAttribute('data-animation', newOptions.animation);
 			}
 			if (newOptions?.duration) {
-				element.style.setProperty('--duration', `${newOptions.duration}ms`);
+				setCSSVariables(element, newOptions.duration);
 			}
 			// Update repeat option
 			if (newOptions?.repeat !== undefined && newOptions.repeat !== options?.repeat) {
@@ -84,7 +73,9 @@ export function runeScroller(element: HTMLElement, options?: RuneScrollerOptions
 			}
 		},
 		destroy() {
-			observer.disconnect();
+			if (observerConnected) {
+				observer.disconnect();
+			}
 			sentinel.remove();
 		}
 	};

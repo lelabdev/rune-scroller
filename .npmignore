@@ -32,6 +32,10 @@ package-lock.json
 .github/
 .gitignore
 CLAUDE.md
+*.test.ts
+*.test.js
+dist/**/*.test.js
+dist/**/*.test.ts
 
 # Development files
 .env

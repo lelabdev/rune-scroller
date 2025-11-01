@@ -1,5 +1,6 @@
 import type { Action } from 'svelte/action';
 import { calculateRootMargin, type AnimationType } from './animations';
+import { setCSSVariables, setupAnimationElement } from './dom-utils.svelte';
 
 export interface AnimateOptions {
 	animation?: AnimationType;
@@ -22,7 +23,7 @@ export interface AnimateOptions {
  * ```
  */
 export const animate: Action<HTMLElement, AnimateOptions> = (node, options = {}) => {
-	const {
+	let {
 		animation = 'fade-in',
 		duration = 800,
 		delay = 0,
@@ -32,18 +33,15 @@ export const animate: Action<HTMLElement, AnimateOptions> = (node, options = {})
 	} = options;
 
 	// Calculate rootMargin from offset (0-100%)
-	const finalRootMargin = calculateRootMargin(offset, rootMargin);
+	let finalRootMargin = calculateRootMargin(offset, rootMargin);
 
-	// Set CSS custom properties for timing
-	node.style.setProperty('--duration', `${duration}ms`);
-	node.style.setProperty('--delay', `${delay}ms`);
-
-	// Add base animation class and data attribute
-	node.classList.add('scroll-animate');
-	node.setAttribute('data-animation', animation);
+	// Setup animation with utilities
+	setupAnimationElement(node, animation);
+	setCSSVariables(node, duration, delay);
 
 	// Track if animation has been triggered
 	let animated = false;
+	let observerConnected = true;
 
 	// Create IntersectionObserver for one-time animation
 	const observer = new IntersectionObserver(
@@ -55,6 +53,7 @@ export const animate: Action<HTMLElement, AnimateOptions> = (node, options = {})
 					animated = true;
 					// Stop observing after animation triggers
 					observer.unobserve(node);
+					observerConnected = false;
 				}
 			});
 		},
@@ -69,25 +68,50 @@ export const animate: Action<HTMLElement, AnimateOptions> = (node, options = {})
 	return {
 		update(newOptions: AnimateOptions) {
 			const {
-				duration: newDuration = 800,
-				delay: newDelay = 0,
-				animation: newAnimation
+				duration: newDuration,
+				delay: newDelay,
+				animation: newAnimation,
+				offset: newOffset,
+				threshold: newThreshold,
+				rootMargin: newRootMargin
 			} = newOptions;
 
 			// Update CSS properties
-			if (newDuration !== duration) {
-				node.style.setProperty('--duration', `${newDuration}ms`);
+			if (newDuration !== undefined) {
+				duration = newDuration;
+				setCSSVariables(node, duration, newDelay ?? delay);
 			}
-			if (newDelay !== delay) {
-				node.style.setProperty('--delay', `${newDelay}ms`);
+			if (newDelay !== undefined && newDelay !== delay) {
+				delay = newDelay;
+				setCSSVariables(node, duration, delay);
 			}
 			if (newAnimation && newAnimation !== animation) {
+				animation = newAnimation;
 				node.setAttribute('data-animation', newAnimation);
+			}
+
+			// Recreate observer if threshold or rootMargin changed
+			if (newThreshold !== undefined || newOffset !== undefined || newRootMargin !== undefined) {
+				if (observerConnected) {
+					observer.disconnect();
+					observerConnected = false;
+				}
+				threshold = newThreshold ?? threshold;
+				offset = newOffset ?? offset;
+				rootMargin = newRootMargin ?? rootMargin;
+				finalRootMargin = calculateRootMargin(offset, rootMargin);
+
+				if (!animated) {
+					observer.observe(node);
+					observerConnected = true;
+				}
 			}
 		},
 
 		destroy() {
-			observer.disconnect();
+			if (observerConnected) {
+				observer.disconnect();
+			}
 		}
 	};
 };
