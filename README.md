@@ -725,6 +725,8 @@ pnpm preview
 
 ## 🔗 Links
 
+- [Live Demo](https://runescroller.lelab.dev/) - Interactive showcase of all animations
+- [npm Package](https://www.npmjs.com/package/rune-scroller) - Install from npm
 - [Svelte 5 Documentation](https://svelte.dev)
 - [IntersectionObserver MDN](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API)
 - [LeLab.dev](https://lelab.dev)

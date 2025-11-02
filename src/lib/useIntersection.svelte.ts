@@ -1,20 +1,10 @@
 import { onMount } from 'svelte';
+import type { IntersectionOptions, UseIntersectionReturn } from './types';
 
 /**
  * Composable for handling IntersectionObserver logic
  * Reduces duplication between animation components
  */
-
-export interface IntersectionOptions {
-	threshold?: number | number[];
-	rootMargin?: string;
-	root?: Element | null;
-}
-
-export interface UseIntersectionReturn {
-	element: HTMLElement | null;
-	isVisible: boolean;
-}
 
 /**
  * Factory function to create intersection observer composables

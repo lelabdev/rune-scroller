@@ -1,11 +1,5 @@
-import type { AnimationType } from './animations';
+import type { RuneScrollerOptions } from './types';
 import { setCSSVariables, setupAnimationElement, createSentinel } from './dom-utils.svelte';
-
-export interface RuneScrollerOptions {
-	animation?: AnimationType;
-	duration?: number;
-	repeat?: boolean;
-}
 
 /**
  * Action pour animer un élément au scroll avec un sentinel invisible juste en dessous

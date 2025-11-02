@@ -1,15 +1,7 @@
 import type { Action } from 'svelte/action';
-import { calculateRootMargin, type AnimationType } from './animations';
+import { calculateRootMargin } from './animations';
+import type { AnimateOptions } from './types';
 import { setCSSVariables, setupAnimationElement } from './dom-utils.svelte';
-
-export interface AnimateOptions {
-	animation?: AnimationType;
-	duration?: number;
-	delay?: number;
-	offset?: number;
-	threshold?: number;
-	rootMargin?: string;
-}
 
 /**
  * Svelte action for scroll animations

@@ -29,13 +29,22 @@ export function setupAnimationElement(element: HTMLElement, animation: Animation
 
 /**
  * Create and inject invisible sentinel element for observer-based triggering
- * @param element - Reference element (sentinel will be placed after it)
+ * Positioned absolutely at the bottom of the element to avoid breaking flex/grid layouts
+ * @param element - Reference element (sentinel will be positioned inside it)
  * @returns The created sentinel element
  */
 export function createSentinel(element: HTMLElement): HTMLElement {
 	const sentinel = document.createElement('div');
-	// Use cssText for efficient single-statement styling
-	sentinel.style.cssText = 'height:20px;margin-top:0.5rem;visibility:hidden';
-	element.parentNode?.insertBefore(sentinel, element.nextSibling);
+	// Position sentinel at the bottom of the element without affecting layout flow
+	// Uses absolute positioning so it doesn't break flex/grid, and pointer-events:none to prevent interactions
+	sentinel.style.cssText =
+		'position:absolute;bottom:0;left:0;right:0;height:20px;visibility:hidden;pointer-events:none';
+
+	// Ensure element has position context for absolute positioning
+	if (element.style.position === '' || element.style.position === 'static') {
+		element.style.position = 'relative';
+	}
+
+	element.appendChild(sentinel);
 	return sentinel;
 }
