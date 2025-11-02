@@ -1,5 +1,9 @@
 # ⚡ Rune Scroller
 
+<div align="center">
+	<img src="./logo.png" alt="Rune Scroller Logo" width="200" />
+</div>
+
 **Native Scroll Animations for Svelte 5** — Built with **Svelte 5 Runes** and **IntersectionObserver API**. No external dependencies, pure performance.
 
 > 🚀 **Open Source Project** by **[ludoloops](https://github.com/ludoloops)** at **[LeLab.dev](https://lelab.dev)**
@@ -57,9 +61,7 @@ For a typical SvelteKit app:
 ```
 rune-scroller-lib/
 ├── src/lib/
-│   ├── Rs.svelte                      # Main animation component (one-time or repeat)
-│   ├── BaseAnimated.svelte            # Base animation implementation
-│   ├── runeScroller.svelte.ts         # Sentinel-based animation action (recommended)
+│   ├── runeScroller.svelte.ts         # Main animation action (sentinel-based)
 │   ├── useIntersection.svelte.ts      # IntersectionObserver composables
 │   ├── animate.svelte.ts              # Animation action for direct DOM control
 │   ├── animations.ts                  # Animation configuration & validation
@@ -92,115 +94,51 @@ pnpm add rune-scroller
 yarn add rune-scroller
 ```
 
-### Basic Usage with `Rs` Component
+### Basic Usage with `runeScroller` Action
 
-The `Rs` component is the main component for scroll animations. Use the `repeat` prop to control animation behavior:
-
-```svelte
-<script>
-	import Rs from 'rune-scroller';
-	import 'rune-scroller/animations.css';
-</script>
-
-<!-- Play animation once when element enters viewport (default) -->
-<Rs animation="fade-in">
-	<div class="card">
-		<h2>Hello World</h2>
-		<p>This element fades in once</p>
-	</div>
-</Rs>
-
-<!-- Repeat animation every time element enters viewport -->
-<Rs animation="zoom-in" repeat>
-	<div class="card">
-		<h2>Repeating Animation</h2>
-		<p>This triggers each time you scroll past it</p>
-	</div>
-</Rs>
-```
-
-### In SvelteKit/Local Development
+Use the `runeScroller` action with the `use:` directive for sentinel-based animation triggering:
 
 ```svelte
 <script>
-	import Rs from '$lib/Rs.svelte';
-	import '$lib/animations.css';
+	import runeScroller from 'rune-scroller';
 </script>
 
-<Rs animation="fade-in-up" duration={1000} delay={200}>
-	<div class="card">
-		<h2>Animated Content</h2>
-	</div>
-</Rs>
+<!-- Simple fade in animation -->
+<div use:runeScroller={{ animation: 'fade-in' }}>
+	<h2>Animated Heading</h2>
+	<p>Animates when scrolled into view</p>
+</div>
+
+<!-- With custom duration -->
+<div use:runeScroller={{ animation: 'fade-in-up', duration: 1500 }}>
+	<div class="card">Smooth fade and slide</div>
+</div>
+
+<!-- Repeat animation on every scroll -->
+<div use:runeScroller={{ animation: 'bounce-in', duration: 800, repeat: true }}>
+	<button>Bounces on every scroll</button>
+</div>
 ```
 
-### API Overview
+### How It Works
 
-The `Rs` component is the unified API for all scroll animations:
+The `runeScroller` action uses an invisible **sentinel element** positioned below your content:
 
-```svelte
-<!-- Animation plays once (default) -->
-<Rs animation="fade-in">Content</Rs>
-
-<!-- Animation repeats on every scroll -->
-<Rs animation="fade-in" repeat>Content</Rs>
-
-<!-- Customize timing -->
-<Rs animation="zoom-in" duration={1200} delay={300}>
-	Content
-</Rs>
-
-<!-- Use with any HTML attribute -->
-<Rs animation="bounce-in" class="my-class" data-test="value">
-	Content
-</Rs>
-```
+1. A 20px sentinel element is automatically placed **below** your animated element
+2. When the sentinel enters the viewport, it triggers the animation
+3. This ensures consistent, accurate timing across all screen sizes
 
 ---
 
-## 🎯 Sentinel-Based Animation Triggering with `runeScroller`
-
-For more precise control over animation timing, use the `runeScroller` action. This approach uses an invisible **sentinel element** positioned below your content to trigger animations at exactly the right moment.
+## 🎯 Sentinel-Based Animation Triggering
 
 ### Why Sentinels?
 
-- **Accurate Timing** - Instead of triggering when the element enters, sentinel triggers slightly earlier
+- **Accurate Timing** - Triggers at the perfect moment for smooth animations
 - **Consistent Behavior** - Same timing across all screen sizes and content heights
 - **Simple API** - No complex offset calculations needed
 - **Performance** - Minimal overhead, pure CSS animations
-
-### How Sentinels Work
-
-1. An invisible 20px sentinel element is automatically placed **below** your animated element
-2. When the sentinel enters the viewport, it triggers the animation
-3. This ensures content animates in perfectly as it becomes visible
-
-```svelte
-<div use:runeScroller={{ animation: 'fade-in-up', duration: 1000 }}>
-  <!-- Your content here -->
-  <!-- Invisible sentinel is automatically placed below -->
-</div>
-```
-
-### Basic Usage
-
-```svelte
-<script>
-	import { runeScroller } from 'rune-scroller';
-	import 'rune-scroller/animations.css';
-</script>
-
-<!-- Simple fade in with sentinel triggering -->
-<div use:runeScroller={{ animation: 'fade-in' }}>
-	<h2>Animated Heading</h2>
-	<p>Animates when sentinel enters viewport</p>
-</div>
-
-<!-- With duration control -->
-<div use:runeScroller={{ animation: 'fade-in-up', duration: 1500 }}>
-	<div class="card">Smooth animation</div>
-</div>
-```
+- **Reliable** - Automatic sentinel placement handles edge cases
 
 ### Sentinel-Based Examples
 
@@ -208,7 +146,7 @@ For more precise control over animation timing, use the `runeScroller` action. T
 
 ```svelte
 <script>
-	import { runeScroller } from 'rune-scroller';
+	import runeScroller from 'rune-scroller';
 </script>
 
 <div class="grid">
@@ -247,95 +185,6 @@ interface RuneScrollerOptions {
 }
 ```
 
-### Comparing: `Rs` Component vs `runeScroller` Action
-
-| Feature | `Rs` Component | `runeScroller` Action |
-|---------|---|---|
-| **Usage** | `<Rs>` wrapper | `use:` directive |
-| **Triggering** | IntersectionObserver on element | IntersectionObserver on sentinel |
-| **Timing Control** | offset, threshold props | Automatic sentinel placement |
-| **Repeat Support** | Yes (via `repeat` prop) | Yes (via `repeat` option) |
-| **Best For** | Complex layouts, component isolation | Direct DOM control, simple/mixed elements |
-
----
-
-## ⚙️ Component Props
-
-### Rs Component
-
-```typescript
-interface RsProps {
-	animation?: string; // Animation type (default: 'fade-in')
-	threshold?: number; // Visibility threshold (default: 0.5)
-	offset?: number; // Trigger offset 0-100% (optional, uses default if not set)
-	rootMargin?: string; // Observer margin (overrides offset if set)
-	duration?: number; // Duration in ms (default: 800)
-	delay?: number; // Delay in ms (default: 0)
-	repeat?: boolean; // Repeat animation on every scroll (default: false)
-	children: Snippet; // Content to animate
-	[key: string]: any; // Accepts any HTML attributes (e.g., data-testid, class, etc.)
-}
-```
-
-#### `offset` Prop (Optional)
-
-Controls when the animation triggers as the element scrolls into view. If not specified, uses default behavior (`-10% 0px -10% 0px`).
-
-- `offset={0}` — Triggers when element touches bottom of screen
-- `offset={50}` — Triggers at middle of screen
-- `offset={100}` — Triggers when element reaches top of screen
-- **Not set** — Uses default behavior (triggers in middle ~80% band)
-
-**Examples:**
-
-```svelte
-<!-- Early trigger (bottom of screen) -->
-<Rs animation="fade-in-up" offset={0}>
-	<div class="card">Animates early</div>
-</Rs>
-
-<!-- Late trigger (top of screen) -->
-<Rs animation="fade-in-up" offset={100}>
-	<div class="card">Animates late</div>
-</Rs>
-
-<!-- Custom timing -->
-<Rs animation="fade-in-up" offset={75}>
-	<div class="card">Animates at 75%</div>
-</Rs>
-
-<!-- Repeat animation on every scroll -->
-<Rs animation="fade-in-up" offset={50} repeat>
-	<div class="card">Animates every time</div>
-</Rs>
-```
-
-**Full example with all props:**
-
-```svelte
-<Rs
-	animation="fade-in-up"
-	duration={1200}
-	delay={300}
-	threshold={0.8}
-	offset={25}
-	repeat={false}
-	data-testid="custom-animation"
->
-	<div class="card">
-		<h2>Custom Timing</h2>
-		<p>Duration: 1200ms, Delay: 300ms, Threshold: 80%, Offset: 25%</p>
-	</div>
-</Rs>
-```
-
-#### Repeat Behavior
-
-Use the `repeat` prop to control animation behavior:
-
-- `repeat={false}` (default) - Animation plays **once** when element enters viewport
-- `repeat={true}` - Animation **repeats** every time element enters viewport
-
 ---
 
 ## 🎨 All Animations with Examples
@@ -347,12 +196,14 @@ Use the `repeat` prop to control animation behavior:
 Simple opacity fade from transparent to visible.
 
 ```svelte
-<Rs animation="fade-in">
-	<div class="card">
-		<h2>Fade In</h2>
-		<p>Simple fade entrance</p>
-	</div>
-</Rs>
+<script>
+	import runeScroller from 'rune-scroller';
+</script>
+
+<div use:runeScroller={{ animation: 'fade-in' }}>
+	<h2>Fade In</h2>
+	<p>Simple fade entrance</p>
+</div>
 ```
 
 #### `fade-in-up`
@@ -360,12 +211,10 @@ Simple opacity fade from transparent to visible.
 Fades in while moving up 100px.
 
 ```svelte
-<Rs animation="fade-in-up">
-	<div class="card">
-		<h2>Fade In Up</h2>
-		<p>Rises from below</p>
-	</div>
-</Rs>
+<div use:runeScroller={{ animation: 'fade-in-up' }}>
+	<h2>Fade In Up</h2>
+	<p>Rises from below</p>
+</div>
 ```
 
 #### `fade-in-down`
@@ -373,12 +222,10 @@ Fades in while moving up 100px.
 Fades in while moving down 100px.
 
 ```svelte
-<Rs animation="fade-in-down">
-	<div class="card">
-		<h2>Fade In Down</h2>
-		<p>Descends from above</p>
-	</div>
-</Rs>
+<div use:runeScroller={{ animation: 'fade-in-down' }}>
+	<h2>Fade In Down</h2>
+	<p>Descends from above</p>
+</div>
 ```
 
 #### `fade-in-left`
@@ -386,12 +233,10 @@ Fades in while moving down 100px.
 Fades in while moving left 100px.
 
 ```svelte
-<Rs animation="fade-in-left">
-	<div class="card">
-		<h2>Fade In Left</h2>
-		<p>Comes from the right</p>
-	</div>
-</Rs>
+<div use:runeScroller={{ animation: 'fade-in-left' }}>
+	<h2>Fade In Left</h2>
+	<p>Comes from the right</p>
+</div>
 ```
 
 #### `fade-in-right`
@@ -399,12 +244,10 @@ Fades in while moving left 100px.
 Fades in while moving right 100px.
 
 ```svelte
-<Rs animation="fade-in-right">
-	<div class="card">
-		<h2>Fade In Right</h2>
-		<p>Comes from the left</p>
-	</div>
-</Rs>
+<div use:runeScroller={{ animation: 'fade-in-right' }}>
+	<h2>Fade In Right</h2>
+	<p>Comes from the left</p>
+</div>
 ```
 
 ---
@@ -416,12 +259,10 @@ Fades in while moving right 100px.
 Scales from 50% to 100% while fading in.
 
 ```svelte
-<Rs animation="zoom-in">
-	<div class="card">
-		<h2>Zoom In</h2>
-		<p>Grows into view</p>
-	</div>
-</Rs>
+<div use:runeScroller={{ animation: 'zoom-in' }}>
+	<h2>Zoom In</h2>
+	<p>Grows into view</p>
+</div>
 ```
 
 #### `zoom-out`
@@ -429,12 +270,10 @@ Scales from 50% to 100% while fading in.
 Scales from 150% to 100% while fading in.
 
 ```svelte
-<Rs animation="zoom-out">
-	<div class="card">
-		<h2>Zoom Out</h2>
-		<p>Shrinks into view</p>
-	</div>
-</Rs>
+<div use:runeScroller={{ animation: 'zoom-out' }}>
+	<h2>Zoom Out</h2>
+	<p>Shrinks into view</p>
+</div>
 ```
 
 #### `zoom-in-up`
@@ -442,12 +281,10 @@ Scales from 150% to 100% while fading in.
 Scales from 50% while translating up 50px.
 
 ```svelte
-<Rs animation="zoom-in-up">
-	<div class="card">
-		<h2>Zoom In Up</h2>
-		<p>Grows while moving up</p>
-	</div>
-</Rs>
+<div use:runeScroller={{ animation: 'zoom-in-up' }}>
+	<h2>Zoom In Up</h2>
+	<p>Grows while moving up</p>
+</div>
 ```
 
 #### `zoom-in-left`
@@ -455,12 +292,10 @@ Scales from 50% while translating up 50px.
 Scales from 50% while translating left 50px.
 
 ```svelte
-<Rs animation="zoom-in-left">
-	<div class="card">
-		<h2>Zoom In Left</h2>
-		<p>Grows while moving left</p>
-	</div>
-</Rs>
+<div use:runeScroller={{ animation: 'zoom-in-left' }}>
+	<h2>Zoom In Left</h2>
+	<p>Grows while moving left</p>
+</div>
 ```
 
 #### `zoom-in-right`
@@ -468,12 +303,10 @@ Scales from 50% while translating left 50px.
 Scales from 50% while translating right 50px.
 
 ```svelte
-<Rs animation="zoom-in-right">
-	<div class="card">
-		<h2>Zoom In Right</h2>
-		<p>Grows while moving right</p>
-	</div>
-</Rs>
+<div use:runeScroller={{ animation: 'zoom-in-right' }}>
+	<h2>Zoom In Right</h2>
+	<p>Grows while moving right</p>
+</div>
 ```
 
 ---
@@ -485,12 +318,10 @@ Scales from 50% while translating right 50px.
 3D rotation on Y axis (left to right).
 
 ```svelte
-<Rs animation="flip">
-	<div class="card">
-		<h2>Flip</h2>
-		<p>Rotates on Y axis</p>
-	</div>
-</Rs>
+<div use:runeScroller={{ animation: 'flip' }}>
+	<h2>Flip</h2>
+	<p>Rotates on Y axis</p>
+</div>
 ```
 
 #### `flip-x`
@@ -498,12 +329,10 @@ Scales from 50% while translating right 50px.
 3D rotation on X axis (top to bottom).
 
 ```svelte
-<Rs animation="flip-x">
-	<div class="card">
-		<h2>Flip X</h2>
-		<p>Rotates on X axis</p>
-	</div>
-</Rs>
+<div use:runeScroller={{ animation: 'flip-x' }}>
+	<h2>Flip X</h2>
+	<p>Rotates on X axis</p>
+</div>
 ```
 
 ---
@@ -515,12 +344,10 @@ Scales from 50% while translating right 50px.
 Slides from left while rotating 45 degrees.
 
 ```svelte
-<Rs animation="slide-rotate">
-	<div class="card">
-		<h2>Slide Rotate</h2>
-		<p>Slides and spins</p>
-	</div>
-</Rs>
+<div use:runeScroller={{ animation: 'slide-rotate' }}>
+	<h2>Slide Rotate</h2>
+	<p>Slides and spins</p>
+</div>
 ```
 
 ---
@@ -532,30 +359,28 @@ Slides from left while rotating 45 degrees.
 Bouncy entrance with scaling keyframe animation.
 
 ```svelte
-<Rs animation="bounce-in" duration={800}>
-	<div class="card">
-		<h2>Bounce In</h2>
-		<p>Bounces into view</p>
-	</div>
-</Rs>
+<div use:runeScroller={{ animation: 'bounce-in', duration: 800 }}>
+	<h2>Bounce In</h2>
+	<p>Bounces into view</p>
+</div>
 ```
 
 ---
 
-### Compare: Once vs Repeat
+### One-Time vs Repeat Animations
 
-**Same animation, different behavior using the `repeat` prop:**
+Control animation behavior with the `repeat` option:
 
 ```svelte
-<!-- Plays once on scroll down (default) -->
-<Rs animation="fade-in-up">
-	<div class="card">Animates once</div>
-</Rs>
+<!-- Plays once on scroll (default) -->
+<div use:runeScroller={{ animation: 'fade-in-up' }}>
+	Animates once when scrolled into view
+</div>
 
 <!-- Repeats each time you scroll by -->
-<Rs animation="fade-in-up" repeat>
-	<div class="card">Animates on every scroll</div>
-</Rs>
+<div use:runeScroller={{ animation: 'fade-in-up', repeat: true }}>
+	Animates every time you scroll past it
+</div>
 ```
 
 ---
@@ -568,17 +393,17 @@ Animate cards with progressive delays:
 
 ```svelte
 <script>
-	import Rs from '$lib/Rs.svelte';
+	import runeScroller from 'rune-scroller';
 </script>
 
 <div class="grid">
 	{#each items as item, i}
-		<Rs animation="fade-in-up" delay={i * 100}>
+		<div use:runeScroller={{ animation: 'fade-in-up', duration: 800 + i * 100 }}>
 			<div class="card">
 				<h3>{item.title}</h3>
 				<p>{item.description}</p>
 			</div>
-		</Rs>
+		</div>
 	{/each}
 </div>
 ```
@@ -586,40 +411,42 @@ Animate cards with progressive delays:
 ### Mixed Animations
 
 ```svelte
-<Rs animation="fade-in">
-	<section>Content fades in</section>
-</Rs>
+<script>
+	import runeScroller from 'rune-scroller';
+</script>
 
-<Rs animation="slide-rotate">
-	<section>Content slides and rotates</section>
-</Rs>
+<section use:runeScroller={{ animation: 'fade-in' }}>
+	Content fades in
+</section>
 
-<Rs animation="zoom-in" repeat>
-	<section>Content zooms in repeatedly</section>
-</Rs>
+<section use:runeScroller={{ animation: 'slide-rotate' }}>
+	Content slides and rotates
+</section>
+
+<section use:runeScroller={{ animation: 'zoom-in', repeat: true }}>
+	Content zooms in repeatedly
+</section>
 ```
 
 ### Hero Section
 
 ```svelte
 <script>
-	import Rs from '$lib/Rs.svelte';
+	import runeScroller from 'rune-scroller';
 </script>
 
 <section class="hero">
-	<div class="hero-content">
-		<Rs animation="fade-in" delay={0}>
-			<h1>Welcome</h1>
-		</Rs>
+	<h1 use:runeScroller={{ animation: 'fade-in', duration: 1000 }}>
+		Welcome
+	</h1>
 
-		<Rs animation="fade-in" delay={200}>
-			<p>Scroll to reveal more</p>
-		</Rs>
+	<p use:runeScroller={{ animation: 'fade-in', duration: 1200 }}>
+		Scroll to reveal more
+	</p>
 
-		<Rs animation="zoom-in" delay={400}>
-			<button>Get Started</button>
-		</Rs>
-	</div>
+	<button use:runeScroller={{ animation: 'zoom-in', duration: 1000 }}>
+		Get Started
+	</button>
 </section>
 ```
 
@@ -653,7 +480,7 @@ function runeScroller(
 
 ```svelte
 <script>
-	import { runeScroller } from 'rune-scroller';
+	import runeScroller from 'rune-scroller';
 </script>
 
 <!-- Animation plays once when sentinel enters viewport -->
@@ -675,7 +502,7 @@ function runeScroller(
 
 ```svelte
 <script>
-	import { runeScroller } from 'rune-scroller';
+	import runeScroller from 'rune-scroller';
 </script>
 
 <!-- Fade in once on scroll -->
@@ -713,7 +540,6 @@ function runeScroller(
 - ✅ Consistent timing across layouts
 - ✅ Minimal overhead applications
 - ✅ Both one-time and repeating animations
-- ❌ Complex layout with component isolation (use `Rs` component instead)
 
 ---
 
@@ -789,13 +615,9 @@ function animate(
 2. **dom-utils.svelte.ts** - Reusable DOM manipulation utilities (CSS variables, animation setup, sentinel creation)
 3. **useIntersection.svelte.ts** - IntersectionObserver composables for element visibility detection
 
-**Middle Layer - Base Implementation:**
-4. **animate.svelte.ts** - Action for direct DOM node animation control
-5. **runeScroller.svelte.ts** - **Recommended** - Sentinel-based action for precise animation timing
-6. **BaseAnimated.svelte** - Base component handling intersection observer + animation logic
-
 **Top Layer - Consumer API:**
-7. **Rs.svelte** - Main unified component (supports one-time & repeating via `repeat` prop)
+4. **runeScroller.svelte.ts** - **Recommended** - Sentinel-based action for scroll animation triggering
+5. **animate.svelte.ts** - Alternative action for direct DOM node animation control
 
 **Styles:**
 - **animations.css** - All animation keyframes & styles (14 animations, GPU-accelerated)

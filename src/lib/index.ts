@@ -1,11 +1,10 @@
-// Components
-export { default as rs } from './Rs.svelte';
+// Main action (default export)
+export { runeScroller as default } from './runeScroller.svelte';
+export type { RuneScrollerOptions } from './runeScroller.svelte';
 
-// Actions
+// Alternative actions
 export { animate } from './animate.svelte';
 export type { AnimateOptions } from './animate.svelte';
-export { runeScroller } from './runeScroller.svelte';
-export type { RuneScrollerOptions } from './runeScroller.svelte';
 
 // Composables
 export { useIntersection, useIntersectionOnce } from './useIntersection.svelte';
