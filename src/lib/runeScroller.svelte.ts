@@ -27,8 +27,19 @@ export function runeScroller(element: HTMLElement, options?: RuneScrollerOptions
 		setCSSVariables(element, options.duration);
 	}
 
-	// Créer le sentinel invisible juste en dessous
-	const sentinel = createSentinel(element);
+	// Créer le sentinel invisible (ou visible si debug=true)
+	// Sentinel positioned absolutely relative to parent (stays fixed while element animates)
+	const sentinel = createSentinel(element, options?.debug);
+	const parent = element.parentElement;
+	if (parent) {
+		// Ensure parent has position context for absolute positioning
+		const parentPosition = window.getComputedStyle(parent).position;
+		if (parentPosition === 'static') {
+			parent.style.position = 'relative';
+		}
+		// Insert sentinel after element, positioned absolutely
+		element.insertAdjacentElement('afterend', sentinel);
+	}
 
 	// Observer le sentinel avec cleanup tracking
 	let observerConnected = true;

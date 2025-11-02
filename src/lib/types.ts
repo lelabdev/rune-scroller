@@ -13,6 +13,7 @@ export interface RuneScrollerOptions {
 	animation?: AnimationType;
 	duration?: number;
 	repeat?: boolean;
+	debug?: boolean;  // Show sentinel as visible red line for debugging
 }
 
 /**

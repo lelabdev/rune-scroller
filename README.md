@@ -122,11 +122,14 @@ Use the `runeScroller` action with the `use:` directive for sentinel-based anima
 
 ### How It Works
 
-The `runeScroller` action uses an invisible **sentinel element** positioned below your content:
+The `runeScroller` action uses an invisible **sentinel element** for precise animation triggering:
 
-1. A 20px sentinel element is automatically placed **below** your animated element
-2. When the sentinel enters the viewport, it triggers the animation
-3. This ensures consistent, accurate timing across all screen sizes
+1. **Sentinel Creation** - An invisible sentinel is created and positioned **absolutely** at your element's bottom
+2. **Parent Context** - Parent element automatically gets `position: relative` if needed (no visual impact)
+3. **Viewport Detection** - When the sentinel enters the viewport, it triggers the animation
+4. **Fixed Positioning** - The sentinel stays fixed while your element animates, ensuring accurate timing
+5. **Invisible by Default** - The sentinel is 1px tall and invisible (`visibility:hidden`)
+6. **Debug Mode** - Add `debug: true` to see the sentinel as a visible cyan line (useful for development)
 
 ---
 

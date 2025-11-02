@@ -28,23 +28,29 @@ export function setupAnimationElement(element: HTMLElement, animation: Animation
 }
 
 /**
- * Create and inject invisible sentinel element for observer-based triggering
- * Positioned absolutely at the bottom of the element to avoid breaking flex/grid layouts
- * @param element - Reference element (sentinel will be positioned inside it)
+ * Create sentinel element for observer-based triggering
+ * Positioned absolutely after element, stays fixed while element animates
+ * @param element - Reference element (used to position sentinel at its bottom)
+ * @param debug - If true, shows the sentinel as a visible line for debugging
  * @returns The created sentinel element
  */
-export function createSentinel(element: HTMLElement): HTMLElement {
+export function createSentinel(element: HTMLElement, debug: boolean = false): HTMLElement {
 	const sentinel = document.createElement('div');
-	// Position sentinel at the bottom of the element without affecting layout flow
-	// Uses absolute positioning so it doesn't break flex/grid, and pointer-events:none to prevent interactions
-	sentinel.style.cssText =
-		'position:absolute;bottom:0;left:0;right:0;height:20px;visibility:hidden;pointer-events:none';
 
-	// Ensure element has position context for absolute positioning
-	if (element.style.position === '' || element.style.position === 'static') {
-		element.style.position = 'relative';
+	// Get element dimensions to position sentinel at its bottom
+	const rect = element.getBoundingClientRect();
+	const elementHeight = rect.height;
+
+	if (debug) {
+		// Debug mode: visible primary color line (cyan #00e0ff)
+		sentinel.style.cssText =
+			`position:absolute;top:${elementHeight}px;left:0;right:0;height:3px;background:#00e0ff;margin:0;padding:0;box-sizing:border-box;z-index:999;pointer-events:none`;
+		sentinel.setAttribute('data-sentinel-debug', 'true');
+	} else {
+		// Production: invisible positioned absolutely (no layout impact)
+		sentinel.style.cssText =
+			`position:absolute;top:${elementHeight}px;left:0;right:0;height:1px;visibility:hidden;margin:0;padding:0;box-sizing:border-box;pointer-events:none`;
 	}
 
-	element.appendChild(sentinel);
 	return sentinel;
 }
