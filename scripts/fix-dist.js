@@ -10,19 +10,8 @@ const distIndexPath = join(__dirname, '..', 'dist', 'index.js');
 
 let content = readFileSync(distIndexPath, 'utf-8');
 
-// Replace .svelte imports for .svelte.ts files with .svelte.js
-content = content.replace(
-  /from '\.\/(\w+)\.svelte';/g,
-  (match, filename) => {
-    // Check if this is a .svelte.ts file (not a component)
-    // For now, we know runeScroller, animate, and useIntersection are .svelte.ts files
-    const svelteJsFiles = ['runeScroller', 'animate', 'useIntersection'];
-    if (svelteJsFiles.includes(filename)) {
-      return `from './${filename}.svelte.js';`;
-    }
-    return match;
-  }
-);
+// Replace .svelte.ts imports with .svelte.js
+content = content.replace(/\.svelte\.ts'/g, ".svelte.js'");
 
 writeFileSync(distIndexPath, content, 'utf-8');
 console.log('✅ Fixed dist/index.js imports');
