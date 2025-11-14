@@ -37,10 +37,36 @@ yarn add rune-scroller
 
 ## 🚀 Quick Start
 
+### Step 1: Import CSS (required)
+
+**⚠️ Important:** You must import the CSS file once in your app.
+
+**Option A - In your root layout (recommended for SvelteKit):**
+
+```svelte
+<!-- src/routes/+layout.svelte -->
+<script>
+	import 'rune-scroller/animations.css';
+</script>
+
+<slot />
+```
+
+**Option B - In each component that uses animations:**
+
 ```svelte
 <script>
 	import runeScroller from 'rune-scroller';
 	import 'rune-scroller/animations.css';
+</script>
+```
+
+### Step 2: Use the animations
+
+```svelte
+<script>
+	import runeScroller from 'rune-scroller';
+	// CSS already imported in layout or above
 </script>
 
 <!-- Simple animation -->
@@ -194,12 +220,23 @@ Rune Scroller uses **sentinel-based triggering**:
 
 ## 🌐 SSR Compatibility
 
-Works seamlessly with SvelteKit:
+Works seamlessly with SvelteKit. Import CSS in your root layout:
 
 ```svelte
+<!-- src/routes/+layout.svelte -->
+<script>
+	import 'rune-scroller/animations.css';
+</script>
+
+<slot />
+```
+
+Then use animations anywhere in your app:
+
+```svelte
+<!-- src/routes/+page.svelte -->
 <script>
 	import runeScroller from 'rune-scroller';
-	import 'rune-scroller/animations.css';
 </script>
 
 <!-- No special handling needed -->
