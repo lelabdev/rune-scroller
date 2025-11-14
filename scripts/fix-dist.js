@@ -15,9 +15,16 @@ const svelteJsModules = distFiles
 	.filter(f => f.endsWith('.svelte.js'))
 	.map(f => f.replace('.svelte.js', ''));
 
+// Get list of regular .js files (not .svelte.js, not .test.js)
+const regularJsModules = distFiles
+	.filter(f => f.endsWith('.js') && !f.endsWith('.svelte.js') && !f.endsWith('.test.js'))
+	.map(f => f.replace('.js', ''));
+
 // Fix function to replace .svelte imports with .svelte.js
-function fixImports(content, svelteJsModules) {
+function fixImports(content, svelteJsModules, regularJsModules) {
 	let fixed = content;
+
+	// Fix .svelte -> .svelte.js
 	for (const moduleName of svelteJsModules) {
 		const escapedName = moduleName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 		// Match both single and double quotes
@@ -26,6 +33,17 @@ function fixImports(content, svelteJsModules) {
 		const pattern2 = new RegExp(`from "\\.\\/` + escapedName + `\\.svelte"`, 'g');
 		fixed = fixed.replace(pattern2, `from "./${moduleName}.svelte.js"`);
 	}
+
+	// Fix regular modules without extension -> .js
+	for (const moduleName of regularJsModules) {
+		const escapedName = moduleName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+		// Match imports without extension (but not already with .js or .svelte.js)
+		const pattern = new RegExp(`from '\\.\\/` + escapedName + `'`, 'g');
+		fixed = fixed.replace(pattern, `from './${moduleName}.js'`);
+		const pattern2 = new RegExp(`from "\\.\\/` + escapedName + `"`, 'g');
+		fixed = fixed.replace(pattern2, `from "./${moduleName}.js"`);
+	}
+
 	return fixed;
 }
 
@@ -34,7 +52,7 @@ const jsFiles = distFiles.filter(f => f.endsWith('.js') && !f.endsWith('.svelte.
 for (const jsFile of jsFiles) {
 	const filePath = join(distDir, jsFile);
 	const content = readFileSync(filePath, 'utf-8');
-	const fixed = fixImports(content, svelteJsModules);
+	const fixed = fixImports(content, svelteJsModules, regularJsModules);
 	if (fixed !== content) {
 		writeFileSync(filePath, fixed, 'utf-8');
 		console.log(`✅ Fixed ${jsFile} imports`);
@@ -46,7 +64,7 @@ const svelteJsFiles = distFiles.filter(f => f.endsWith('.svelte.js'));
 for (const jsFile of svelteJsFiles) {
 	const filePath = join(distDir, jsFile);
 	const content = readFileSync(filePath, 'utf-8');
-	const fixed = fixImports(content, svelteJsModules);
+	const fixed = fixImports(content, svelteJsModules, regularJsModules);
 	if (fixed !== content) {
 		writeFileSync(filePath, fixed, 'utf-8');
 		console.log(`✅ Fixed ${jsFile} imports`);
@@ -58,7 +76,7 @@ const dtsFiles = distFiles.filter(f => f.endsWith('.d.ts'));
 for (const dtsFile of dtsFiles) {
 	const filePath = join(distDir, dtsFile);
 	const content = readFileSync(filePath, 'utf-8');
-	const fixed = fixImports(content, svelteJsModules);
+	const fixed = fixImports(content, svelteJsModules, regularJsModules);
 	if (fixed !== content) {
 		writeFileSync(filePath, fixed, 'utf-8');
 		console.log(`✅ Fixed ${dtsFile} imports`);
