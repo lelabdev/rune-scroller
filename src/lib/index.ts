@@ -8,7 +8,7 @@ export type {
 export type { AnimationType } from './animations';
 
 // Main action (default export)
-export { runeScroller as default } from './runeScroller.svelte.ts';
+export { runeScroller as default } from './runeScroller.svelte';
 
 // Component
 export { default as RuneScroller } from './runeScroller.svelte';
