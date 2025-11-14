@@ -21,6 +21,16 @@
 /* Animation states - transform-specific initial states */
 /* (opacity: 0 is already set in .scroll-animate base class) */
 
+/* Fade In (no transform, just opacity) */
+[data-animation='fade-in'] {
+	/* No transform needed, uses base opacity: 0 from .scroll-animate */
+}
+
+[data-animation='fade-in'].is-visible {
+	/* Inherits opacity: 1 from .scroll-animate.is-visible */
+	transform: none;
+}
+
 /* Fade In Up */
 [data-animation='fade-in-up'] {
 	transform: translateY(300px);
