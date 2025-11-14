@@ -10,9 +10,6 @@ export type { AnimationType } from './animations';
 // Main action (default export)
 export { runeScroller as default } from './runeScroller.svelte';
 
-// Component export
-export { default as RuneScroller } from './RuneScroller.svelte';
-
 // Alternative actions
 export { animate } from './animate.svelte';
 
