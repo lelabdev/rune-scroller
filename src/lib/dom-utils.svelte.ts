@@ -29,27 +29,33 @@ export function setupAnimationElement(element: HTMLElement, animation: Animation
 
 /**
  * Create sentinel element for observer-based triggering
- * Positioned absolutely below element (no layout impact)
- * @param element - Reference element (used to position sentinel at its bottom)
+ * Positioned absolutely relative to element (no layout impact)
+ * @param element - Reference element (used to position sentinel)
  * @param debug - If true, shows the sentinel as a visible line for debugging
+ * @param offset - Offset in pixels from element bottom (default: 0, negative = above element)
  * @returns The created sentinel element
  */
-export function createSentinel(element: HTMLElement, debug: boolean = false): HTMLElement {
+export function createSentinel(
+	element: HTMLElement,
+	debug: boolean = false,
+	offset: number = 0
+): HTMLElement {
 	const sentinel = document.createElement('div');
 
-	// Get element dimensions to position sentinel at its bottom
+	// Get element dimensions to position sentinel at its bottom + offset
 	const rect = element.getBoundingClientRect();
 	const elementHeight = rect.height;
+	const sentinelTop = elementHeight + offset;
 
 	if (debug) {
 		// Debug mode: visible primary color line (cyan #00e0ff)
 		sentinel.style.cssText =
-			`position:absolute;top:${elementHeight}px;left:0;right:0;height:3px;background:#00e0ff;margin:0;padding:0;box-sizing:border-box;z-index:999;pointer-events:none`;
+			`position:absolute;top:${sentinelTop}px;left:0;right:0;height:3px;background:#00e0ff;margin:0;padding:0;box-sizing:border-box;z-index:999;pointer-events:none`;
 		sentinel.setAttribute('data-sentinel-debug', 'true');
 	} else {
 		// Production: invisible positioned absolutely (no layout impact)
 		sentinel.style.cssText =
-			`position:absolute;top:${elementHeight}px;left:0;right:0;height:1px;visibility:hidden;margin:0;padding:0;box-sizing:border-box;pointer-events:none`;
+			`position:absolute;top:${sentinelTop}px;left:0;right:0;height:1px;visibility:hidden;margin:0;padding:0;box-sizing:border-box;pointer-events:none`;
 	}
 
 	return sentinel;

@@ -13,7 +13,8 @@ export interface RuneScrollerOptions {
 	animation?: AnimationType;
 	duration?: number;
 	repeat?: boolean;
-	debug?: boolean;  // Show sentinel as visible red line for debugging
+	debug?: boolean;  // Show sentinel as visible line for debugging
+	sentinelOffset?: number;  // Offset of sentinel in pixels (negative = above element)
 }
 
 /**
