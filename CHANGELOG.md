@@ -5,6 +5,21 @@ All notable changes to Rune Scroller will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2025-11-18
+
+### Added
+
+- **Auto-wrapping with `display:contents`** - Automatically wraps elements with position:relative container for sentinel, preventing layout breakage in flex/grid
+- **`offset` prop** - Control sentinel position in pixels (negative = trigger earlier, positive = delay trigger)
+- Improved documentation with sentinel position details and offset examples
+
+### Fixed
+
+- Sentinel no longer breaks flex/grid layouts
+- Wrapper automatically unwraps on component destroy
+
+---
+
 ## [0.1.2] - 2025-11-02
 
 ### Documentation
