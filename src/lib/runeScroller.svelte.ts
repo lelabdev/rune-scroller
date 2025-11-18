@@ -38,7 +38,7 @@ export function runeScroller(element: HTMLElement, options?: RuneScrollerOptions
 
 	// Créer le sentinel invisible (ou visible si debug=true)
 	// Sentinel positioned absolutely relative to wrapper
-	const sentinel = createSentinel(element, options?.debug, options?.sentinelOffset);
+	const sentinel = createSentinel(element, options?.debug, options?.offset);
 	wrapper.appendChild(sentinel);
 
 	// Observer le sentinel avec cleanup tracking

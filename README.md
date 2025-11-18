@@ -119,7 +119,7 @@ interface RuneScrollerOptions {
 	duration?: number;          // Duration in ms (default: 2000)
 	repeat?: boolean;           // Repeat on scroll (default: false)
 	debug?: boolean;            // Show sentinel as visible line (default: false)
-	sentinelOffset?: number;    // Sentinel offset in px (default: 0, negative = above)
+	offset?: number;            // Sentinel offset in px (default: 0, negative = above)
 }
 ```
 
@@ -129,7 +129,7 @@ interface RuneScrollerOptions {
 - **`duration`** - How long the animation lasts in milliseconds (default: 2000ms).
 - **`repeat`** - If `true`, animation plays every time sentinel enters viewport. If `false`, plays only once.
 - **`debug`** - If `true`, displays the sentinel element as a visible cyan line below your element. Useful for seeing exactly when animations trigger.
-- **`sentinelOffset`** - Offset of the sentinel in pixels. Positive values move sentinel down (delays animation), negative values move it up (triggers earlier). Useful for large elements where you want animation to trigger before the entire element is visible.
+- **`offset`** - Offset of the sentinel in pixels. Positive values move sentinel down (delays animation), negative values move it up (triggers earlier). Useful for large elements where you want animation to trigger before the entire element is visible.
 
 ### Examples
 
@@ -167,7 +167,7 @@ interface RuneScrollerOptions {
 <!-- Large element - trigger animation earlier with negative offset -->
 <div use:runeScroller={{
 	animation: 'fade-in-up',
-	sentinelOffset: -200  // Trigger 200px before element bottom
+	offset: -200  // Trigger 200px before element bottom
 }}>
 	Large content that needs early triggering
 </div>
@@ -175,7 +175,7 @@ interface RuneScrollerOptions {
 <!-- Delay animation by moving sentinel down -->
 <div use:runeScroller={{
 	animation: 'zoom-in',
-	sentinelOffset: 300  // Trigger 300px after element bottom
+	offset: 300  // Trigger 300px after element bottom
 }}>
 	Content with delayed animation
 </div>
@@ -342,7 +342,7 @@ interface RuneScrollerOptions {
 	duration?: number;
 	repeat?: boolean;
 	debug?: boolean;
-	sentinelOffset?: number;
+	offset?: number;
 }
 
 interface AnimateOptions {

@@ -14,7 +14,7 @@ export interface RuneScrollerOptions {
 	duration?: number;
 	repeat?: boolean;
 	debug?: boolean;  // Show sentinel as visible line for debugging
-	sentinelOffset?: number;  // Offset of sentinel in pixels (negative = above element)
+	offset?: number;  // Offset of sentinel in pixels (negative = above element)
 }
 
 /**
