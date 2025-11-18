@@ -118,9 +118,16 @@ interface RuneScrollerOptions {
 	animation?: AnimationType;  // Animation name (default: 'fade-in')
 	duration?: number;          // Duration in ms (default: 2000)
 	repeat?: boolean;           // Repeat on scroll (default: false)
-	debug?: boolean;            // Show sentinel element (default: false)
+	debug?: boolean;            // Show sentinel as visible line (default: false)
 }
 ```
+
+### Option Details
+
+- **`animation`** - Type of animation to play. Choose from 14 built-in animations listed above.
+- **`duration`** - How long the animation lasts in milliseconds (default: 2000ms).
+- **`repeat`** - If `true`, animation plays every time sentinel enters viewport. If `false`, plays only once.
+- **`debug`** - If `true`, displays the sentinel element as a visible cyan line below your element. Useful for seeing exactly when animations trigger.
 
 ### Examples
 
@@ -140,9 +147,19 @@ interface RuneScrollerOptions {
 	Repeats every time you scroll
 </div>
 
-<!-- Debug mode (shows invisible sentinel) -->
+<!-- Debug mode - shows cyan line marking sentinel position -->
 <div use:runeScroller={{ animation: 'fade-in', debug: true }}>
-	You'll see a cyan line (the sentinel trigger)
+	The cyan line below this shows when animation will trigger
+</div>
+
+<!-- Multiple options -->
+<div use:runeScroller={{
+	animation: 'fade-in-up',
+	duration: 1200,
+	repeat: true,
+	debug: true
+}}>
+	Full featured example
 </div>
 ```
 

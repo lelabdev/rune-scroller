@@ -29,7 +29,7 @@ export function setupAnimationElement(element: HTMLElement, animation: Animation
 
 /**
  * Create sentinel element for observer-based triggering
- * Positioned absolutely after element, stays fixed while element animates
+ * Positioned absolutely below element (no layout impact)
  * @param element - Reference element (used to position sentinel at its bottom)
  * @param debug - If true, shows the sentinel as a visible line for debugging
  * @returns The created sentinel element

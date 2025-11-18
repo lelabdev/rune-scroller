@@ -27,19 +27,19 @@ export function runeScroller(element: HTMLElement, options?: RuneScrollerOptions
 		setCSSVariables(element, options.duration);
 	}
 
+	// Créer un wrapper div autour de l'élément pour le sentinel en position absolute
+	// Ceci évite de casser le flex/grid flow du parent
+	const wrapper = document.createElement('div');
+	wrapper.style.cssText = 'position:relative;display:contents';
+
+	// Insérer le wrapper avant l'élément
+	element.insertAdjacentElement('beforebegin', wrapper);
+	wrapper.appendChild(element);
+
 	// Créer le sentinel invisible (ou visible si debug=true)
-	// Sentinel positioned absolutely relative to parent (stays fixed while element animates)
+	// Sentinel positioned absolutely relative to wrapper
 	const sentinel = createSentinel(element, options?.debug);
-	const parent = element.parentElement;
-	if (parent) {
-		// Ensure parent has position context for absolute positioning
-		const parentPosition = window.getComputedStyle(parent).position;
-		if (parentPosition === 'static') {
-			parent.style.position = 'relative';
-		}
-		// Insert sentinel after element, positioned absolutely
-		element.insertAdjacentElement('afterend', sentinel);
-	}
+	wrapper.appendChild(sentinel);
 
 	// Observer le sentinel avec cleanup tracking
 	let observerConnected = true;
@@ -82,6 +82,12 @@ export function runeScroller(element: HTMLElement, options?: RuneScrollerOptions
 				observer.disconnect();
 			}
 			sentinel.remove();
+			// Unwrap element (move it out of wrapper)
+			const parent = wrapper.parentElement;
+			if (parent) {
+				wrapper.insertAdjacentElement('beforebegin', element);
+			}
+			wrapper.remove();
 		}
 	};
 }
