@@ -18,6 +18,28 @@
 
 ---
 
-## After (Bun + JSDoc)
+## After (Bun + JSDoc + SvelteKit conventions)
 
-_To be measured after migration_
+**Build:** ✅ Success (simplified!)
+- Command: bun run build
+- Output: src/lib -> dist
+- Note: Just `bunx svelte-package` - no custom scripts needed!
+- .d.ts files generated automatically from JSDoc ✨
+
+**Tests:** ✅ Success (18/18 passed - same as before)
+- Command: bun test
+- Duration: ~12ms (faster with Bun test runner!)
+- Test Files: 4 passed
+- Tests: 18 passed
+
+**Type Check:** ✅ Success
+- Command: bun run check
+- Uses jsconfig.json (SvelteKit convention)
+- Result: 0 errors, 0 warnings
+
+**Key Improvements:**
+- ✅ No custom build scripts (fix-dist.js, generate-types.js removed)
+- ✅ Follows SvelteKit conventions exactly (jsconfig.json)
+- ✅ svelte-package handles everything automatically
+- ✅ Simpler, more maintainable build process
+- ✅ Tests run faster with Bun (12ms vs 555ms with Vitest)
