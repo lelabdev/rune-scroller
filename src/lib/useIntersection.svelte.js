@@ -1,5 +1,4 @@
 import { onMount } from 'svelte';
-import type { IntersectionOptions, UseIntersectionReturn } from './types';
 
 /**
  * Composable for handling IntersectionObserver logic
@@ -9,21 +8,19 @@ import type { IntersectionOptions, UseIntersectionReturn } from './types';
 /**
  * Factory function to create intersection observer composables
  * Eliminates duplication between useIntersection and useIntersectionOnce
- * @param options - IntersectionObserver configuration
- * @param onIntersect - Callback handler for intersection changes
- * @param once - Whether to trigger only once (default: false)
+ * @param {import('./types.js').IntersectionOptions} [options={}] - IntersectionObserver configuration
+ * @param {((entry: IntersectionObserverEntry, isVisible: boolean) => void) | undefined} onIntersect - Callback handler for intersection changes
+ * @param {boolean} [once=false] - Whether to trigger only once
+ * @returns {import('./types.js').UseIntersectionReturn}
  */
-function createIntersectionObserver(
-	options: IntersectionOptions = {},
-	onIntersect: (entry: IntersectionObserverEntry, isVisible: boolean) => void,
-	once: boolean = false
-) {
+function createIntersectionObserver(options = {}, onIntersect = undefined, once = false) {
 	const { threshold = 0.5, rootMargin = '-10% 0px -10% 0px', root = null } = options;
 
-	let element: HTMLElement | null = $state(null);
+	let element = $state(null);
 	let isVisible = $state(false);
 	let hasTriggeredOnce = false;
-	let observer: IntersectionObserver | null = null;
+	/** @type {IntersectionObserver | null} */
+	let observer = null;
 
 	onMount(() => {
 		if (!element) return;
@@ -35,7 +32,9 @@ function createIntersectionObserver(
 					if (once && hasTriggeredOnce) return;
 
 					isVisible = entry.isIntersecting;
-					onIntersect(entry, entry.isIntersecting);
+					if (onIntersect) {
+						onIntersect(entry, entry.isIntersecting);
+					}
 
 					// Unobserve after first trigger if once=true
 					if (once && entry.isIntersecting) {
@@ -62,7 +61,7 @@ function createIntersectionObserver(
 		get element() {
 			return element;
 		},
-		set element(value: HTMLElement | null) {
+		set element(value) {
 			element = value;
 		},
 		get isVisible() {
@@ -74,13 +73,11 @@ function createIntersectionObserver(
 /**
  * Track element visibility with IntersectionObserver
  * Updates isVisible whenever visibility changes
- * @param options - IntersectionObserver configuration
- * @param onVisible - Optional callback when visibility changes
+ * @param {import('./types.js').IntersectionOptions} [options={}] - IntersectionObserver configuration
+ * @param {(isVisible: boolean) => void} [onVisible] - Optional callback when visibility changes
+ * @returns {import('./types.js').UseIntersectionReturn}
  */
-export function useIntersection(
-	options: IntersectionOptions = {},
-	onVisible?: (isVisible: boolean) => void
-) {
+export function useIntersection(options = {}, onVisible) {
 	return createIntersectionObserver(
 		options,
 		(_entry, isVisible) => {
@@ -93,8 +90,9 @@ export function useIntersection(
 /**
  * Track element visibility once (until first trigger)
  * Unobserves after first visibility
- * @param options - IntersectionObserver configuration
+ * @param {import('./types.js').IntersectionOptions} [options={}] - IntersectionObserver configuration
+ * @returns {import('./types.js').UseIntersectionReturn}
  */
-export function useIntersectionOnce(options: IntersectionOptions = {}) {
+export function useIntersectionOnce(options = {}) {
 	return createIntersectionObserver(options, () => {}, true);
 }
