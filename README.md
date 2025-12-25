@@ -13,10 +13,10 @@
 
 ## ✨ Features
 
-- **~2KB gzipped** - Minimal overhead
+- **~3.4KB gzipped** (11.5KB uncompressed) - Minimal overhead
 - **Zero dependencies** - Pure Svelte 5 + IntersectionObserver
 - **14 animations** - Fade, Zoom, Flip, Slide, Bounce variants
-- **TypeScript** - Full type coverage
+- **Full TypeScript support** - Type definitions generated from JSDoc
 - **SSR-ready** - SvelteKit compatible
 - **GPU-accelerated** - Pure CSS transforms
 - **Accessible** - Respects `prefers-reduced-motion`
