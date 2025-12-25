@@ -42,17 +42,18 @@
   },
   "scripts": {
     "dev": "vite dev",
-    "build": "svelte-package && node scripts/fix-dist.js",
+    "build": "bunx svelte-package",
     "preview": "vite preview",
     "prepare": "svelte-kit sync || echo ''",
-    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch",
     "format": "prettier --write .",
     "lint": "prettier --check . && eslint .",
-    "prepublishonly": "pnpm run check && pnpm run build",
+    "prepublishonly": "bun run check && bun run build && bun test",
     "test:unit": "vitest",
-    "test": "npm run test:unit -- --run"
+    "test": "bun test"
   },
+  "packageManager": "bun@1.3.4",
   "devDependencies": {
     "@eslint/compat": "^1.4.0",
     "@eslint/js": "^9.36.0",

@@ -1,11 +1,11 @@
-import type { RuneScrollerOptions } from './types';
-import { setCSSVariables, setupAnimationElement, createSentinel } from './dom-utils.svelte';
+import { setCSSVariables, setupAnimationElement, createSentinel } from './dom-utils.svelte.js';
 
 /**
  * Action pour animer un élément au scroll avec un sentinel invisible juste en dessous
- * @param element - L'élément à animer
- * @param options - Options d'animation (animation type, duration, et repeat)
- * @returns Objet action Svelte
+ *
+ * @param {HTMLElement} element - L'élément à animer
+ * @param {import('./types.js').RuneScrollerOptions} [options] - Options d'animation (animation type, duration, et repeat)
+ * @returns {{ update: (newOptions?: import('./types.js').RuneScrollerOptions) => void, destroy: () => void }} Objet action Svelte
  *
  * @example
  * ```svelte
@@ -20,10 +20,12 @@ import { setCSSVariables, setupAnimationElement, createSentinel } from './dom-ut
  * </div>
  * ```
  */
-export function runeScroller(element: HTMLElement, options?: RuneScrollerOptions) {
+export function runeScroller(element, options) {
 	// Setup animation classes et variables CSS
 	if (options?.animation || options?.duration) {
-		setupAnimationElement(element, options.animation!);
+		if (options.animation) {
+			setupAnimationElement(element, options.animation);
+		}
 		setCSSVariables(element, options.duration);
 	}
 
@@ -65,7 +67,7 @@ export function runeScroller(element: HTMLElement, options?: RuneScrollerOptions
 	observer.observe(sentinel);
 
 	return {
-		update(newOptions?: RuneScrollerOptions) {
+		update(newOptions) {
 			if (newOptions?.animation) {
 				element.setAttribute('data-animation', newOptions.animation);
 			}

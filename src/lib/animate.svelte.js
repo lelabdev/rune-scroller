@@ -1,11 +1,13 @@
-import type { Action } from 'svelte/action';
-import { calculateRootMargin } from './animations';
-import type { AnimateOptions } from './types';
-import { setCSSVariables, setupAnimationElement } from './dom-utils.svelte';
+import { calculateRootMargin } from './animations.js';
+import { setCSSVariables, setupAnimationElement } from './dom-utils.svelte.js';
 
 /**
  * Svelte action for scroll animations
  * Triggers animation once when element enters viewport
+ *
+ * @param {HTMLElement} node - The element to animate
+ * @param {import('./types.js').AnimateOptions} [options={}] - Animation configuration
+ * @returns {{ update: (newOptions: import('./types.js').AnimateOptions) => void, destroy: () => void }}
  *
  * @example
  * ```svelte
@@ -14,7 +16,7 @@ import { setCSSVariables, setupAnimationElement } from './dom-utils.svelte';
  * </div>
  * ```
  */
-export const animate: Action<HTMLElement, AnimateOptions> = (node, options = {}) => {
+export const animate = (node, options = {}) => {
 	let {
 		animation = 'fade-in',
 		duration = 800,
@@ -58,7 +60,7 @@ export const animate: Action<HTMLElement, AnimateOptions> = (node, options = {})
 	observer.observe(node);
 
 	return {
-		update(newOptions: AnimateOptions) {
+		update(newOptions) {
 			const {
 				duration: newDuration,
 				delay: newDelay,
