@@ -5,10 +5,10 @@ This file provides guidance to Claude Code when working with this repository.
 ## Project Overview
 
 **Rune Scroller** is a lightweight scroll animation library for Svelte 5:
-- **~2KB gzipped** - minimal overhead
+- **~3.4KB gzipped** (11.5KB uncompressed) - minimal overhead
 - **Zero dependencies** - pure Svelte 5 + IntersectionObserver
 - **14 animations** - Fade, Zoom, Flip, Slide, Bounce variants
-- **TypeScript** - full type coverage
+- **JSDoc with TypeScript support** - full type coverage via JSDoc annotations
 - **SSR-ready** - SvelteKit compatible
 
 Published to npm as [`rune-scroller`](https://www.npmjs.com/package/rune-scroller).
@@ -16,18 +16,18 @@ Published to npm as [`rune-scroller`](https://www.npmjs.com/package/rune-scrolle
 ## Quick Commands
 
 ```bash
-# Install (always use pnpm)
-pnpm install
+# Install (always use Bun)
+bun install
 
 # Development
-pnpm dev                    # Start Vite dev server
-pnpm check                  # TypeScript type checking
-pnpm format                 # Format with Prettier
-pnpm lint                   # Lint with ESLint
+bun run dev                 # Start Vite dev server
+bun run check               # Type checking with jsconfig.json
+bun run format              # Format with Prettier
+bun run lint                # Lint with ESLint
 
 # Build & Test
-pnpm build                  # Build library (svelte-package + fix-dist)
-pnpm test                   # Run tests (Vitest)
+bun run build               # Build library (just svelte-package - automatic!)
+bun test                    # Run tests (Bun test runner, 46x faster)
 
 # Publishing
 npm publish                 # Publish to npm (runs prepublishOnly)
@@ -40,7 +40,7 @@ npm publish                 # Publish to npm (runs prepublishOnly)
 The library provides 3 different ways to use scroll animations, each suited for different use cases:
 
 #### 1. `runeScroller` Action (Recommended - Sentinel-based)
-**File:** `src/lib/runeScroller.svelte.ts`
+**File:** `src/lib/runeScroller.svelte.js`
 
 **Best for:** Simple, reliable scroll animations with minimal configuration.
 
@@ -70,7 +70,7 @@ The library provides 3 different ways to use scroll animations, each suited for 
 - Better for complex animations with large movements
 
 #### 2. `animate` Action (Direct observation)
-**File:** `src/lib/animate.svelte.ts`
+**File:** `src/lib/animate.svelte.js`
 
 **Best for:** Advanced use cases needing fine-grained control over IntersectionObserver.
 
@@ -142,19 +142,22 @@ The library provides 3 different ways to use scroll animations, each suited for 
 - `.is-visible` class triggers animations
 - Respects `prefers-reduced-motion`
 
-**`src/lib/useIntersection.svelte.ts`**
+**`src/lib/useIntersection.svelte.js`**
 - `useIntersection()` - Continuous visibility tracking
 - `useIntersectionOnce()` - One-time trigger
 - Factory pattern to reduce code duplication
+- Uses JSDoc for type annotations
 
-**`src/lib/dom-utils.svelte.ts`**
+**`src/lib/dom-utils.svelte.js`**
 - `setCSSVariables()` - Set --duration and --delay
 - `setupAnimationElement()` - Add .scroll-animate class and data-animation
 - `createSentinel()` - Create sentinel element for runeScroller action
+- Uses JSDoc for type annotations
 
 **`src/lib/types.ts`**
-- Centralized TypeScript interfaces
+- Centralized TypeScript type definitions
 - `RuneScrollerOptions`, `AnimateOptions`, `IntersectionOptions`, `UseIntersectionReturn`
+- Used by JSDoc annotations via `@type {import('./types.js').TypeName}`
 
 **`src/lib/BaseAnimated.svelte`**
 - Internal component used by `RuneScroller.svelte`
@@ -167,13 +170,13 @@ The library provides 3 different ways to use scroll animations, each suited for 
 
 ```typescript
 // Main export (recommended)
-export { runeScroller as default } from './runeScroller.svelte';
+export { runeScroller as default } from './runeScroller.svelte.js';
 
 // Alternative action
-export { animate } from './animate.svelte';
+export { animate } from './animate.svelte.js';
 
 // Composables
-export { useIntersection, useIntersectionOnce } from './useIntersection.svelte';
+export { useIntersection, useIntersectionOnce } from './useIntersection.svelte.js';
 
 // Utilities
 export { calculateRootMargin } from './animations';
@@ -192,14 +195,18 @@ export type {
 
 ## Build Process
 
-**Pipeline** (`pnpm build`):
-1. **`svelte-package`** - Compiles TypeScript/Svelte to `dist/`
-2. **`scripts/fix-dist.js`** - Fixes ES module imports
-   - Adds `.svelte.js` extension to `.svelte.ts` file imports
-   - Uses hardcoded list: `['runeScroller', 'animate', 'useIntersection']`
-   - Ensures ES module compliance
+**Pipeline** (`bun run build`):
+1. **`svelte-package`** - Compiles JavaScript/Svelte to `dist/` and generates `.d.ts` from JSDoc
+   - Automatically generates TypeScript definitions from JSDoc annotations
+   - No custom scripts needed - everything is handled by svelte-package!
 
-**Output:** `dist/` with `.js`, `.svelte.js`, `.d.ts`, and `animations.css`
+**Output:** `dist/` with `.js`, `.svelte.js`, `.d.ts`, `.d.ts.map`, and `animations.css`
+
+**Key Points:**
+- Uses `jsconfig.json` (SvelteKit convention for JavaScript projects)
+- Type definitions automatically generated from JSDoc comments
+- No custom build scripts required (removed fix-dist.js and generate-types.js)
+- Follows SvelteKit best practices exactly
 
 **Known Issue:** Test files (`*.test.js`, `*.test.d.ts`) are currently included in `dist/`. See TODO.md for fix.
 
@@ -235,11 +242,13 @@ All animations use **300px** translation distance:
 - **No trailing commas**
 - **100 character line width**
 
-**TypeScript**
-- Strict mode enabled
+**JSDoc & Types**
+- Strict mode enabled in jsconfig.json
 - Bundle module resolution
-- Full type coverage (no `any`)
+- Full type coverage via JSDoc annotations (no `any`)
 - Use conditional checks instead of non-null assertions (`!`)
+- Type definitions in `src/lib/types.ts`
+- JSDoc references types via `@type {import('./types.js').TypeName}`
 
 **Svelte 5**
 - Runes syntax only (`$state`, `$props()`, `$effect()`)
@@ -262,11 +271,11 @@ All animations use **300px** translation distance:
    - Initial state: `[data-animation='name'] { transform: ... }`
    - Final state: `[data-animation='name'].is-visible { transform: ... }`
 3. Update animation count in README.md if needed
-4. Build and test: `pnpm build && pnpm test`
+4. Build and test: `bun run build && bun test`
 
 ### Testing Locally
 
-**Option 1:** Use `pnpm dev:full` from site directory
+**Option 1:** Use `bun run dev:full` from site directory
 - Automatically syncs lib changes to site
 - Test in browser at http://localhost:5173
 
@@ -296,7 +305,7 @@ This shows sentinel as a **cyan line (#00e0ff)** at its exact position.
 2. Update `CHANGELOG.md` with changes
 3. Run pre-publish checks:
    ```bash
-   pnpm check && pnpm build && pnpm test
+   bun run check && bun run build && bun test
    ```
 4. Publish to npm:
    ```bash
@@ -310,18 +319,19 @@ This shows sentinel as a **cyan line (#00e0ff)** at its exact position.
 ## Common Issues
 
 **Module not found errors**
-- Run `pnpm build` to regenerate `dist/` with fixed imports
-- Check `scripts/fix-dist.js` is adding `.svelte.js` extensions
+- Run `bun run build` to regenerate `dist/`
 - Verify `dist/index.js` imports have correct extensions
+- svelte-package automatically handles `.svelte.js` extensions
 
 **Type errors**
-- Run `pnpm check` to verify TypeScript
+- Run `bun run check` to verify types with jsconfig.json
 - Ensure all exports in `src/lib/index.ts` are correct
 - Check for non-null assertions (`!`) that should be conditional checks
+- Verify JSDoc annotations are correct
 
 **Tests failing**
-- Run `pnpm test` for details
-- Check Vitest configuration in `vite.config.ts`
+- Run `bun test` for details
+- Check Bun test configuration
 - Verify all 14 animation types are defined
 
 **Animation not triggering**
