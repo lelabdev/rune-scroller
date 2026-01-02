@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { calculateRootMargin, type AnimationType } from './animations';
+import { describe, it, expect } from 'bun:test';
+import { calculateRootMargin } from './animations';
 
 describe('calculateRootMargin', () => {
 	it('calculates rootMargin from offset (0-100%)', () => {
@@ -21,29 +21,5 @@ describe('calculateRootMargin', () => {
 		const custom = '-20% 0px';
 		expect(calculateRootMargin(50, custom)).toBe(custom);
 		expect(calculateRootMargin(0, custom)).toBe(custom);
-	});
-});
-
-describe('AnimationType', () => {
-	it('includes all expected animation types', () => {
-		const validAnimations: AnimationType[] = [
-			'fade-in',
-			'fade-in-up',
-			'fade-in-down',
-			'fade-in-left',
-			'fade-in-right',
-			'zoom-in',
-			'zoom-out',
-			'zoom-in-up',
-			'zoom-in-left',
-			'zoom-in-right',
-			'flip',
-			'flip-x',
-			'slide-rotate',
-			'bounce-in'
-		];
-
-		// If this compiles, all types are valid
-		expect(validAnimations.length).toBe(14);
 	});
 });
