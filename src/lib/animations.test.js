@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'bun:test';
-import { calculateRootMargin } from './animations';
+import { calculateRootMargin } from './animations.js';
 
 describe('calculateRootMargin', () => {
 	it('calculates rootMargin from offset (0-100%)', () => {
