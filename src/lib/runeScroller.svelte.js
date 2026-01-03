@@ -22,17 +22,18 @@ import { setCSSVariables, setupAnimationElement, createSentinel } from './dom-ut
  */
 export function runeScroller(element, options) {
 	// Setup animation classes et variables CSS
-	if (options?.animation || options?.duration) {
-		if (options.animation) {
-			setupAnimationElement(element, options.animation);
-		}
+	if (options?.animation) {
+		setupAnimationElement(element, options.animation);
+	}
+
+	if (options?.duration !== undefined) {
 		setCSSVariables(element, options.duration);
 	}
 
 	// Créer un wrapper div autour de l'élément pour le sentinel en position absolute
 	// Ceci évite de casser le flex/grid flow du parent
 	const wrapper = document.createElement('div');
-	wrapper.style.cssText = 'position:relative;display:contents';
+	wrapper.style.cssText = 'position:relative;display:block;width:100%;margin:0;padding:0';
 
 	// Insérer le wrapper avant l'élément
 	element.insertAdjacentElement('beforebegin', wrapper);
