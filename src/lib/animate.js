@@ -1,5 +1,5 @@
 import { calculateRootMargin } from './animations.js';
-import { setCSSVariables, setupAnimationElement } from './dom-utils.svelte.js';
+import { setCSSVariables, setupAnimationElement } from './dom-utils.js';
 
 /**
  * Svelte action for scroll animations

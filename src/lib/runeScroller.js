@@ -1,4 +1,4 @@
-import { setCSSVariables, setupAnimationElement, createSentinel } from './dom-utils.svelte.js';
+import { setCSSVariables, setupAnimationElement, createSentinel } from './dom-utils.js';
 
 /**
  * Action pour animer un élément au scroll avec un sentinel invisible juste en dessous
@@ -29,6 +29,9 @@ export function runeScroller(element, options) {
 	if (options?.duration !== undefined) {
 		setCSSVariables(element, options.duration);
 	}
+
+	// Force reflow to ensure initial transform is applied before observer triggers
+	void element.offsetHeight;
 
 	// Créer un wrapper div autour de l'élément pour le sentinel en position absolute
 	// Ceci évite de casser le flex/grid flow du parent
