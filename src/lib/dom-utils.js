@@ -48,3 +48,38 @@ export function createSentinel(element, debug = false, offset = 0) {
 
 	return sentinel;
 }
+
+/**
+ * Check if CSS animations are loaded and warn if not
+ * @returns {boolean} True if CSS appears to be loaded
+ */
+export function isCSSLoaded() {
+	if (typeof document === 'undefined') return true;
+	const style = getComputedStyle(document.documentElement);
+	return style.getPropertyValue('--duration') !== undefined || style.getPropertyValue('--delay') !== undefined;
+}
+
+/**
+ * Warn if CSS is not loaded
+ * @returns {void}
+ */
+export function checkAndWarnIfCSSNotLoaded() {
+	if (typeof document === 'undefined') return;
+	// Try to detect if animations.css is loaded by checking for animation classes
+	const test = document.createElement('div');
+	test.className = 'scroll-animate is-visible';
+	test.style.position = 'absolute';
+	test.style.opacity = '0';
+	document.body.appendChild(test);
+	const computed = getComputedStyle(test);
+	const hasAnimation = computed.animation !== 'none' && computed.animation !== '';
+	test.remove();
+
+	if (!hasAnimation) {
+		console.warn(
+			'[rune-scroller] CSS animations not found. Make sure to import the animations:\n' +
+			'  import "rune-scroller/animations.css";\n' +
+			'Documentation: https://github.com/lelabdev/rune-scroller#installation'
+		);
+	}
+}

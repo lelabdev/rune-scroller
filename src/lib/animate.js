@@ -1,5 +1,5 @@
 import { calculateRootMargin, ANIMATION_TYPES } from './animations.js';
-import { setCSSVariables, setupAnimationElement } from './dom-utils.js';
+import { setCSSVariables, setupAnimationElement, checkAndWarnIfCSSNotLoaded } from './dom-utils.js';
 import { createManagedObserver, disconnectObserver } from './observer-utils.js';
 
 /**
@@ -24,6 +24,11 @@ export const animate = (node, options = {}) => {
 			update: () => {},
 			destroy: () => {}
 		};
+	}
+
+	// Warn if CSS is not loaded (first time only)
+	if (typeof document !== 'undefined') {
+		checkAndWarnIfCSSNotLoaded();
 	}
 
 	let {

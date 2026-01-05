@@ -1,4 +1,4 @@
-import { setCSSVariables, setupAnimationElement, createSentinel } from './dom-utils.js';
+import { setCSSVariables, setupAnimationElement, createSentinel, checkAndWarnIfCSSNotLoaded } from './dom-utils.js';
 import { createManagedObserver, disconnectObserver } from './observer-utils.js';
 import { ANIMATION_TYPES } from './animations.js';
 
@@ -30,6 +30,11 @@ export function runeScroller(element, options) {
 			update: () => {},
 			destroy: () => {}
 		};
+	}
+
+	// Warn if CSS is not loaded (first time only)
+	if (typeof document !== 'undefined') {
+		checkAndWarnIfCSSNotLoaded();
 	}
 
 	// Validate animation type
