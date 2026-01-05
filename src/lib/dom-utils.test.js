@@ -107,53 +107,53 @@ describe('DOM Utilities', () => {
 
 	describe('createSentinel', () => {
 		it('creates a div element', () => {
-			const sentinel = createSentinel(testElement);
+			const { element: sentinel } = createSentinel(testElement);
 			expect(sentinel).toBeInstanceOf(HTMLDivElement);
 			expect(sentinel.tagName).toBe('DIV');
 		});
 
 		it('sets position:absolute', () => {
-			const sentinel = createSentinel(testElement);
+			const { element: sentinel } = createSentinel(testElement);
 			expect(sentinel.style.position).toBe('absolute');
 		});
 
 		it('creates hidden sentinel by default', () => {
-			const sentinel = createSentinel(testElement);
+			const { element: sentinel } = createSentinel(testElement);
 			expect(sentinel.style.visibility).toBe('hidden');
 			expect(sentinel.getAttribute('data-sentinel-debug')).toBeNull();
 		});
 
 		it('creates visible sentinel when debug=true', () => {
-			const sentinel = createSentinel(testElement, true);
+			const { element: sentinel } = createSentinel(testElement, true);
 			expect(sentinel.style.visibility).not.toBe('hidden');
 			expect(sentinel.getAttribute('data-sentinel-debug')).toBe('true');
 		});
 
 		it('uses custom sentinelColor in debug mode', () => {
-			const sentinel = createSentinel(testElement, true, 0, '#ff0000');
+			const { element: sentinel } = createSentinel(testElement, true, 0, '#ff0000');
 			// happy-dom preserves hex format, not converting to rgb
 			expect(sentinel.style.backgroundColor).toBe('#ff0000');
 		});
 
 		it('uses default sentinelColor #00e0ff', () => {
-			const sentinel = createSentinel(testElement, true);
+			const { element: sentinel } = createSentinel(testElement, true);
 			// happy-dom preserves hex format, not converting to rgb
 			expect(sentinel.style.backgroundColor).toBe('#00e0ff');
 		});
 
 		it('sets debugLabel as text content in debug mode', () => {
-			const sentinel = createSentinel(testElement, true, 0, '#00e0ff', 'fade-in');
+			const { element: sentinel } = createSentinel(testElement, true, 0, '#00e0ff', 'fade-in');
 			expect(sentinel.textContent).toBe('fade-in');
 		});
 
 		it('shows sentinelId as text if no debugLabel provided', () => {
-			const sentinel = createSentinel(testElement, true, 0, '#00e0ff', '', 'test-id');
+			const { element: sentinel } = createSentinel(testElement, true, 0, '#00e0ff', '', 'test-id');
 			expect(sentinel.textContent).toBe('test-id');
 		});
 
 		it('generates auto-ID when not provided', () => {
-			const sentinel1 = createSentinel(testElement);
-			const sentinel2 = createSentinel(testElement);
+			const { element: sentinel1 } = createSentinel(testElement);
+			const { element: sentinel2 } = createSentinel(testElement);
 			expect(sentinel1.getAttribute('data-sentinel-id')).toMatch(/^sentinel-\d+$/);
 			expect(sentinel2.getAttribute('data-sentinel-id')).toMatch(/^sentinel-\d+$/);
 			// IDs should be different
@@ -161,29 +161,29 @@ describe('DOM Utilities', () => {
 		});
 
 		it('uses custom sentinelId when provided', () => {
-			const sentinel = createSentinel(testElement, false, 0, '#00e0ff', '', 'custom-id');
+			const { element: sentinel } = createSentinel(testElement, false, 0, '#00e0ff', '', 'custom-id');
 			expect(sentinel.getAttribute('data-sentinel-id')).toBe('custom-id');
 		});
 
 		it('always sets data-sentinel-id attribute', () => {
-			const sentinel1 = createSentinel(testElement);
-			const sentinel2 = createSentinel(testElement, false, 0, '#00e0ff', '', 'my-id');
+			const { element: sentinel1 } = createSentinel(testElement);
+			const { element: sentinel2 } = createSentinel(testElement, false, 0, '#00e0ff', '', 'my-id');
 			expect(sentinel1.hasAttribute('data-sentinel-id')).toBe(true);
 			expect(sentinel2.hasAttribute('data-sentinel-id')).toBe(true);
 		});
 
 		it('respects offset parameter', () => {
-			const sentinel = createSentinel(testElement, false, 50);
+			const { element: sentinel } = createSentinel(testElement, false, 50);
 			expect(sentinel.style.top).toBe('150px');
 		});
 
 		it('handles negative offset (trigger earlier)', () => {
-			const sentinel = createSentinel(testElement, false, -25);
+			const { element: sentinel } = createSentinel(testElement, false, -25);
 			expect(sentinel.style.top).toBe('75px');
 		});
 
 		it('sets correct positioning for debug sentinel', () => {
-			const sentinel = createSentinel(testElement, true, 0, '#00e0ff');
+			const { element: sentinel } = createSentinel(testElement, true, 0, '#00e0ff');
 			expect(sentinel.style.position).toBe('absolute');
 			expect(sentinel.style.left).toBe('0px');
 			expect(sentinel.style.right).toBe('0px');
@@ -191,21 +191,21 @@ describe('DOM Utilities', () => {
 		});
 
 		it('sets correct positioning for hidden sentinel', () => {
-			const sentinel = createSentinel(testElement, false, 0);
+			const { element: sentinel } = createSentinel(testElement, false, 0);
 			expect(sentinel.style.position).toBe('absolute');
 			expect(sentinel.style.height).toBe('1px');
 		});
 
 		it('sets pointer-events:none to prevent interaction', () => {
-			const sentinel = createSentinel(testElement, true);
+			const { element: sentinel } = createSentinel(testElement, true);
 			expect(sentinel.style.pointerEvents).toBe('none');
 		});
 
 		it('multiple sentinels have incrementing IDs', () => {
 			const ids = [];
 			for (let i = 0; i < 3; i++) {
-				const sentinel = createSentinel(testElement);
-				ids.push(sentinel.getAttribute('data-sentinel-id'));
+				const { id } = createSentinel(testElement);
+				ids.push(id);
 			}
 			expect(ids[0]).not.toBe(ids[1]);
 			expect(ids[1]).not.toBe(ids[2]);

@@ -38,7 +38,7 @@ export function setupAnimationElement(element, animation) {
  * @param {string} [sentinelColor='#00e0ff'] - Color for debug sentinel
  * @param {string} [debugLabel] - Label text to display on sentinel (e.g., animation name)
  * @param {string} [sentinelId] - Unique identifier for sentinel (auto-generated if not provided)
- * @returns {HTMLElement} The created sentinel element
+ * @returns {{ element: HTMLElement, id: string }} The created sentinel element and its ID
  */
 export function createSentinel(element, debug = false, offset = 0, sentinelColor = '#00e0ff', debugLabel = '', sentinelId) {
 	const sentinel = document.createElement('div');
@@ -70,7 +70,7 @@ export function createSentinel(element, debug = false, offset = 0, sentinelColor
 			`position:absolute;top:${sentinelTop}px;left:0;right:0;height:1px;visibility:hidden;margin:0;padding:0;box-sizing:border-box;pointer-events:none`;
 	}
 
-	return sentinel;
+	return { element: sentinel, id: sentinelId };
 }
 
 /**

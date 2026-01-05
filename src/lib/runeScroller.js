@@ -56,11 +56,6 @@ export function runeScroller(element, options) {
 		setCSSVariables(element, options.duration);
 	}
 
-	// Add sentinel ID to element if provided
-	if (options?.sentinelId) {
-		element.setAttribute('data-sentinel-id', options.sentinelId);
-	}
-
 	// Force reflow to ensure initial transform is applied before observer triggers
 	void element.offsetHeight;
 
@@ -75,7 +70,7 @@ export function runeScroller(element, options) {
 
 	// Create the invisible sentinel (or visible if debug=true)
 	// Positioned absolutely relative to the wrapper
-	const sentinel = createSentinel(
+	const sentinelResult = createSentinel(
 		element,
 		options?.debug,
 		options?.offset,
@@ -83,6 +78,12 @@ export function runeScroller(element, options) {
 		options?.debugLabel,
 		options?.sentinelId
 	);
+	const sentinel = sentinelResult.element;
+	const sentinelId = sentinelResult.id;
+
+	// Add sentinel ID to element (either provided or auto-generated)
+	element.setAttribute('data-sentinel-id', sentinelId);
+
 	wrapper.appendChild(sentinel);
 
 	// Observe the sentinel with cleanup tracking
@@ -116,14 +117,15 @@ export function runeScroller(element, options) {
 
 	// Function to recreate sentinel when element is resized
 	const recreateSentinel = () => {
-		const newSentinel = createSentinel(
+		const newSentinelResult = createSentinel(
 			element,
 			options?.debug,
 			options?.offset,
 			options?.sentinelColor,
 			options?.debugLabel,
-			options?.sentinelId
+			sentinelId
 		);
+		const newSentinel = newSentinelResult.element;
 		currentSentinel.replaceWith(newSentinel);
 		currentSentinel = newSentinel;
 		// Update observer to watch the new sentinel
