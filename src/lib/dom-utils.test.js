@@ -1,0 +1,191 @@
+import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
+import { setCSSVariables, setupAnimationElement, createSentinel } from './dom-utils.js';
+
+describe('DOM Utilities', () => {
+	let testElement;
+
+	beforeEach(() => {
+		// Create a test element in the DOM
+		testElement = document.createElement('div');
+		testElement.style.cssText = 'width: 100px; height: 100px;';
+		document.body.appendChild(testElement);
+	});
+
+	afterEach(() => {
+		// Clean up
+		if (testElement && testElement.parentElement) {
+			testElement.remove();
+		}
+	});
+
+	describe('setCSSVariables', () => {
+		it('sets --duration CSS variable', () => {
+			setCSSVariables(testElement, 1000);
+			expect(testElement.style.getPropertyValue('--duration')).toBe('1000ms');
+		});
+
+		it('sets --delay CSS variable with default 0', () => {
+			setCSSVariables(testElement);
+			expect(testElement.style.getPropertyValue('--delay')).toBe('0ms');
+		});
+
+		it('sets both --duration and --delay', () => {
+			setCSSVariables(testElement, 500, 100);
+			expect(testElement.style.getPropertyValue('--duration')).toBe('500ms');
+			expect(testElement.style.getPropertyValue('--delay')).toBe('100ms');
+		});
+
+		it('sets --delay without --duration', () => {
+			setCSSVariables(testElement, undefined, 50);
+			expect(testElement.style.getPropertyValue('--delay')).toBe('50ms');
+			// --duration should not be set if undefined
+			expect(testElement.style.getPropertyValue('--duration')).toBe('');
+		});
+
+		it('handles zero values', () => {
+			setCSSVariables(testElement, 0, 0);
+			expect(testElement.style.getPropertyValue('--duration')).toBe('0ms');
+			expect(testElement.style.getPropertyValue('--delay')).toBe('0ms');
+		});
+	});
+
+	describe('setupAnimationElement', () => {
+		it('adds scroll-animate class', () => {
+			setupAnimationElement(testElement, 'fade-in');
+			expect(testElement.classList.contains('scroll-animate')).toBe(true);
+		});
+
+		it('sets data-animation attribute', () => {
+			setupAnimationElement(testElement, 'fade-in-up');
+			expect(testElement.getAttribute('data-animation')).toBe('fade-in-up');
+		});
+
+		it('sets correct animation type', () => {
+			setupAnimationElement(testElement, 'zoom-in');
+			expect(testElement.getAttribute('data-animation')).toBe('zoom-in');
+		});
+
+		it('handles different animation types', () => {
+			const animations = ['fade-in', 'zoom-out', 'flip', 'bounce-in'];
+			animations.forEach((anim) => {
+				const el = document.createElement('div');
+				document.body.appendChild(el);
+				setupAnimationElement(el, anim);
+				expect(el.getAttribute('data-animation')).toBe(anim);
+				el.remove();
+			});
+		});
+
+		it('adds class even if already has other classes', () => {
+			testElement.classList.add('existing-class');
+			setupAnimationElement(testElement, 'fade-in');
+			expect(testElement.classList.contains('existing-class')).toBe(true);
+			expect(testElement.classList.contains('scroll-animate')).toBe(true);
+		});
+	});
+
+	describe('createSentinel', () => {
+		it('creates a div element', () => {
+			const sentinel = createSentinel(testElement);
+			expect(sentinel).toBeInstanceOf(HTMLDivElement);
+			expect(sentinel.tagName).toBe('DIV');
+		});
+
+		it('sets position:absolute', () => {
+			const sentinel = createSentinel(testElement);
+			expect(sentinel.style.position).toBe('absolute');
+		});
+
+		it('creates hidden sentinel by default', () => {
+			const sentinel = createSentinel(testElement);
+			expect(sentinel.style.visibility).toBe('hidden');
+			expect(sentinel.getAttribute('data-sentinel-debug')).toBeNull();
+		});
+
+		it('creates visible sentinel when debug=true', () => {
+			const sentinel = createSentinel(testElement, true);
+			expect(sentinel.style.visibility).not.toBe('hidden');
+			expect(sentinel.getAttribute('data-sentinel-debug')).toBe('true');
+		});
+
+		it('uses custom sentinelColor in debug mode', () => {
+			const sentinel = createSentinel(testElement, true, 0, '#ff0000');
+			expect(sentinel.style.backgroundColor).toBe('rgb(255, 0, 0)');
+		});
+
+		it('uses default sentinelColor #00e0ff', () => {
+			const sentinel = createSentinel(testElement, true);
+			expect(sentinel.style.backgroundColor).toBe('rgb(0, 224, 255)');
+		});
+
+		it('sets debugLabel as text content in debug mode', () => {
+			const sentinel = createSentinel(testElement, true, 0, '#00e0ff', 'fade-in');
+			expect(sentinel.textContent).toBe('fade-in');
+		});
+
+		it('shows sentinelId as text if no debugLabel provided', () => {
+			const sentinel = createSentinel(testElement, true, 0, '#00e0ff', '', 'test-id');
+			expect(sentinel.textContent).toBe('test-id');
+		});
+
+		it('generates auto-ID when not provided', () => {
+			const sentinel1 = createSentinel(testElement);
+			const sentinel2 = createSentinel(testElement);
+			expect(sentinel1.getAttribute('data-sentinel-id')).toMatch(/^sentinel-\d+$/);
+			expect(sentinel2.getAttribute('data-sentinel-id')).toMatch(/^sentinel-\d+$/);
+			// IDs should be different
+			expect(sentinel1.getAttribute('data-sentinel-id')).not.toBe(sentinel2.getAttribute('data-sentinel-id'));
+		});
+
+		it('uses custom sentinelId when provided', () => {
+			const sentinel = createSentinel(testElement, false, 0, '#00e0ff', '', 'custom-id');
+			expect(sentinel.getAttribute('data-sentinel-id')).toBe('custom-id');
+		});
+
+		it('always sets data-sentinel-id attribute', () => {
+			const sentinel1 = createSentinel(testElement);
+			const sentinel2 = createSentinel(testElement, false, 0, '#00e0ff', '', 'my-id');
+			expect(sentinel1.hasAttribute('data-sentinel-id')).toBe(true);
+			expect(sentinel2.hasAttribute('data-sentinel-id')).toBe(true);
+		});
+
+		it('respects offset parameter', () => {
+			const sentinel = createSentinel(testElement, false, 50);
+			expect(sentinel.style.top).toMatch(/150px/);
+		});
+
+		it('handles negative offset (trigger earlier)', () => {
+			const sentinel = createSentinel(testElement, false, -25);
+			expect(sentinel.style.top).toMatch(/75px/);
+		});
+
+		it('sets correct positioning for debug sentinel', () => {
+			const sentinel = createSentinel(testElement, true, 0, '#00e0ff');
+			expect(sentinel.style.position).toBe('absolute');
+			expect(sentinel.style.left).toBe('0px');
+			expect(sentinel.style.right).toBe('0px');
+			expect(sentinel.style.height).toBe('3px');
+		});
+
+		it('sets correct positioning for hidden sentinel', () => {
+			const sentinel = createSentinel(testElement, false, 0);
+			expect(sentinel.style.position).toBe('absolute');
+			expect(sentinel.style.height).toBe('1px');
+		});
+
+		it('sets pointer-events:none to prevent interaction', () => {
+			const sentinel = createSentinel(testElement, true);
+			expect(sentinel.style.pointerEvents).toBe('none');
+		});
+
+		it('multiple sentinels have incrementing IDs', () => {
+			const ids = [];
+			for (let i = 0; i < 3; i++) {
+				const sentinel = createSentinel(testElement);
+				ids.push(sentinel.getAttribute('data-sentinel-id'));
+			}
+			expect(ids[0]).not.toBe(ids[1]);
+			expect(ids[1]).not.toBe(ids[2]);
+		});
+	});
+});

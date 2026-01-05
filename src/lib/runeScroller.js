@@ -56,6 +56,11 @@ export function runeScroller(element, options) {
 		setCSSVariables(element, options.duration);
 	}
 
+	// Add sentinel ID to element if provided
+	if (options?.sentinelId) {
+		element.setAttribute('data-sentinel-id', options.sentinelId);
+	}
+
 	// Force reflow to ensure initial transform is applied before observer triggers
 	void element.offsetHeight;
 
@@ -74,8 +79,9 @@ export function runeScroller(element, options) {
 		element,
 		options?.debug,
 		options?.offset,
-		options?.debugColor,
-		options?.debugLabel
+		options?.sentinelColor,
+		options?.debugLabel,
+		options?.sentinelId
 	);
 	wrapper.appendChild(sentinel);
 
@@ -114,8 +120,9 @@ export function runeScroller(element, options) {
 			element,
 			options?.debug,
 			options?.offset,
-			options?.debugColor,
-			options?.debugLabel
+			options?.sentinelColor,
+			options?.debugLabel,
+			options?.sentinelId
 		);
 		currentSentinel.replaceWith(newSentinel);
 		currentSentinel = newSentinel;

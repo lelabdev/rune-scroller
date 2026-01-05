@@ -1,4 +1,10 @@
 /**
+ * Global counter for auto-generating sentinel IDs
+ * @type {number}
+ */
+let sentinelCounter = 0;
+
+/**
  * Set CSS custom properties on an element
  * @param {HTMLElement} element - Target DOM element
  * @param {number} [duration] - Animation duration in milliseconds
@@ -29,22 +35,35 @@ export function setupAnimationElement(element, animation) {
  * @param {HTMLElement} element - Reference element (used to position sentinel)
  * @param {boolean} [debug=false] - If true, shows the sentinel as a visible line for debugging
  * @param {number} [offset=0] - Offset in pixels from element bottom (negative = above element)
- * @param {string} [debugColor='#00e0ff'] - Color for debug sentinel
+ * @param {string} [sentinelColor='#00e0ff'] - Color for debug sentinel
  * @param {string} [debugLabel] - Label text to display on sentinel (e.g., animation name)
+ * @param {string} [sentinelId] - Unique identifier for sentinel (auto-generated if not provided)
  * @returns {HTMLElement} The created sentinel element
  */
-export function createSentinel(element, debug = false, offset = 0, debugColor = '#00e0ff', debugLabel = '') {
+export function createSentinel(element, debug = false, offset = 0, sentinelColor = '#00e0ff', debugLabel = '', sentinelId) {
 	const sentinel = document.createElement('div');
 	const rect = element.getBoundingClientRect();
 	const elementHeight = rect.height;
 	const sentinelTop = elementHeight + offset;
 
+	// Generate auto-ID if not provided
+	if (!sentinelId) {
+		sentinelCounter++;
+		sentinelId = `sentinel-${sentinelCounter}`;
+	}
+
+	// Always set the data-sentinel-id attribute
+	sentinel.setAttribute('data-sentinel-id', sentinelId);
+
 	if (debug) {
 		sentinel.style.cssText =
-			`position:absolute;top:${sentinelTop}px;left:0;right:0;height:3px;background:${debugColor};margin:0;padding:2px 4px;box-sizing:border-box;z-index:999;pointer-events:none;display:flex;align-items:center;font-size:10px;color:#000;font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis`;
+			`position:absolute;top:${sentinelTop}px;left:0;right:0;height:3px;background:${sentinelColor};margin:0;padding:2px 4px;box-sizing:border-box;z-index:999;pointer-events:none;display:flex;align-items:center;font-size:10px;color:#000;font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis`;
 		sentinel.setAttribute('data-sentinel-debug', 'true');
+		// Show ID in debug mode (or debugLabel if provided)
 		if (debugLabel) {
 			sentinel.textContent = debugLabel;
+		} else {
+			sentinel.textContent = sentinelId;
 		}
 	} else {
 		sentinel.style.cssText =

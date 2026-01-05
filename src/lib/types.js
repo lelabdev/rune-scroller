@@ -17,7 +17,8 @@
  * @property {number} [duration=800] - Animation duration in milliseconds
  * @property {boolean} [repeat=false] - Repeat animation on every scroll
  * @property {boolean} [debug=false] - Show sentinel as visible line for debugging
- * @property {string} [debugColor='#00e0ff'] - Debug sentinel color (hex or CSS color)
+ * @property {string} [sentinelColor='#00e0ff'] - Sentinel color for debug mode (hex or CSS color)
+ * @property {string} [sentinelId] - Unique identifier for sentinel (auto-generated if not provided)
  * @property {string} [debugLabel] - Debug label to show on sentinel (e.g., animation name)
  * @property {number} [offset=0] - Offset of sentinel in pixels (negative = above element)
  * @property {(element: HTMLElement) => void} [onVisible] - Callback fired when animation becomes visible
@@ -34,7 +35,8 @@
  * @property {number} [offset] - Viewport offset percentage (0-100)
  * @property {number} [threshold=0] - Intersection ratio to trigger (0-1)
  * @property {string} [rootMargin] - Custom IntersectionObserver margin
- * @property {string} [debugColor='#00e0ff'] - Debug sentinel color (hex or CSS color)
+ * @property {string} [sentinelColor='#00e0ff'] - Sentinel color for debug mode (hex or CSS color)
+ * @property {string} [sentinelId] - Unique identifier for sentinel (auto-generated if not provided)
  * @property {string} [debugLabel] - Debug label to show on sentinel (e.g., animation name)
  * @property {(element: HTMLElement) => void} [onVisible] - Callback fired when animation becomes visible
  */
