@@ -59,6 +59,10 @@ export function runeScroller(element, options) {
 
 	// Observe the sentinel with cleanup tracking
 	const state = { isConnected: true };
+	let currentSentinel = sentinel;
+	let resizeObserver;
+	let intersectionObserver;
+
 	const { observer } = createManagedObserver(
 		sentinel,
 		(entries) => {
@@ -66,9 +70,11 @@ export function runeScroller(element, options) {
 			if (isIntersecting) {
 				// Add the is-visible class to trigger animation
 				element.classList.add('is-visible');
+				// Call onVisible callback if provided
+				options?.onVisible?.(element);
 				// Disconnect if not in repeat mode
 				if (!options?.repeat) {
-					disconnectObserver(observer, state);
+					disconnectObserver(intersectionObserver, state);
 				}
 			} else if (options?.repeat) {
 				// In repeat mode, remove the class when the sentinel exits
@@ -77,6 +83,26 @@ export function runeScroller(element, options) {
 		},
 		{ threshold: 0 }
 	);
+
+	intersectionObserver = observer;
+
+	// Function to recreate sentinel when element is resized
+	const recreateSentinel = () => {
+		const newSentinel = createSentinel(element, options?.debug, options?.offset);
+		currentSentinel.replaceWith(newSentinel);
+		currentSentinel = newSentinel;
+		// Update observer to watch the new sentinel
+		intersectionObserver.disconnect();
+		intersectionObserver.observe(newSentinel);
+	};
+
+	// Setup ResizeObserver to handle element resizing
+	if (typeof ResizeObserver !== 'undefined') {
+		resizeObserver = new ResizeObserver(() => {
+			recreateSentinel();
+		});
+		resizeObserver.observe(element);
+	}
 
 	return {
 		update(newOptions) {
@@ -90,10 +116,20 @@ export function runeScroller(element, options) {
 			if (newOptions?.repeat !== undefined && newOptions.repeat !== options?.repeat) {
 				options = { ...options, repeat: newOptions.repeat };
 			}
+			// Update offset and debug if changed
+			if ((newOptions?.offset !== undefined && newOptions.offset !== options?.offset) ||
+				(newOptions?.debug !== undefined && newOptions.debug !== options?.debug)) {
+				options = { ...options, ...newOptions };
+				recreateSentinel();
+			}
 		},
 		destroy() {
-			disconnectObserver(observer, state);
-			sentinel.remove();
+			disconnectObserver(intersectionObserver, state);
+			// Cleanup ResizeObserver
+			if (resizeObserver) {
+				resizeObserver.disconnect();
+			}
+			currentSentinel.remove();
 			// Unwrap element (move it out of wrapper)
 			const parent = wrapper.parentElement;
 			if (parent) {

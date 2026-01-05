@@ -18,6 +18,7 @@
  * @property {boolean} [repeat=false] - Repeat animation on every scroll
  * @property {boolean} [debug=false] - Show sentinel as visible cyan line for debugging
  * @property {number} [offset=0] - Offset of sentinel in pixels (negative = above element)
+ * @property {(element: HTMLElement) => void} [onVisible] - Callback fired when animation becomes visible
  */
 
 /**
@@ -31,6 +32,7 @@
  * @property {number} [offset] - Viewport offset percentage (0-100)
  * @property {number} [threshold=0] - Intersection ratio to trigger (0-1)
  * @property {string} [rootMargin] - Custom IntersectionObserver margin
+ * @property {(element: HTMLElement) => void} [onVisible] - Callback fired when animation becomes visible
  */
 
 /**

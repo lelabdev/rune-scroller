@@ -32,7 +32,8 @@ export const animate = (node, options = {}) => {
 		delay = 0,
 		offset,
 		threshold = 0,
-		rootMargin
+		rootMargin,
+		onVisible
 	} = options;
 
 	// Calculate rootMargin from offset (0-100%)
@@ -54,6 +55,8 @@ export const animate = (node, options = {}) => {
 				// Trigger animation once when element enters viewport
 				if (entry.isIntersecting && !animated) {
 					node.classList.add('is-visible');
+					// Call onVisible callback if provided
+					onVisible?.(node);
 					animated = true;
 					// Stop observing after animation triggers
 					disconnectObserver(observer, state);
@@ -105,6 +108,8 @@ export const animate = (node, options = {}) => {
 							entries.forEach((entry) => {
 								if (entry.isIntersecting && !animated) {
 									node.classList.add('is-visible');
+									// Call onVisible callback if provided
+									onVisible?.(node);
 									animated = true;
 									disconnectObserver(newObserver, state);
 								}
