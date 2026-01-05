@@ -59,7 +59,7 @@ export function createSentinel(element, debug = false, offset = 0, sentinelColor
 
 	if (debug) {
 		sentinel.style.cssText =
-			`position:absolute;top:${sentinelTop}px;left:0;right:0;height:3px;background:${sentinelColor};margin:0;padding:2px 4px;box-sizing:border-box;z-index:999;pointer-events:none;display:flex;align-items:center;font-size:10px;color:#000;font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis`;
+			`position:absolute;top:${sentinelTop}px;left:0;width:100%;height:3px;background:${sentinelColor};margin:0;padding:2px 4px;box-sizing:border-box;z-index:999;pointer-events:none;display:flex;align-items:center;font-size:10px;color:#000;font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis`;
 		sentinel.setAttribute('data-sentinel-debug', 'true');
 		// Show ID in debug mode (or debugLabel if provided)
 		if (debugLabel) {
@@ -69,7 +69,7 @@ export function createSentinel(element, debug = false, offset = 0, sentinelColor
 		}
 	} else {
 		sentinel.style.cssText =
-			`position:absolute;top:${sentinelTop}px;left:0;right:0;height:1px;visibility:hidden;margin:0;padding:0;box-sizing:border-box;pointer-events:none`;
+			`position:absolute;top:${sentinelTop}px;left:0;width:100%;height:1px;visibility:hidden;margin:0;padding:0;box-sizing:border-box;pointer-events:none`;
 	}
 
 	return { element: sentinel, id: sentinelId };

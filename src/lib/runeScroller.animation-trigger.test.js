@@ -323,7 +323,7 @@ describe('runeScroller Animation Trigger Tests', () => {
 
 			// Sentinel should span full width
 			expect(sentinel.style.left).toBe('0px');
-			expect(sentinel.style.right).toBe('0px');
+			expect(sentinel.style.width).toBe('100%');
 
 			element.getBoundingClientRect = originalGetBoundingClientRect;
 		});

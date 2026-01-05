@@ -192,7 +192,7 @@ describe('DOM Utilities', () => {
 			const { element: sentinel } = createSentinel(testElement, true, 0, '#00e0ff');
 			expect(sentinel.style.position).toBe('absolute');
 			expect(sentinel.style.left).toBe('0px');
-			expect(sentinel.style.right).toBe('0px');
+			expect(sentinel.style.width).toBe('100%');
 			expect(sentinel.style.height).toBe('3px');
 		});
 
