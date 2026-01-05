@@ -15,7 +15,7 @@ export function setCSSVariables(element, duration, delay = 0) {
 /**
  * Setup animation element with required classes and attributes
  * @param {HTMLElement} element - Target DOM element
- * @param {import('./animations.js').AnimationType} animation - Animation type to apply
+ * @param {import('./types.js').AnimationType} animation - Animation type to apply
  * @returns {void}
  */
 export function setupAnimationElement(element, animation) {

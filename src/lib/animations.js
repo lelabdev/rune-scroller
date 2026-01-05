@@ -1,12 +1,6 @@
 /**
- * Animation type definitions and utilities
- */
-
-/**
- * Type-safe animation names
- * Maps to CSS classes in animations.css
- *
- * @typedef {'fade-in' | 'fade-in-up' | 'fade-in-down' | 'fade-in-left' | 'fade-in-right' | 'zoom-in' | 'zoom-out' | 'zoom-in-up' | 'zoom-in-left' | 'zoom-in-right' | 'flip' | 'flip-x' | 'slide-rotate' | 'bounce-in'} AnimationType
+ * Animation utilities
+ * Type definitions have been moved to types.js for single source of truth
  */
 
 /**

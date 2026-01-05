@@ -1,27 +1,37 @@
 import { setCSSVariables, setupAnimationElement, createSentinel } from './dom-utils.js';
+import { createManagedObserver, disconnectObserver } from './observer-utils.js';
 
 /**
- * Action pour animer un élément au scroll avec un sentinel invisible juste en dessous
+ * Svelte action for scroll animations using an invisible sentinel element
+ * Trigger animations when the sentinel enters the viewport instead of the element itself
  *
- * @param {HTMLElement} element - L'élément à animer
- * @param {import('./types.js').RuneScrollerOptions} [options] - Options d'animation (animation type, duration, et repeat)
- * @returns {{ update: (newOptions?: import('./types.js').RuneScrollerOptions) => void, destroy: () => void }} Objet action Svelte
+ * @param {HTMLElement} element - The element to animate
+ * @param {import('./types.js').RuneScrollerOptions} [options] - Animation options (animation type, duration, and repeat)
+ * @returns {{ update: (newOptions?: import('./types.js').RuneScrollerOptions) => void, destroy: () => void }} Svelte action object
  *
  * @example
  * ```svelte
- * <!-- Animation une seule fois -->
+ * <!-- One-time animation -->
  * <div use:runeScroller={{ animation: 'fade-in-up', duration: 1000 }}>
  *   Content
  * </div>
  *
- * <!-- Animation répétée à chaque scroll -->
+ * <!-- Repeat animation on every scroll -->
  * <div use:runeScroller={{ animation: 'fade-in-up', duration: 1000, repeat: true }}>
  *   Content
  * </div>
  * ```
  */
 export function runeScroller(element, options) {
-	// Setup animation classes et variables CSS
+	// SSR Guard: Return no-op action when running on server
+	if (typeof window === 'undefined') {
+		return {
+			update: () => {},
+			destroy: () => {}
+		};
+	}
+
+	// Setup animation classes and CSS variables
 	if (options?.animation) {
 		setupAnimationElement(element, options.animation);
 	}
@@ -33,42 +43,40 @@ export function runeScroller(element, options) {
 	// Force reflow to ensure initial transform is applied before observer triggers
 	void element.offsetHeight;
 
-	// Créer un wrapper div autour de l'élément pour le sentinel en position absolute
-	// Ceci évite de casser le flex/grid flow du parent
+	// Create a wrapper div around the element to position the sentinel
+	// This prevents breaking the parent's flex/grid flow
 	const wrapper = document.createElement('div');
 	wrapper.style.cssText = 'position:relative;display:block;width:100%;margin:0;padding:0';
 
-	// Insérer le wrapper avant l'élément
+	// Insert the wrapper before the element
 	element.insertAdjacentElement('beforebegin', wrapper);
 	wrapper.appendChild(element);
 
-	// Créer le sentinel invisible (ou visible si debug=true)
-	// Sentinel positioned absolutely relative to wrapper
+	// Create the invisible sentinel (or visible if debug=true)
+	// Positioned absolutely relative to the wrapper
 	const sentinel = createSentinel(element, options?.debug, options?.offset);
 	wrapper.appendChild(sentinel);
 
-	// Observer le sentinel avec cleanup tracking
-	let observerConnected = true;
-	const observer = new IntersectionObserver(
+	// Observe the sentinel with cleanup tracking
+	const state = { isConnected: true };
+	const { observer } = createManagedObserver(
+		sentinel,
 		(entries) => {
 			const isIntersecting = entries[0].isIntersecting;
 			if (isIntersecting) {
-				// Ajouter la classe is-visible à l'élément
+				// Add the is-visible class to trigger animation
 				element.classList.add('is-visible');
-				// Déconnecter si pas en mode repeat
+				// Disconnect if not in repeat mode
 				if (!options?.repeat) {
-					observer.disconnect();
-					observerConnected = false;
+					disconnectObserver(observer, state);
 				}
 			} else if (options?.repeat) {
-				// En mode repeat, retirer la classe quand le sentinel sort
+				// In repeat mode, remove the class when the sentinel exits
 				element.classList.remove('is-visible');
 			}
 		},
 		{ threshold: 0 }
 	);
-
-	observer.observe(sentinel);
 
 	return {
 		update(newOptions) {
@@ -84,9 +92,7 @@ export function runeScroller(element, options) {
 			}
 		},
 		destroy() {
-			if (observerConnected) {
-				observer.disconnect();
-			}
+			disconnectObserver(observer, state);
 			sentinel.remove();
 			// Unwrap element (move it out of wrapper)
 			const parent = wrapper.parentElement;

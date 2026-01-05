@@ -1,5 +1,6 @@
 import { calculateRootMargin } from './animations.js';
 import { setCSSVariables, setupAnimationElement } from './dom-utils.js';
+import { createManagedObserver, disconnectObserver } from './observer-utils.js';
 
 /**
  * Svelte action for scroll animations
@@ -17,6 +18,14 @@ import { setCSSVariables, setupAnimationElement } from './dom-utils.js';
  * ```
  */
 export const animate = (node, options = {}) => {
+	// SSR Guard: Return no-op action when running on server
+	if (typeof window === 'undefined') {
+		return {
+			update: () => {},
+			destroy: () => {}
+		};
+	}
+
 	let {
 		animation = 'fade-in',
 		duration = 800,
@@ -35,10 +44,11 @@ export const animate = (node, options = {}) => {
 
 	// Track if animation has been triggered
 	let animated = false;
-	let observerConnected = true;
+	const state = { isConnected: true };
 
 	// Create IntersectionObserver for one-time animation
-	const observer = new IntersectionObserver(
+	const { observer } = createManagedObserver(
+		node,
 		(entries) => {
 			entries.forEach((entry) => {
 				// Trigger animation once when element enters viewport
@@ -46,8 +56,7 @@ export const animate = (node, options = {}) => {
 					node.classList.add('is-visible');
 					animated = true;
 					// Stop observing after animation triggers
-					observer.unobserve(node);
-					observerConnected = false;
+					disconnectObserver(observer, state);
 				}
 			});
 		},
@@ -56,8 +65,6 @@ export const animate = (node, options = {}) => {
 			rootMargin: finalRootMargin
 		}
 	);
-
-	observer.observe(node);
 
 	return {
 		update(newOptions) {
@@ -86,26 +93,33 @@ export const animate = (node, options = {}) => {
 
 			// Recreate observer if threshold or rootMargin changed
 			if (newThreshold !== undefined || newOffset !== undefined || newRootMargin !== undefined) {
-				if (observerConnected) {
-					observer.disconnect();
-					observerConnected = false;
-				}
+				disconnectObserver(observer, state);
 				threshold = newThreshold ?? threshold;
 				offset = newOffset ?? offset;
 				rootMargin = newRootMargin ?? rootMargin;
 				finalRootMargin = calculateRootMargin(offset, rootMargin);
 
 				if (!animated) {
-					observer.observe(node);
-					observerConnected = true;
+					const newObserver = new IntersectionObserver(
+						(entries) => {
+							entries.forEach((entry) => {
+								if (entry.isIntersecting && !animated) {
+									node.classList.add('is-visible');
+									animated = true;
+									disconnectObserver(newObserver, state);
+								}
+							});
+						},
+						{ threshold, rootMargin: finalRootMargin }
+					);
+					newObserver.observe(node);
+					state.isConnected = true;
 				}
 			}
 		},
 
 		destroy() {
-			if (observerConnected) {
-				observer.disconnect();
-			}
+			disconnectObserver(observer, state);
 		}
 	};
 };
