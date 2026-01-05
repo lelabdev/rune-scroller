@@ -1,4 +1,4 @@
-import { calculateRootMargin } from './animations.js';
+import { calculateRootMargin, ANIMATION_TYPES } from './animations.js';
 import { setCSSVariables, setupAnimationElement } from './dom-utils.js';
 import { createManagedObserver, disconnectObserver } from './observer-utils.js';
 
@@ -35,6 +35,15 @@ export const animate = (node, options = {}) => {
 		rootMargin,
 		onVisible
 	} = options;
+
+	// Validate animation type
+	if (animation && !ANIMATION_TYPES.includes(animation)) {
+		console.warn(
+			`[rune-scroller] Invalid animation "${animation}". Using "fade-in" instead. ` +
+			`Valid options: ${ANIMATION_TYPES.join(', ')}`
+		);
+		animation = 'fade-in';
+	}
 
 	// Calculate rootMargin from offset (0-100%)
 	let finalRootMargin = calculateRootMargin(offset, rootMargin);
@@ -90,8 +99,16 @@ export const animate = (node, options = {}) => {
 				setCSSVariables(node, duration, delay);
 			}
 			if (newAnimation && newAnimation !== animation) {
-				animation = newAnimation;
-				node.setAttribute('data-animation', newAnimation);
+				// Validate animation type
+				if (!ANIMATION_TYPES.includes(newAnimation)) {
+					console.warn(
+						`[rune-scroller] Invalid animation "${newAnimation}". Keeping "${animation}". ` +
+						`Valid options: ${ANIMATION_TYPES.join(', ')}`
+					);
+				} else {
+					animation = newAnimation;
+					node.setAttribute('data-animation', newAnimation);
+				}
 			}
 
 			// Recreate observer if threshold or rootMargin changed

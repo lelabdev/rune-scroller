@@ -1,5 +1,6 @@
 import { setCSSVariables, setupAnimationElement, createSentinel } from './dom-utils.js';
 import { createManagedObserver, disconnectObserver } from './observer-utils.js';
+import { ANIMATION_TYPES } from './animations.js';
 
 /**
  * Svelte action for scroll animations using an invisible sentinel element
@@ -31,9 +32,19 @@ export function runeScroller(element, options) {
 		};
 	}
 
+	// Validate animation type
+	let animation = options?.animation ?? 'fade-in';
+	if (animation && !ANIMATION_TYPES.includes(animation)) {
+		console.warn(
+			`[rune-scroller] Invalid animation "${animation}". Using "fade-in" instead. ` +
+			`Valid options: ${ANIMATION_TYPES.join(', ')}`
+		);
+		animation = 'fade-in';
+	}
+
 	// Setup animation classes and CSS variables
-	if (options?.animation) {
-		setupAnimationElement(element, options.animation);
+	if (animation) {
+		setupAnimationElement(element, animation);
 	}
 
 	if (options?.duration !== undefined) {
