@@ -3,6 +3,8 @@ import { setCSSVariables, setupAnimationElement, createSentinel } from './dom-ut
 /**
  * Action pour animer un élément au scroll avec un sentinel invisible juste en dessous
  *
+ * **SSR Compatible:** This action only runs in the browser. Svelte automatically skips actions during SSR.
+ *
  * @param {HTMLElement} element - L'élément à animer
  * @param {import('./types.js').RuneScrollerOptions} [options] - Options d'animation (animation type, duration, et repeat)
  * @returns {{ update: (newOptions?: import('./types.js').RuneScrollerOptions) => void, destroy: () => void }} Objet action Svelte
@@ -21,6 +23,15 @@ import { setCSSVariables, setupAnimationElement, createSentinel } from './dom-ut
  * ```
  */
 export function runeScroller(element, options) {
+	// SSR guard: actions only run in browser, never server-side
+	if (typeof window === 'undefined') {
+		// Return empty action object for SSR (no-op)
+		return {
+			update() {},
+			destroy() {}
+		};
+	}
+
 	// Setup animation classes et variables CSS
 	if (options?.animation) {
 		setupAnimationElement(element, options.animation);

@@ -423,6 +423,36 @@ interface AnimateOptions {
 
 ---
 
+## 🚀 SSR Compatibility
+
+**Full SSR Support** - Rune Scroller is fully compatible with SvelteKit and server-side rendering:
+
+**How it works:**
+- Actions (`use:runeScroller` and `use:animate`) only execute in the browser
+- Svelte automatically skips all actions during server-side rendering
+- No DOM errors or warnings during build/render
+- Content renders normally server-side (animations only apply in browser)
+
+**Result:**
+- ✅ Zero SSR configuration needed
+- ✅ Animations gracefully skip on server, activate in browser
+- ✅ Perfect for SvelteKit projects with `ssr: true`
+
+**Example:**
+```svelte
+<!-- This works perfectly in SvelteKit with SSR enabled -->
+<script>
+	import runeScroller from 'rune-scroller';
+	import 'rune-scroller/animations.css';
+</script>
+
+<div use:runeScroller={{ animation: 'fade-in' }}>
+	<!-- Content renders on server, animates in browser -->
+</div>
+```
+
+---
+
 ## 📄 License
 
 MIT © [ludoloops](https://github.com/ludoloops)
