@@ -29,9 +29,11 @@ export function setupAnimationElement(element, animation) {
  * @param {HTMLElement} element - Reference element (used to position sentinel)
  * @param {boolean} [debug=false] - If true, shows the sentinel as a visible line for debugging
  * @param {number} [offset=0] - Offset in pixels from element bottom (negative = above element)
+ * @param {string} [debugColor='#00e0ff'] - Color for debug sentinel
+ * @param {string} [debugLabel] - Label text to display on sentinel (e.g., animation name)
  * @returns {HTMLElement} The created sentinel element
  */
-export function createSentinel(element, debug = false, offset = 0) {
+export function createSentinel(element, debug = false, offset = 0, debugColor = '#00e0ff', debugLabel = '') {
 	const sentinel = document.createElement('div');
 	const rect = element.getBoundingClientRect();
 	const elementHeight = rect.height;
@@ -39,8 +41,11 @@ export function createSentinel(element, debug = false, offset = 0) {
 
 	if (debug) {
 		sentinel.style.cssText =
-			`position:absolute;top:${sentinelTop}px;left:0;right:0;height:3px;background:#00e0ff;margin:0;padding:0;box-sizing:border-box;z-index:999;pointer-events:none`;
+			`position:absolute;top:${sentinelTop}px;left:0;right:0;height:3px;background:${debugColor};margin:0;padding:2px 4px;box-sizing:border-box;z-index:999;pointer-events:none;display:flex;align-items:center;font-size:10px;color:#000;font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis`;
 		sentinel.setAttribute('data-sentinel-debug', 'true');
+		if (debugLabel) {
+			sentinel.textContent = debugLabel;
+		}
 	} else {
 		sentinel.style.cssText =
 			`position:absolute;top:${sentinelTop}px;left:0;right:0;height:1px;visibility:hidden;margin:0;padding:0;box-sizing:border-box;pointer-events:none`;

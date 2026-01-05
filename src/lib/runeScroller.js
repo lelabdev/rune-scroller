@@ -70,7 +70,13 @@ export function runeScroller(element, options) {
 
 	// Create the invisible sentinel (or visible if debug=true)
 	// Positioned absolutely relative to the wrapper
-	const sentinel = createSentinel(element, options?.debug, options?.offset);
+	const sentinel = createSentinel(
+		element,
+		options?.debug,
+		options?.offset,
+		options?.debugColor,
+		options?.debugLabel
+	);
 	wrapper.appendChild(sentinel);
 
 	// Observe the sentinel with cleanup tracking
@@ -104,7 +110,13 @@ export function runeScroller(element, options) {
 
 	// Function to recreate sentinel when element is resized
 	const recreateSentinel = () => {
-		const newSentinel = createSentinel(element, options?.debug, options?.offset);
+		const newSentinel = createSentinel(
+			element,
+			options?.debug,
+			options?.offset,
+			options?.debugColor,
+			options?.debugLabel
+		);
 		currentSentinel.replaceWith(newSentinel);
 		currentSentinel = newSentinel;
 		// Update observer to watch the new sentinel
