@@ -44,7 +44,8 @@ export function runeScroller(element, options) {
 
 	// Créer le sentinel invisible (ou visible si debug=true)
 	// Sentinel positioned absolutely relative to wrapper
-	const sentinel = createSentinel(element, options?.debug, options?.offset);
+	// createSentinel returns { sentinel, cleanup } with ResizeObserver for repositioning
+	const { sentinel, cleanup: cleanupSentinel } = createSentinel(element, options?.debug, options?.offset);
 	wrapper.appendChild(sentinel);
 
 	// Observer le sentinel avec cleanup tracking
@@ -84,10 +85,17 @@ export function runeScroller(element, options) {
 			}
 		},
 		destroy() {
+			// Cleanup ResizeObserver tracking sentinel position
+			cleanupSentinel();
+
+			// Disconnect IntersectionObserver if still connected
 			if (observerConnected) {
 				observer.disconnect();
 			}
+
+			// Remove sentinel from DOM
 			sentinel.remove();
+
 			// Unwrap element (move it out of wrapper)
 			const parent = wrapper.parentElement;
 			if (parent) {
