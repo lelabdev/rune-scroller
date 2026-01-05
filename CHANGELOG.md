@@ -75,7 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `AnimatedElements` component for repeating animations
 - `animate` action for direct DOM element animation
 - `useIntersection` and `useIntersectionOnce` composables
-- 14+ animation types: fade, zoom, flip, slide, rotate, bounce
+- 14 animation types: fade, zoom, flip, slide, rotate, bounce
 - Full TypeScript support with `AnimationType` union types
 - Customizable animations with duration, delay, threshold, offset
 - GPU-accelerated CSS transforms

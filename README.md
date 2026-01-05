@@ -91,17 +91,17 @@ yarn add rune-scroller
 
 ### Fade (5)
 - `fade-in` - Simple opacity fade
-- `fade-in-up` - Fade + move up 100px
-- `fade-in-down` - Fade + move down 100px
-- `fade-in-left` - Fade + move from right
-- `fade-in-right` - Fade + move from left
+- `fade-in-up` - Fade + move up 300px
+- `fade-in-down` - Fade + move down 300px
+- `fade-in-left` - Fade + move from right 300px
+- `fade-in-right` - Fade + move from left 300px
 
 ### Zoom (5)
-- `zoom-in` - Scale from 0.6 to 1
-- `zoom-out` - Scale from 1.2 to 1
-- `zoom-in-up` - Zoom + move up
-- `zoom-in-left` - Zoom + move from right
-- `zoom-in-right` - Zoom + move from left
+- `zoom-in` - Scale from 0.3 to 1
+- `zoom-out` - Scale from 2 to 1
+- `zoom-in-up` - Zoom (0.5→1) + move up 300px
+- `zoom-in-left` - Zoom (0.5→1) + move from right 300px
+- `zoom-in-right` - Zoom (0.5→1) + move from left 300px
 
 ### Others (4)
 - `flip` - 3D flip on Y-axis
@@ -116,7 +116,7 @@ yarn add rune-scroller
 ```typescript
 interface RuneScrollerOptions {
 	animation?: AnimationType;  // Animation name (default: 'fade-in')
-	duration?: number;          // Duration in ms (default: 2000)
+	duration?: number;          // Duration in ms (default: 800)
 	repeat?: boolean;           // Repeat on scroll (default: false)
 	debug?: boolean;            // Show sentinel as visible line (default: false)
 	offset?: number;            // Sentinel offset in px (default: 0, negative = above)
@@ -200,19 +200,19 @@ For advanced use cases, use `animate` for fine-grained IntersectionObserver cont
 	duration: 1000,
 	delay: 200,
 	threshold: 0.5,
-	offset: 20,
-	once: true
+	offset: 20
 }}>
 	Advanced control
 </div>
 ```
 
 **Options:**
-- `threshold` - Intersection ratio to trigger (0-1)
+- `threshold` - Intersection ratio to trigger (0-1, default: 0)
 - `offset` - Viewport offset percentage (0-100)
 - `rootMargin` - Custom IntersectionObserver margin
-- `delay` - Animation delay in ms
-- `once` - Trigger only once
+- `delay` - Animation delay in ms (default: 0)
+
+**Note:** `animate` triggers the animation **once** when the element enters the viewport (it's one-time by default, unlike `runeScroller` with `repeat: true`)
 
 ### Using Composables
 
@@ -304,6 +304,19 @@ Users who prefer reduced motion will see content without animations.
 ---
 
 ## 📚 API Reference
+
+### Public API
+
+Rune Scroller exports **2 action-based APIs** (no components):
+
+1. **`runeScroller`** (default) - Recommended, sentinel-based, simple
+2. **`animate`** (advanced) - Direct observation, fine-grained control
+
+**Why actions instead of components?**
+- Actions are lightweight directives
+- No DOM wrapper overhead
+- Better performance
+- More flexible
 
 ### Main Export
 
@@ -406,8 +419,37 @@ interface AnimateOptions {
 
 - **npm Package**: [rune-scroller](https://www.npmjs.com/package/rune-scroller)
 - **GitHub**: [lelabdev/rune-scroller](https://github.com/lelabdev/rune-scroller)
-- **Documentation**: [CLAUDE.md](./CLAUDE.md)
 - **Changelog**: [CHANGELOG.md](./CHANGELOG.md)
+
+---
+
+## 🚀 SSR Compatibility
+
+**Full SSR Support** - Rune Scroller is fully compatible with SvelteKit and server-side rendering:
+
+**How it works:**
+- Actions (`use:runeScroller` and `use:animate`) only execute in the browser
+- Svelte automatically skips all actions during server-side rendering
+- No DOM errors or warnings during build/render
+- Content renders normally server-side (animations only apply in browser)
+
+**Result:**
+- ✅ Zero SSR configuration needed
+- ✅ Animations gracefully skip on server, activate in browser
+- ✅ Perfect for SvelteKit projects with `ssr: true`
+
+**Example:**
+```svelte
+<!-- This works perfectly in SvelteKit with SSR enabled -->
+<script>
+	import runeScroller from 'rune-scroller';
+	import 'rune-scroller/animations.css';
+</script>
+
+<div use:runeScroller={{ animation: 'fade-in' }}>
+	<!-- Content renders on server, animates in browser -->
+</div>
+```
 
 ---
 
@@ -423,10 +465,10 @@ Contributions welcome! Please open an issue or PR on GitHub.
 
 ```bash
 # Development
-pnpm install
-pnpm dev
-pnpm test
-pnpm build
+bun install
+bun run dev
+bun test
+bun run build
 ```
 
 ---

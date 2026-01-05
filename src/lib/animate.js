@@ -1,9 +1,11 @@
 import { calculateRootMargin } from './animations.js';
-import { setCSSVariables, setupAnimationElement } from './dom-utils.svelte.js';
+import { setCSSVariables, setupAnimationElement } from './dom-utils.js';
 
 /**
  * Svelte action for scroll animations
  * Triggers animation once when element enters viewport
+ *
+ * **SSR Compatible:** This action only runs in the browser. Svelte automatically skips actions during SSR.
  *
  * @param {HTMLElement} node - The element to animate
  * @param {import('./types.js').AnimateOptions} [options={}] - Animation configuration
@@ -17,6 +19,15 @@ import { setCSSVariables, setupAnimationElement } from './dom-utils.svelte.js';
  * ```
  */
 export const animate = (node, options = {}) => {
+	// SSR guard: actions only run in browser, never server-side
+	if (typeof window === 'undefined') {
+		// Return empty action object for SSR (no-op)
+		return {
+			update() {},
+			destroy() {}
+		};
+	}
+
 	let {
 		animation = 'fade-in',
 		duration = 800,

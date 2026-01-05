@@ -1,7 +1,9 @@
-import { setCSSVariables, setupAnimationElement, createSentinel } from './dom-utils.svelte.js';
+import { setCSSVariables, setupAnimationElement, createSentinel } from './dom-utils.js';
 
 /**
  * Action pour animer un élément au scroll avec un sentinel invisible juste en dessous
+ *
+ * **SSR Compatible:** This action only runs in the browser. Svelte automatically skips actions during SSR.
  *
  * @param {HTMLElement} element - L'élément à animer
  * @param {import('./types.js').RuneScrollerOptions} [options] - Options d'animation (animation type, duration, et repeat)
@@ -21,18 +23,31 @@ import { setCSSVariables, setupAnimationElement, createSentinel } from './dom-ut
  * ```
  */
 export function runeScroller(element, options) {
+	// SSR guard: actions only run in browser, never server-side
+	if (typeof window === 'undefined') {
+		// Return empty action object for SSR (no-op)
+		return {
+			update() {},
+			destroy() {}
+		};
+	}
+
 	// Setup animation classes et variables CSS
-	if (options?.animation || options?.duration) {
-		if (options.animation) {
-			setupAnimationElement(element, options.animation);
-		}
+	if (options?.animation) {
+		setupAnimationElement(element, options.animation);
+	}
+
+	if (options?.duration !== undefined) {
 		setCSSVariables(element, options.duration);
 	}
+
+	// Force reflow to ensure initial transform is applied before observer triggers
+	void element.offsetHeight;
 
 	// Créer un wrapper div autour de l'élément pour le sentinel en position absolute
 	// Ceci évite de casser le flex/grid flow du parent
 	const wrapper = document.createElement('div');
-	wrapper.style.cssText = 'position:relative;display:contents';
+	wrapper.style.cssText = 'position:relative;display:block;width:100%;margin:0;padding:0';
 
 	// Insérer le wrapper avant l'élément
 	element.insertAdjacentElement('beforebegin', wrapper);
@@ -40,7 +55,8 @@ export function runeScroller(element, options) {
 
 	// Créer le sentinel invisible (ou visible si debug=true)
 	// Sentinel positioned absolutely relative to wrapper
-	const sentinel = createSentinel(element, options?.debug, options?.offset);
+	// createSentinel returns { sentinel, cleanup } with ResizeObserver for repositioning
+	const { sentinel, cleanup: cleanupSentinel } = createSentinel(element, options?.debug, options?.offset);
 	wrapper.appendChild(sentinel);
 
 	// Observer le sentinel avec cleanup tracking
@@ -80,10 +96,17 @@ export function runeScroller(element, options) {
 			}
 		},
 		destroy() {
+			// Cleanup ResizeObserver tracking sentinel position
+			cleanupSentinel();
+
+			// Disconnect IntersectionObserver if still connected
 			if (observerConnected) {
 				observer.disconnect();
 			}
+
+			// Remove sentinel from DOM
 			sentinel.remove();
+
 			// Unwrap element (move it out of wrapper)
 			const parent = wrapper.parentElement;
 			if (parent) {
