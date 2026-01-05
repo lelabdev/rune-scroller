@@ -44,6 +44,12 @@ describe('runeScroller Complex Animations', () => {
 		`;
 		element.textContent = 'Zoom Target';
 
+		// Mock offsetHeight for accurate height calculation
+		Object.defineProperty(element, 'offsetHeight', {
+			configurable: true,
+			value: 200
+		});
+
 		const spacer = document.createElement('div');
 		spacer.style.cssText = 'height: 1500px; background: blue;';
 		document.body.appendChild(spacer);

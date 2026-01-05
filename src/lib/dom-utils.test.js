@@ -18,6 +18,12 @@ describe('DOM Utilities', () => {
 		testElement.style.cssText = 'width: 100px; height: 100px;';
 		window.document.body.appendChild(testElement);
 
+		// Mock offsetHeight (element intrinsic height, not affected by CSS transforms)
+		Object.defineProperty(testElement, 'offsetHeight', {
+			configurable: true,
+			value: 100
+		});
+
 		// Mock getBoundingClientRect for all tests (returns 100px height by default)
 		testElement.getBoundingClientRect = () => ({
 			height: 100,

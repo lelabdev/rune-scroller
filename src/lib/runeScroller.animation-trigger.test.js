@@ -48,6 +48,12 @@ describe('runeScroller Animation Trigger Tests', () => {
 		`;
 		element.textContent = 'Test Element';
 
+		// Mock offsetHeight for accurate height calculation
+		Object.defineProperty(element, 'offsetHeight', {
+			configurable: true,
+			value: 200
+		});
+
 		// Position element way down the page (below viewport)
 		const spacer = document.createElement('div');
 		spacer.style.cssText = 'height: 1000px; background: blue;';

@@ -78,6 +78,12 @@ describe('runeScroller Integration Tests - Sentinel Positioning', () => {
 		});
 
 		it('positions sentinel absolutely relative to wrapper', () => {
+			// Mock offsetHeight for accurate height calculation
+			Object.defineProperty(element, 'offsetHeight', {
+				configurable: true,
+				value: 200
+			});
+
 			// Mock getBoundingClientRect to return correct dimensions
 			const originalGetBoundingClientRect = element.getBoundingClientRect;
 			element.getBoundingClientRect = () => ({

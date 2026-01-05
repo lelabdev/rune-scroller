@@ -42,8 +42,10 @@ export function setupAnimationElement(element, animation) {
  */
 export function createSentinel(element, debug = false, offset = 0, sentinelColor = '#00e0ff', debugLabel = '', sentinelId) {
 	const sentinel = document.createElement('div');
-	const rect = element.getBoundingClientRect();
-	const elementHeight = rect.height;
+	// Use offsetHeight instead of getBoundingClientRect for accurate dimensions
+	// getBoundingClientRect returns transformed dimensions (affected by scale, etc)
+	// offsetHeight returns the actual element height independent of CSS transforms
+	const elementHeight = element.offsetHeight;
 	const sentinelTop = elementHeight + offset;
 
 	// Generate auto-ID if not provided
