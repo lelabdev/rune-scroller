@@ -305,6 +305,19 @@ Users who prefer reduced motion will see content without animations.
 
 ## 📚 API Reference
 
+### Public API
+
+Rune Scroller exports **2 action-based APIs** (no components):
+
+1. **`runeScroller`** (default) - Recommended, sentinel-based, simple
+2. **`animate`** (advanced) - Direct observation, fine-grained control
+
+**Why actions instead of components?**
+- Actions are lightweight directives
+- No DOM wrapper overhead
+- Better performance
+- More flexible
+
 ### Main Export
 
 ```typescript
