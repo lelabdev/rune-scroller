@@ -62,7 +62,7 @@ export function runeScroller(element, options) {
 	// Create a wrapper div around the element to position the sentinel
 	// This prevents breaking the parent's flex/grid flow
 	const wrapper = document.createElement('div');
-	wrapper.style.cssText = 'position:relative;display:block;width:100%;margin:0;padding:0;box-sizing:border-box;overflow:hidden';
+	wrapper.style.cssText = 'position:relative;display:block;width:100%;margin:0;padding:0;box-sizing:border-box';
 
 	// Insert the wrapper before the element
 	element.insertAdjacentElement('beforebegin', wrapper);
