@@ -1,14 +1,35 @@
 import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
+import { Window } from 'happy-dom';
 import { setCSSVariables, setupAnimationElement, createSentinel } from './dom-utils.js';
+
+// Setup happy-dom environment
+const window = new Window();
+global.document = window.document;
+global.HTMLElement = window.HTMLElement;
+global.HTMLDivElement = window.HTMLDivElement;
+global.ResizeObserver = window.ResizeObserver;
 
 describe('DOM Utilities', () => {
 	let testElement;
 
 	beforeEach(() => {
-		// Create a test element in the DOM
-		testElement = document.createElement('div');
+		// Create a test element in the happy-dom DOM
+		testElement = window.document.createElement('div');
 		testElement.style.cssText = 'width: 100px; height: 100px;';
-		document.body.appendChild(testElement);
+		window.document.body.appendChild(testElement);
+
+		// Mock getBoundingClientRect for all tests (returns 100px height by default)
+		testElement.getBoundingClientRect = () => ({
+			height: 100,
+			width: 0,
+			top: 0,
+			left: 0,
+			bottom: 100,
+			right: 0,
+			x: 0,
+			y: 0,
+			toJSON: () => {}
+		});
 	});
 
 	afterEach(() => {
@@ -68,8 +89,8 @@ describe('DOM Utilities', () => {
 		it('handles different animation types', () => {
 			const animations = ['fade-in', 'zoom-out', 'flip', 'bounce-in'];
 			animations.forEach((anim) => {
-				const el = document.createElement('div');
-				document.body.appendChild(el);
+				const el = window.document.createElement('div');
+				window.document.body.appendChild(el);
 				setupAnimationElement(el, anim);
 				expect(el.getAttribute('data-animation')).toBe(anim);
 				el.remove();
@@ -110,12 +131,14 @@ describe('DOM Utilities', () => {
 
 		it('uses custom sentinelColor in debug mode', () => {
 			const sentinel = createSentinel(testElement, true, 0, '#ff0000');
-			expect(sentinel.style.backgroundColor).toBe('rgb(255, 0, 0)');
+			// happy-dom preserves hex format, not converting to rgb
+			expect(sentinel.style.backgroundColor).toBe('#ff0000');
 		});
 
 		it('uses default sentinelColor #00e0ff', () => {
 			const sentinel = createSentinel(testElement, true);
-			expect(sentinel.style.backgroundColor).toBe('rgb(0, 224, 255)');
+			// happy-dom preserves hex format, not converting to rgb
+			expect(sentinel.style.backgroundColor).toBe('#00e0ff');
 		});
 
 		it('sets debugLabel as text content in debug mode', () => {
@@ -151,12 +174,12 @@ describe('DOM Utilities', () => {
 
 		it('respects offset parameter', () => {
 			const sentinel = createSentinel(testElement, false, 50);
-			expect(sentinel.style.top).toMatch(/150px/);
+			expect(sentinel.style.top).toBe('150px');
 		});
 
 		it('handles negative offset (trigger earlier)', () => {
 			const sentinel = createSentinel(testElement, false, -25);
-			expect(sentinel.style.top).toMatch(/75px/);
+			expect(sentinel.style.top).toBe('75px');
 		});
 
 		it('sets correct positioning for debug sentinel', () => {
