@@ -59,7 +59,7 @@ describe('useIntersection Composable', () => {
 			const fs = require('fs');
 			const content = fs.readFileSync('./src/lib/useIntersection.svelte.js', 'utf8');
 			expect(content).toContain('$state');
-			expect(content).toContain('onMount');
+			expect(content).toContain('$effect');
 		});
 	});
 
@@ -69,8 +69,8 @@ describe('useIntersection Composable', () => {
 			const content = fs.readFileSync('./src/lib/useIntersection.svelte.js', 'utf8');
 			// Should mention IntersectionObserver usage
 			expect(content).toContain('IntersectionObserver');
-			// Should mention onMount lifecycle
-			expect(content).toContain('onMount');
+			// Should mention $effect lifecycle (Svelte 5 best practice)
+			expect(content).toContain('$effect');
 		});
 
 		it('exports are accessible for import', () => {
