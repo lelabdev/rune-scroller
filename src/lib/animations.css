@@ -7,13 +7,12 @@
 .scroll-animate,
 .animated-element {
 	opacity: 0;
-	transition: all var(--duration, 800ms) cubic-bezier(0.34, 1.56, 0.64, 1);
-	transition-delay: var(--delay, 0ms);
+	transition: opacity var(--duration, 2500ms) linear var(--delay, 0ms), transform var(--duration, 2500ms) cubic-bezier(0.34, 1.56, 0.64, 1) var(--delay, 0ms);
 }
 
 .scroll-animate.is-visible,
 .animated-element.is-visible {
-	opacity: 1;
+	opacity: 1 !important;
 	/* GPU acceleration only for visible elements to reduce initial memory pressure */
 	will-change: transform, opacity;
 }
@@ -23,17 +22,17 @@
 
 /* Fade In (no transform, just opacity) */
 [data-animation='fade-in'] {
-	/* No transform needed, uses base opacity: 0 from .scroll-animate */
+	transform: translateY(0);
 }
 
 [data-animation='fade-in'].is-visible {
 	/* Inherits opacity: 1 from .scroll-animate.is-visible */
-	transform: none;
+	transform: translateY(0);
 }
 
 /* Fade In Up */
 [data-animation='fade-in-up'] {
-	transform: translateY(300px);
+	transform: translateY(var(--translate-distance, 300px));
 }
 
 [data-animation='fade-in-up'].is-visible {
@@ -42,7 +41,7 @@
 
 /* Fade In Down */
 [data-animation='fade-in-down'] {
-	transform: translateY(-300px);
+	transform: translateY(calc(-1 * var(--translate-distance, 300px)));
 }
 
 [data-animation='fade-in-down'].is-visible {
@@ -51,7 +50,7 @@
 
 /* Fade In Left */
 [data-animation='fade-in-left'] {
-	transform: translateX(-300px);
+	transform: translateX(calc(-1 * var(--translate-distance, 300px)));
 }
 
 [data-animation='fade-in-left'].is-visible {
@@ -60,7 +59,7 @@
 
 /* Fade In Right */
 [data-animation='fade-in-right'] {
-	transform: translateX(300px);
+	transform: translateX(var(--translate-distance, 300px));
 }
 
 [data-animation='fade-in-right'].is-visible {
@@ -87,7 +86,7 @@
 
 /* Zoom In Up */
 [data-animation='zoom-in-up'] {
-	transform: scale(0.5) translateY(300px);
+	transform: scale(0.5) translateY(var(--translate-distance, 300px));
 }
 
 [data-animation='zoom-in-up'].is-visible {
@@ -96,7 +95,7 @@
 
 /* Zoom In Left */
 [data-animation='zoom-in-left'] {
-	transform: scale(0.5) translateX(-300px);
+	transform: scale(0.5) translateX(calc(-1 * var(--translate-distance, 300px)));
 }
 
 [data-animation='zoom-in-left'].is-visible {
@@ -105,7 +104,7 @@
 
 /* Zoom In Right */
 [data-animation='zoom-in-right'] {
-	transform: scale(0.5) translateX(300px);
+	transform: scale(0.5) translateX(var(--translate-distance, 300px));
 }
 
 [data-animation='zoom-in-right'].is-visible {
@@ -132,7 +131,7 @@
 
 /* Slide Rotate */
 [data-animation='slide-rotate'] {
-	transform: translateX(-300px) rotate(-45deg);
+	transform: translateX(calc(-1 * var(--translate-distance, 300px))) rotate(-45deg);
 }
 
 [data-animation='slide-rotate'].is-visible {
@@ -146,7 +145,7 @@
 
 [data-animation='bounce-in'].is-visible {
 	transform: scale(1);
-	animation: bounce var(--duration, 800ms) cubic-bezier(0.68, -0.55, 0.265, 1.55);
+	animation: bounce var(--duration, 1500ms) cubic-bezier(0.68, -0.55, 0.265, 1.55);
 	animation-delay: var(--delay, 0ms);
 }
 

@@ -1,86 +1,150 @@
-import { setCSSVariables, setupAnimationElement, createSentinel } from './dom-utils.js';
+import { setCSSVariables, setupAnimationElement, createSentinel, checkAndWarnIfCSSNotLoaded } from './dom-utils.js';
+import { createManagedObserver, disconnectObserver } from './observer-utils.js';
+import { ANIMATION_TYPES } from './animations.js';
 
 /**
- * Action pour animer un élément au scroll avec un sentinel invisible juste en dessous
+ * Svelte action for scroll animations using an invisible sentinel element
+ * Trigger animations when the sentinel enters the viewport instead of the element itself
  *
- * **SSR Compatible:** This action only runs in the browser. Svelte automatically skips actions during SSR.
- *
- * @param {HTMLElement} element - L'élément à animer
- * @param {import('./types.js').RuneScrollerOptions} [options] - Options d'animation (animation type, duration, et repeat)
- * @returns {{ update: (newOptions?: import('./types.js').RuneScrollerOptions) => void, destroy: () => void }} Objet action Svelte
+ * @param {HTMLElement} element - The element to animate
+ * @param {import('./types.js').RuneScrollerOptions} [options] - Animation options (animation type, duration, and repeat)
+ * @returns {{ update: (newOptions?: import('./types.js').RuneScrollerOptions) => void, destroy: () => void }} Svelte action object
  *
  * @example
  * ```svelte
- * <!-- Animation une seule fois -->
+ * <!-- One-time animation -->
  * <div use:runeScroller={{ animation: 'fade-in-up', duration: 1000 }}>
  *   Content
  * </div>
  *
- * <!-- Animation répétée à chaque scroll -->
+ * <!-- Repeat animation on every scroll -->
  * <div use:runeScroller={{ animation: 'fade-in-up', duration: 1000, repeat: true }}>
  *   Content
  * </div>
  * ```
  */
 export function runeScroller(element, options) {
-	// SSR guard: actions only run in browser, never server-side
+	// SSR Guard: Return no-op action when running on server
 	if (typeof window === 'undefined') {
-		// Return empty action object for SSR (no-op)
 		return {
-			update() {},
-			destroy() {}
+			update: () => {},
+			destroy: () => {}
 		};
 	}
 
-	// Setup animation classes et variables CSS
-	if (options?.animation) {
-		setupAnimationElement(element, options.animation);
+	// Warn if CSS is not loaded (first time only)
+	if (typeof document !== 'undefined') {
+		checkAndWarnIfCSSNotLoaded();
 	}
 
+	// Validate animation type
+	let animation = options?.animation ?? 'fade-in';
+	if (animation && !ANIMATION_TYPES.includes(animation)) {
+		console.warn(
+			`[rune-scroller] Invalid animation "${animation}". Using "fade-in" instead. ` +
+			`Valid options: ${ANIMATION_TYPES.join(', ')}`
+		);
+		animation = 'fade-in';
+	}
+
+	// Initialize opacity: 0 BEFORE adding .scroll-animate class
+	// This ensures the transition applies correctly when .is-visible is added later
+	element.style.opacity = '0';
+
+	// Setup animation classes and CSS variables
+	if (animation) {
+		setupAnimationElement(element, animation);
+	}
+
+	// Set CSS variables for duration
 	if (options?.duration !== undefined) {
 		setCSSVariables(element, options.duration);
 	}
 
-	// Force reflow to ensure initial transform is applied before observer triggers
+	// Force reflow to ensure transitions are ready
 	void element.offsetHeight;
 
-	// Créer un wrapper div autour de l'élément pour le sentinel en position absolute
-	// Ceci évite de casser le flex/grid flow du parent
+	// Create a wrapper div around the element to position the sentinel
+	// This prevents breaking the parent's flex/grid flow
 	const wrapper = document.createElement('div');
-	wrapper.style.cssText = 'position:relative;display:block;width:100%;margin:0;padding:0';
+	wrapper.style.cssText = 'position:relative;display:block;width:100%;margin:0;padding:0;box-sizing:border-box';
 
-	// Insérer le wrapper avant l'élément
+	// Insert the wrapper before the element
 	element.insertAdjacentElement('beforebegin', wrapper);
 	wrapper.appendChild(element);
 
-	// Créer le sentinel invisible (ou visible si debug=true)
-	// Sentinel positioned absolutely relative to wrapper
-	// createSentinel returns { sentinel, cleanup } with ResizeObserver for repositioning
-	const { sentinel, cleanup: cleanupSentinel } = createSentinel(element, options?.debug, options?.offset);
+	// Create the invisible sentinel (or visible if debug=true)
+	// Positioned absolutely relative to the wrapper
+	const sentinelResult = createSentinel(
+		element,
+		options?.debug,
+		options?.offset,
+		options?.sentinelColor,
+		options?.debugLabel,
+		options?.sentinelId
+	);
+	const sentinel = sentinelResult.element;
+	const sentinelId = sentinelResult.id;
+
+	// Add sentinel ID to element (either provided or auto-generated)
+	element.setAttribute('data-sentinel-id', sentinelId);
+
 	wrapper.appendChild(sentinel);
 
-	// Observer le sentinel avec cleanup tracking
-	let observerConnected = true;
-	const observer = new IntersectionObserver(
+	// Observe the sentinel with cleanup tracking
+	const state = { isConnected: true };
+	let currentSentinel = sentinel;
+	let resizeObserver;
+	let intersectionObserver;
+
+	const { observer } = createManagedObserver(
+		sentinel,
 		(entries) => {
 			const isIntersecting = entries[0].isIntersecting;
 			if (isIntersecting) {
-				// Ajouter la classe is-visible à l'élément
+				// Add the is-visible class to trigger animation
 				element.classList.add('is-visible');
-				// Déconnecter si pas en mode repeat
+				// Call onVisible callback if provided
+				options?.onVisible?.(element);
+				// Disconnect if not in repeat mode
 				if (!options?.repeat) {
-					observer.disconnect();
-					observerConnected = false;
+					disconnectObserver(intersectionObserver, state);
 				}
 			} else if (options?.repeat) {
-				// En mode repeat, retirer la classe quand le sentinel sort
+				// In repeat mode, remove the class when the sentinel exits
 				element.classList.remove('is-visible');
 			}
 		},
 		{ threshold: 0 }
 	);
 
-	observer.observe(sentinel);
+	intersectionObserver = observer;
+
+	// Function to recreate sentinel when element is resized
+	const recreateSentinel = () => {
+		const newSentinelResult = createSentinel(
+			element,
+			options?.debug,
+			options?.offset,
+			options?.sentinelColor,
+			options?.debugLabel,
+			sentinelId
+		);
+		const newSentinel = newSentinelResult.element;
+		currentSentinel.replaceWith(newSentinel);
+		currentSentinel = newSentinel;
+		// Update observer to watch the new sentinel
+		intersectionObserver.disconnect();
+		intersectionObserver.observe(newSentinel);
+	};
+
+	// Setup ResizeObserver to handle element resizing
+	if (typeof ResizeObserver !== 'undefined') {
+		resizeObserver = new ResizeObserver(() => {
+			recreateSentinel();
+		});
+		resizeObserver.observe(element);
+	}
 
 	return {
 		update(newOptions) {
@@ -94,19 +158,20 @@ export function runeScroller(element, options) {
 			if (newOptions?.repeat !== undefined && newOptions.repeat !== options?.repeat) {
 				options = { ...options, repeat: newOptions.repeat };
 			}
+			// Update offset and debug if changed
+			if ((newOptions?.offset !== undefined && newOptions.offset !== options?.offset) ||
+				(newOptions?.debug !== undefined && newOptions.debug !== options?.debug)) {
+				options = { ...options, ...newOptions };
+				recreateSentinel();
+			}
 		},
 		destroy() {
-			// Cleanup ResizeObserver tracking sentinel position
-			cleanupSentinel();
-
-			// Disconnect IntersectionObserver if still connected
-			if (observerConnected) {
-				observer.disconnect();
+			disconnectObserver(intersectionObserver, state);
+			// Cleanup ResizeObserver
+			if (resizeObserver) {
+				resizeObserver.disconnect();
 			}
-
-			// Remove sentinel from DOM
-			sentinel.remove();
-
+			currentSentinel.remove();
 			// Unwrap element (move it out of wrapper)
 			const parent = wrapper.parentElement;
 			if (parent) {

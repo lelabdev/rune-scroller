@@ -1,13 +1,29 @@
 /**
- * Animation type definitions and utilities
+ * Animation utilities
+ * Type definitions have been moved to types.js for single source of truth
  */
 
 /**
- * Type-safe animation names
- * Maps to CSS classes in animations.css
- *
- * @typedef {'fade-in' | 'fade-in-up' | 'fade-in-down' | 'fade-in-left' | 'fade-in-right' | 'zoom-in' | 'zoom-out' | 'zoom-in-up' | 'zoom-in-left' | 'zoom-in-right' | 'flip' | 'flip-x' | 'slide-rotate' | 'bounce-in'} AnimationType
+ * All available animation types in the library
+ * Useful for programmatic access and validation
+ * @type {readonly string[]}
  */
+export const ANIMATION_TYPES = [
+	'fade-in',
+	'fade-in-up',
+	'fade-in-down',
+	'fade-in-left',
+	'fade-in-right',
+	'zoom-in',
+	'zoom-out',
+	'zoom-in-up',
+	'zoom-in-left',
+	'zoom-in-right',
+	'flip',
+	'flip-x',
+	'slide-rotate',
+	'bounce-in'
+];
 
 /**
  * Calculate rootMargin for IntersectionObserver from offset or custom rootMargin

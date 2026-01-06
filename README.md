@@ -20,6 +20,7 @@
 - **SSR-ready** - SvelteKit compatible
 - **GPU-accelerated** - Pure CSS transforms
 - **Accessible** - Respects `prefers-reduced-motion`
+- **v2.0.0 New** - `onVisible` callback, ResizeObserver support, animation validation, sentinel customization
 
 ---
 
@@ -115,21 +116,35 @@ yarn add rune-scroller
 
 ```typescript
 interface RuneScrollerOptions {
+<<<<<<< HEAD
+	animation?: AnimationType;        // Animation name (default: 'fade-in')
+	duration?: number;                // Duration in ms (default: 2500)
+	repeat?: boolean;                 // Repeat on scroll (default: false)
+	debug?: boolean;                  // Show sentinel as visible line (default: false)
+	offset?: number;                  // Sentinel offset in px (default: 0, negative = above)
+	onVisible?: (element: HTMLElement) => void;  // Callback when animation triggers (v2.0.0+)
+	sentinelColor?: string;           // Sentinel debug color, e.g. '#ff6b6b' (v2.0.0+)
+	sentinelId?: string;              // Custom ID for sentinel identification (v2.0.0+)
+=======
 	animation?: AnimationType;  // Animation name (default: 'fade-in')
 	duration?: number;          // Duration in ms (default: 800)
 	repeat?: boolean;           // Repeat on scroll (default: false)
 	debug?: boolean;            // Show sentinel as visible line (default: false)
 	offset?: number;            // Sentinel offset in px (default: 0, negative = above)
+>>>>>>> origin/main
 }
 ```
 
 ### Option Details
 
-- **`animation`** - Type of animation to play. Choose from 14 built-in animations listed above.
-- **`duration`** - How long the animation lasts in milliseconds (default: 2000ms).
+- **`animation`** - Type of animation to play. Choose from 14 built-in animations listed above. Invalid animations automatically fallback to 'fade-in' with a console warning.
+- **`duration`** - How long the animation lasts in milliseconds (default: 800ms).
 - **`repeat`** - If `true`, animation plays every time sentinel enters viewport. If `false`, plays only once.
-- **`debug`** - If `true`, displays the sentinel element as a visible cyan line below your element. Useful for seeing exactly when animations trigger.
+- **`debug`** - If `true`, displays the sentinel element as a visible line below your element. Useful for seeing exactly when animations trigger. Default color is cyan (#00e0ff), customize with `sentinelColor`.
 - **`offset`** - Offset of the sentinel in pixels. Positive values move sentinel down (delays animation), negative values move it up (triggers earlier). Useful for large elements where you want animation to trigger before the entire element is visible.
+- **`onVisible`** *(v2.0.0+)* - Callback function triggered when the animation becomes visible. Receives the animated element as parameter. Useful for analytics, lazy loading, or triggering custom effects.
+- **`sentinelColor`** *(v2.0.0+)* - Customize the debug sentinel color (e.g., '#ff6b6b' for red). Only visible when `debug: true`. Useful for distinguishing multiple sentinels on the same page.
+- **`sentinelId`** *(v2.0.0+)* - Set a custom ID for the sentinel element. If not provided, an auto-ID is generated (`sentinel-1`, `sentinel-2`, etc.). Useful for identifying sentinels in DevTools and tracking which element owns which sentinel.
 
 ### Examples
 
@@ -178,6 +193,45 @@ interface RuneScrollerOptions {
 	offset: 300  // Trigger 300px after element bottom
 }}>
 	Content with delayed animation
+</div>
+
+<!-- v2.0.0: onVisible callback for analytics tracking -->
+<div use:runeScroller={{
+	animation: 'fade-in-up',
+	onVisible: (el) => {
+		console.log('Animation visible!', el);
+		// Track analytics, load images, trigger API calls, etc.
+		window.gtag?.('event', 'animation_visible', { element: el.id });
+	}
+}}>
+	Tracked animation
+</div>
+
+<!-- v2.0.0: Custom sentinel color for debugging -->
+<div use:runeScroller={{
+	animation: 'fade-in',
+	debug: true,
+	sentinelColor: '#ff6b6b'  // Red instead of default cyan
+}}>
+	Red debug sentinel
+</div>
+
+<!-- v2.0.0: Custom sentinel ID for identification -->
+<div use:runeScroller={{
+	animation: 'zoom-in',
+	sentinelId: 'hero-zoom',
+	debug: true
+}}>
+	Identified sentinel (shows "hero-zoom" in debug mode)
+</div>
+
+<!-- v2.0.0: Auto-ID (sentinel-1, sentinel-2, etc) -->
+<div use:runeScroller={{
+	animation: 'fade-in-up',
+	debug: true
+	// sentinelId omitted → auto generates "sentinel-1", "sentinel-2", etc
+}}>
+	Auto-identified sentinel
 </div>
 ```
 
@@ -245,11 +299,18 @@ Rune Scroller uses **sentinel-based triggering**:
 3. This ensures precise timing regardless of element size
 4. Uses native IntersectionObserver for performance
 5. Pure CSS animations (GPU-accelerated)
+6. *(v2.0.0)* Sentinel automatically repositions on element resize via ResizeObserver
 
 **Why sentinels?**
 - Accurate timing across all screen sizes
 - No complex offset calculations
 - Handles staggered animations naturally
+- Sentinel stays fixed while element animates (no observer confusion with transforms)
+
+**Automatic ResizeObserver** *(v2.0.0+)*
+- Sentinel repositions automatically when element resizes
+- Works with responsive layouts and dynamic content
+- No configuration needed—it just works
 
 ---
 
@@ -356,16 +417,22 @@ interface RuneScrollerOptions {
 	repeat?: boolean;
 	debug?: boolean;
 	offset?: number;
+	onVisible?: (element: HTMLElement) => void;      // v2.0.0+
+	sentinelColor?: string;                          // v2.0.0+
+	sentinelId?: string;                             // v2.0.0+
 }
 
 interface AnimateOptions {
 	animation?: AnimationType;
-	duration?: number;
+	duration?: number;                               // default: 2500
 	delay?: number;
 	threshold?: number;
 	rootMargin?: string;
 	offset?: number;
 	once?: boolean;
+	onVisible?: (element: HTMLElement) => void;      // v2.0.0+
+	sentinelColor?: string;                          // v2.0.0+
+	sentinelId?: string;                             // v2.0.0+
 }
 ```
 

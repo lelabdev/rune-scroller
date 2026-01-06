@@ -1,11 +1,10 @@
-import { calculateRootMargin } from './animations.js';
-import { setCSSVariables, setupAnimationElement } from './dom-utils.js';
+import { calculateRootMargin, ANIMATION_TYPES } from './animations.js';
+import { setCSSVariables, setupAnimationElement, checkAndWarnIfCSSNotLoaded } from './dom-utils.js';
+import { createManagedObserver, disconnectObserver } from './observer-utils.js';
 
 /**
  * Svelte action for scroll animations
  * Triggers animation once when element enters viewport
- *
- * **SSR Compatible:** This action only runs in the browser. Svelte automatically skips actions during SSR.
  *
  * @param {HTMLElement} node - The element to animate
  * @param {import('./types.js').AnimateOptions} [options={}] - Animation configuration
@@ -19,23 +18,37 @@ import { setCSSVariables, setupAnimationElement } from './dom-utils.js';
  * ```
  */
 export const animate = (node, options = {}) => {
-	// SSR guard: actions only run in browser, never server-side
+	// SSR Guard: Return no-op action when running on server
 	if (typeof window === 'undefined') {
-		// Return empty action object for SSR (no-op)
 		return {
-			update() {},
-			destroy() {}
+			update: () => {},
+			destroy: () => {}
 		};
+	}
+
+	// Warn if CSS is not loaded (first time only)
+	if (typeof document !== 'undefined') {
+		checkAndWarnIfCSSNotLoaded();
 	}
 
 	let {
 		animation = 'fade-in',
-		duration = 800,
+		duration = 2500,
 		delay = 0,
 		offset,
 		threshold = 0,
-		rootMargin
+		rootMargin,
+		onVisible
 	} = options;
+
+	// Validate animation type
+	if (animation && !ANIMATION_TYPES.includes(animation)) {
+		console.warn(
+			`[rune-scroller] Invalid animation "${animation}". Using "fade-in" instead. ` +
+			`Valid options: ${ANIMATION_TYPES.join(', ')}`
+		);
+		animation = 'fade-in';
+	}
 
 	// Calculate rootMargin from offset (0-100%)
 	let finalRootMargin = calculateRootMargin(offset, rootMargin);
@@ -46,19 +59,21 @@ export const animate = (node, options = {}) => {
 
 	// Track if animation has been triggered
 	let animated = false;
-	let observerConnected = true;
+	const state = { isConnected: true };
 
 	// Create IntersectionObserver for one-time animation
-	const observer = new IntersectionObserver(
+	const { observer } = createManagedObserver(
+		node,
 		(entries) => {
 			entries.forEach((entry) => {
 				// Trigger animation once when element enters viewport
 				if (entry.isIntersecting && !animated) {
 					node.classList.add('is-visible');
+					// Call onVisible callback if provided
+					onVisible?.(node);
 					animated = true;
 					// Stop observing after animation triggers
-					observer.unobserve(node);
-					observerConnected = false;
+					disconnectObserver(observer, state);
 				}
 			});
 		},
@@ -67,8 +82,6 @@ export const animate = (node, options = {}) => {
 			rootMargin: finalRootMargin
 		}
 	);
-
-	observer.observe(node);
 
 	return {
 		update(newOptions) {
@@ -91,32 +104,49 @@ export const animate = (node, options = {}) => {
 				setCSSVariables(node, duration, delay);
 			}
 			if (newAnimation && newAnimation !== animation) {
-				animation = newAnimation;
-				node.setAttribute('data-animation', newAnimation);
+				// Validate animation type
+				if (!ANIMATION_TYPES.includes(newAnimation)) {
+					console.warn(
+						`[rune-scroller] Invalid animation "${newAnimation}". Keeping "${animation}". ` +
+						`Valid options: ${ANIMATION_TYPES.join(', ')}`
+					);
+				} else {
+					animation = newAnimation;
+					node.setAttribute('data-animation', newAnimation);
+				}
 			}
 
 			// Recreate observer if threshold or rootMargin changed
 			if (newThreshold !== undefined || newOffset !== undefined || newRootMargin !== undefined) {
-				if (observerConnected) {
-					observer.disconnect();
-					observerConnected = false;
-				}
+				disconnectObserver(observer, state);
 				threshold = newThreshold ?? threshold;
 				offset = newOffset ?? offset;
 				rootMargin = newRootMargin ?? rootMargin;
 				finalRootMargin = calculateRootMargin(offset, rootMargin);
 
 				if (!animated) {
-					observer.observe(node);
-					observerConnected = true;
+					const newObserver = new IntersectionObserver(
+						(entries) => {
+							entries.forEach((entry) => {
+								if (entry.isIntersecting && !animated) {
+									node.classList.add('is-visible');
+									// Call onVisible callback if provided
+									onVisible?.(node);
+									animated = true;
+									disconnectObserver(newObserver, state);
+								}
+							});
+						},
+						{ threshold, rootMargin: finalRootMargin }
+					);
+					newObserver.observe(node);
+					state.isConnected = true;
 				}
 			}
 		},
 
 		destroy() {
-			if (observerConnected) {
-				observer.disconnect();
-			}
+			disconnectObserver(observer, state);
 		}
 	};
 };
