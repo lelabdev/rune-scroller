@@ -5,6 +5,38 @@ All notable changes to Rune Scroller will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-01-05
+
+### Added
+
+- **`onVisible` callback** - Trigger actions when animations become visible (e.g., analytics tracking, lazy loading)
+- **ResizeObserver support** - Sentinel automatically repositions when element resizes, perfect for responsive layouts
+- **`sentinelColor` prop** - Customize debug sentinel color (e.g., `sentinelColor: '#ff6b6b'` for red)
+- **`sentinelId` prop** - Set custom ID or use auto-generated IDs (`sentinel-1`, `sentinel-2`, etc.) for easy element tracking
+- **`data-sentinel-id` attributes** - Added to both animated elements and sentinels for bidirectional identification
+- **Animation validation** - Invalid animations automatically fallback to `'fade-in'` with console warning
+- **Improved error handling** - Clearer console messages for missing CSS imports and configuration issues
+- **Comprehensive test suite** - 278 tests with >80% code coverage, including integration tests for sentinel positioning and complex animations
+- **Architecture Decision Records** - Documented sentinel-based approach vs. direct observation
+
+### Fixed
+
+- **Sentinel positioning with zoom-in** - Fixed using `offsetHeight` instead of `getBoundingClientRect().height` (was affected by transform scale)
+- **Horizontal scroll with sentinel** - Fixed by using `left:0;width:100%` instead of `left:0;right:0` (prevents overflow)
+- **Test coverage inadequate** - Created 58 new tests covering all critical scenarios and edge cases
+
+### Changed
+
+- Sentinel positioning logic now uses `offsetHeight` for accurate dimensions
+- Sentinel wrapper CSS now uses `width:100%` with `box-sizing:border-box`
+- Enhanced debug mode to show sentinel ID when provided
+
+### Breaking Changes
+
+None - fully backward compatible with v1.0.0 APIs.
+
+---
+
 ## [1.0.0] - 2025-11-18
 
 ### Added

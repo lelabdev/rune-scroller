@@ -33,7 +33,7 @@ export const animate = (node, options = {}) => {
 
 	let {
 		animation = 'fade-in',
-		duration = 1500,
+		duration = 2500,
 		delay = 0,
 		offset,
 		threshold = 0,

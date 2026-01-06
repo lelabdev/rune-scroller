@@ -47,16 +47,21 @@ export function runeScroller(element, options) {
 		animation = 'fade-in';
 	}
 
+	// Initialize opacity: 0 BEFORE adding .scroll-animate class
+	// This ensures the transition applies correctly when .is-visible is added later
+	element.style.opacity = '0';
+
 	// Setup animation classes and CSS variables
 	if (animation) {
 		setupAnimationElement(element, animation);
 	}
 
+	// Set CSS variables for duration
 	if (options?.duration !== undefined) {
 		setCSSVariables(element, options.duration);
 	}
 
-	// Force reflow to ensure initial transform is applied before observer triggers
+	// Force reflow to ensure transitions are ready
 	void element.offsetHeight;
 
 	// Create a wrapper div around the element to position the sentinel

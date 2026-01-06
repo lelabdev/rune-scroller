@@ -7,13 +7,12 @@
 .scroll-animate,
 .animated-element {
 	opacity: 0;
-	transition: opacity var(--duration, 1500ms) cubic-bezier(0.34, 1.56, 0.64, 1), transform var(--duration, 1500ms) cubic-bezier(0.34, 1.56, 0.64, 1);
-	transition-delay: var(--delay, 0ms);
+	transition: opacity var(--duration, 2500ms) linear var(--delay, 0ms), transform var(--duration, 2500ms) cubic-bezier(0.34, 1.56, 0.64, 1) var(--delay, 0ms);
 }
 
 .scroll-animate.is-visible,
 .animated-element.is-visible {
-	opacity: 1;
+	opacity: 1 !important;
 	/* GPU acceleration only for visible elements to reduce initial memory pressure */
 	will-change: transform, opacity;
 }
@@ -23,12 +22,12 @@
 
 /* Fade In (no transform, just opacity) */
 [data-animation='fade-in'] {
-	/* No transform needed, uses base opacity: 0 from .scroll-animate */
+	transform: translateY(0);
 }
 
 [data-animation='fade-in'].is-visible {
 	/* Inherits opacity: 1 from .scroll-animate.is-visible */
-	transform: none;
+	transform: translateY(0);
 }
 
 /* Fade In Up */

@@ -7,17 +7,21 @@ Rune Scroller v2.0 is a major release with breaking changes aimed at improving c
 ## What's New in v2.0 ✨
 
 ### ✅ New Features
-- **Configurable animation distance**: Use `--translate-distance` CSS variable to customize animation travel distance
-- **Explicit SSR guards**: More defensive server-side rendering support
-- **Shared observer utilities**: Reduced code duplication and cleaner internals
-- **ANIMATION_TYPES constant**: Programmatic access to all available animations
-- **Better type consolidation**: Single source of truth for type definitions
+- **`onVisible` callback** - Trigger actions when animations become visible (analytics, lazy loading, etc.)
+- **ResizeObserver support** - Sentinel automatically repositions when element resizes
+- **`sentinelColor` prop** - Customize debug sentinel color (e.g., `sentinelColor: '#ff6b6b'`)
+- **`sentinelId` prop** - Set custom ID or auto-generate IDs for element tracking
+- **`data-sentinel-id` attributes** - Added to both elements and sentinels for identification
+- **Animation validation** - Invalid animations automatically fallback to `'fade-in'` with warning
+- **Improved error handling** - Clearer console messages for configuration issues
+- **Comprehensive tests** - 278 tests with >80% code coverage including integration tests
+- **Better documentation** - Updated README with v2.0.0 examples and API reference
 
 ### ✅ Improvements
-- 100% English codebase (no French comments)
-- Cleaner, more maintainable code
-- Better organized utilities
-- Enhanced documentation
+- Sentinel positioning fixed for zoom-in animations (now uses `offsetHeight`)
+- Horizontal scroll issue fixed (uses `width:100%` instead of `left:0;right:0`)
+- Architecture better documented with sentinel vs. direct observation comparison
+- More reliable animation triggering across all edge cases
 
 ## Breaking Changes 🚨
 
@@ -49,10 +53,11 @@ import type { AnimationType } from 'rune-scroller/types.js';
 ## Migration Checklist
 
 - [ ] Update to v2.0.0: `npm install rune-scroller@2.0.0`
-- [ ] Remove any direct imports of `RuneScroller.svelte` or `BaseAnimated.svelte` (if any)
-- [ ] Update type imports to use `rune-scroller/types.js` if needed
-- [ ] Run tests to verify animations still work
-- [ ] Optional: Use new `--translate-distance` CSS variable for custom animation distances
+- [ ] No breaking API changes - existing code continues to work
+- [ ] Optional: Add `onVisible` callback for analytics/tracking
+- [ ] Optional: Use `sentinelColor` and `sentinelId` for better debugging
+- [ ] Test in your application to verify animations still trigger correctly
+- [ ] Update any custom CSS if you were using `--translate-distance` (still works)
 
 ## Feature Migration Examples
 
@@ -80,19 +85,73 @@ import type { AnimationType } from 'rune-scroller/types.js';
 </style>
 ```
 
-### ANIMATION_TYPES Constant
+### onVisible Callback
+
+```svelte
+<!-- v1: No callback support -->
+<div use:runeScroller={{ animation: 'fade-in' }}>
+  Content
+</div>
+
+<!-- v2: New callback for analytics, lazy loading, etc. -->
+<div use:runeScroller={{
+  animation: 'fade-in',
+  onVisible: (el) => {
+    console.log('Animation triggered!', el);
+    window.gtag?.('event', 'animation_visible', { element: el.id });
+  }
+}}>
+  Tracked animation
+</div>
+```
+
+### Sentinel Customization
+
+```svelte
+<!-- v2: Custom sentinel color for debugging -->
+<div use:runeScroller={{
+  animation: 'fade-in',
+  debug: true,
+  sentinelColor: '#ff6b6b'  // Red sentinel
+}}>
+  Content
+</div>
+
+<!-- v2: Custom sentinel ID for identification -->
+<div use:runeScroller={{
+  animation: 'fade-in',
+  sentinelId: 'hero-fade',
+  debug: true
+}}>
+  Identified sentinel
+</div>
+
+<!-- v2: Auto-generated sentinel IDs -->
+<div use:runeScroller={{
+  animation: 'fade-in',
+  debug: true
+  // sentinelId omitted → auto generates "sentinel-1", "sentinel-2", etc
+}}>
+  Auto-identified
+</div>
+```
+
+### Responsive Layouts with ResizeObserver
+
+```svelte
+<!-- v2: Sentinel automatically repositions on resize (no setup needed) -->
+<div style="width: {windowWidth}px" use:runeScroller={{ animation: 'fade-in' }}>
+  Content automatically re-triggers when resized
+</div>
+```
+
+### Animation Validation
 
 ```javascript
-// v2: New - Programmatic access to all animations
-import { ANIMATION_TYPES } from 'rune-scroller';
-
-console.log(ANIMATION_TYPES);
-// ['fade-in', 'fade-in-up', 'fade-in-down', ..., 'bounce-in']
-
-// Useful for validation
-function isValidAnimation(name) {
-  return ANIMATION_TYPES.includes(name);
-}
+// v2: Invalid animations automatically fallback with warning
+<div use:runeScroller={{ animation: 'invalid-animation' }}>
+  <!-- Automatically uses 'fade-in' instead, console warning shown -->
+</div>
 ```
 
 ## API Stability
