@@ -21,6 +21,20 @@
 - **GPU-accelerated** - Pure CSS transforms
 - **Accessible** - Respects `prefers-reduced-motion`
 - **v2.0.0 New** - `onVisible` callback, ResizeObserver support, animation validation, sentinel customization
+- **✨ Latest** - `useIntersection` migrated to Svelte 5 `$effect` rune for better lifecycle management
+
+---
+
+## 📊 Performance & Quality
+
+**Recent Optimization (2026-01-06):**
+- ✅ **278/278 tests passing** (100%)
+- ✅ **Bundle size:** 10.5KiB gzipped (stable, no regression)
+- ✅ **Type safety:** 0 errors (JSDoc + TypeScript)
+- ✅ **Memory leaks:** 0 detected
+- ✅ **Svelte 5 aligned:** Full runes support
+
+See [`MIGRATION_METRICS.md`](../MIGRATION_METRICS.md) for detailed performance benchmarks.
 
 ---
 
