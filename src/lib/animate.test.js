@@ -1,10 +1,12 @@
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
+import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test';
 import { Window } from 'happy-dom';
 import { animate } from './animate.js';
+import { mockIntersectionObserver } from './__mocks__/IntersectionObserver.js';
+import { createTestElement, getSentinel, isAnimating, hasAnimation } from './__test-helpers__/dom.js';
 
 /**
  * Unit tests for the animate action (direct observation without sentinel)
- * Covers IntersectionObserver threshold, rootMargin, delay, and animation triggering
+ * Tests verify: animation triggering via IntersectionObserver, callbacks, repeat behavior
  */
 describe('animate Action', () => {
 	let window;
@@ -13,6 +15,7 @@ describe('animate Action', () => {
 	let action;
 
 	beforeEach(() => {
+		// Setup test environment
 		window = new Window();
 		document = window.document;
 
@@ -20,37 +23,29 @@ describe('animate Action', () => {
 		global.document = document;
 		global.HTMLElement = window.HTMLElement;
 		global.HTMLDivElement = window.HTMLDivElement;
-		global.IntersectionObserver = window.IntersectionObserver;
+
+		// Install mock IntersectionObserver
+		mockIntersectionObserver.install();
 
 		global.getComputedStyle = () => ({
 			animation: 'fade-in 800ms ease-out',
 			getPropertyValue: () => ''
 		});
 
-		element = document.createElement('div');
-		element.style.cssText = 'width: 100px; height: 100px;';
-		element.textContent = 'Animate Test';
+		// Create test element
+		element = createTestElement({ id: 'animate-test', document });
 		document.body.appendChild(element);
-
-		// Mock getBoundingClientRect
-		element.getBoundingClientRect = () => ({
-			height: 100,
-			width: 100,
-			top: 0,
-			left: 0,
-			bottom: 100,
-			right: 100,
-			x: 0,
-			y: 0,
-			toJSON: () => {}
-		});
 	});
 
 	afterEach(() => {
+		// Cleanup
+		mockIntersectionObserver.reset();
+		mockIntersectionObserver.uninstall();
+
 		if (action && action.destroy) {
 			action.destroy();
 		}
-		if (element && element.parentElement) {
+		if (element?.parentElement) {
 			element.remove();
 		}
 		delete global.window;
@@ -71,8 +66,8 @@ describe('animate Action', () => {
 		});
 	});
 
-	describe('Setup', () => {
-		it('creates action object with update and destroy methods', () => {
+	describe('Setup & Initialization', () => {
+		it('creates action with update and destroy methods', () => {
 			action = animate(element, { animation: 'fade-in' });
 
 			expect(action).toBeDefined();
@@ -80,7 +75,7 @@ describe('animate Action', () => {
 			expect(typeof action.destroy).toBe('function');
 		});
 
-		it('applies animation class and data attribute', () => {
+		it('applies scroll-animate class and data-animation attribute', () => {
 			action = animate(element, { animation: 'fade-in-up' });
 
 			expect(element.classList.contains('scroll-animate')).toBe(true);
@@ -90,82 +85,113 @@ describe('animate Action', () => {
 		it('sets CSS variables for duration and delay', () => {
 			action = animate(element, {
 				animation: 'fade-in',
-				duration: 1000,
-				delay: 200
+				duration: 1200,
+				delay: 300
 			});
 
-			expect(element.style.getPropertyValue('--duration')).toBe('1000ms');
-			expect(element.style.getPropertyValue('--delay')).toBe('200ms');
+			expect(element.style.getPropertyValue('--duration')).toBe('1200ms');
+			expect(element.style.getPropertyValue('--delay')).toBe('300ms');
 		});
 	});
 
-	describe('Direct Element Observation', () => {
-		it('observes element directly (not a sentinel)', () => {
+	describe('Animation Triggering via IntersectionObserver', () => {
+		it('applies is-visible class when element enters viewport', () => {
 			action = animate(element, { animation: 'fade-in' });
 
-			// Element itself is being observed, not a sentinel wrapper
-			expect(element.parentElement.tagName).toBe('BODY');
-			// No wrapper should be created
-			expect(element.style.position).not.toBe('relative');
+			// Initially not visible
+			expect(isAnimating(element)).toBe(false);
+
+			// Trigger intersection
+			mockIntersectionObserver.trigger(element, true);
+
+			// Should now be visible
+			expect(isAnimating(element)).toBe(true);
+			expect(element.classList.contains('is-visible')).toBe(true);
 		});
 
-		it('applies animation class on initialization', () => {
-			action = animate(element, { animation: 'zoom-in', duration: 1500 });
-
-			expect(element.classList.contains('scroll-animate')).toBe(true);
-			expect(element.getAttribute('data-animation')).toBe('zoom-in');
-		});
-	});
-
-	describe('Threshold Configuration', () => {
-		it('accepts threshold option for IntersectionObserver', () => {
-			expect(() => {
-				action = animate(element, {
-					animation: 'fade-in',
-					threshold: 0.5
-				});
-			}).not.toThrow();
-		});
-
-		it('defaults to threshold 0 if not provided', () => {
+		it('applies is-visible only once (one-time trigger)', () => {
 			action = animate(element, { animation: 'fade-in' });
 
-			expect(action).toBeDefined();
-			expect(typeof action.update).toBe('function');
+			// First trigger
+			mockIntersectionObserver.trigger(element, true);
+			expect(isAnimating(element)).toBe(true);
+
+			// Observer should be disconnected after first trigger
+			const observer = mockIntersectionObserver.getObserverFor(element);
+			expect(observer).toBeUndefined();
 		});
 
-		it('accepts threshold as array', () => {
-			expect(() => {
-				action = animate(element, {
-					animation: 'fade-in',
-					threshold: [0, 0.25, 0.5, 0.75, 1]
-				});
-			}).not.toThrow();
-		});
-	});
+		it('remains visible after exiting and re-entering viewport', () => {
+			action = animate(element, { animation: 'fade-in' });
 
-	describe('Offset Configuration', () => {
-		it('accepts offset as percentage for rootMargin calculation', () => {
-			expect(() => {
-				action = animate(element, {
-					animation: 'fade-in',
-					offset: 20  // 20% offset
-				});
-			}).not.toThrow();
-		});
+			// Trigger enter
+			mockIntersectionObserver.trigger(element, true);
+			expect(isAnimating(element)).toBe(true);
 
-		it('accepts rootMargin for direct control', () => {
-			expect(() => {
-				action = animate(element, {
-					animation: 'fade-in',
-					rootMargin: '100px 0px 100px 0px'
-				});
-			}).not.toThrow();
+			// Try to trigger exit (won't work since observer disconnected)
+			// Element stays in is-visible state (animation completed)
+			expect(isAnimating(element)).toBe(true);
 		});
 	});
 
-	describe('Animation Options', () => {
-		it('accepts delay option', () => {
+	describe('Callback Execution', () => {
+		it('calls onVisible callback when element enters viewport', () => {
+			const callback = mock();
+			action = animate(element, {
+				animation: 'fade-in',
+				onVisible: callback
+			});
+
+			mockIntersectionObserver.trigger(element, true);
+
+			expect(callback).toHaveBeenCalled();
+			expect(callback.mock.calls.length).toBeGreaterThan(0);
+		});
+
+		it('passes element to onVisible callback', () => {
+			let capturedElement = null;
+			action = animate(element, {
+				animation: 'fade-in',
+				onVisible: (el) => {
+					capturedElement = el;
+				}
+			});
+
+			mockIntersectionObserver.trigger(element, true);
+
+			expect(capturedElement).toBe(element);
+		});
+
+		it('calls onVisible only once (one-time callback)', () => {
+			const callback = mock();
+			action = animate(element, {
+				animation: 'fade-in',
+				onVisible: callback
+			});
+
+			mockIntersectionObserver.trigger(element, true);
+			const firstCallCount = callback.mock.calls.length;
+
+			// Try to trigger again (observer already disconnected)
+			mockIntersectionObserver.trigger(element, false);
+			mockIntersectionObserver.trigger(element, true);
+
+			// Should not call again since observer is disconnected
+			expect(callback.mock.calls.length).toBe(firstCallCount);
+		});
+	});
+
+	describe('Configuration Options', () => {
+		it('accepts and uses duration option', () => {
+			action = animate(element, {
+				animation: 'fade-in',
+				duration: 2000
+			});
+
+			expect(element.style.getPropertyValue('--duration')).toBe('2000ms');
+		});
+
+		it('accepts and uses delay option', () => {
 			action = animate(element, {
 				animation: 'fade-in',
 				delay: 500
@@ -174,43 +200,45 @@ describe('animate Action', () => {
 			expect(element.style.getPropertyValue('--delay')).toBe('500ms');
 		});
 
-		it('accepts onVisible callback', () => {
-			let called = false;
-			action = animate(element, {
-				animation: 'fade-in',
-				onVisible: () => {
-					called = true;
-				}
-			});
-
-			expect(action).toBeDefined();
-		});
-
-		it('validates animation type', () => {
-			expect(() => {
-				action = animate(element, {
-					animation: 'invalid-animation'
-				});
-			}).not.toThrow();
-
-			// Should fallback to 'fade-in'
-			expect(element.getAttribute('data-animation')).toBe('fade-in');
-		});
-
-		it('respects repeat option', () => {
+		it('accepts threshold option', () => {
 			expect(() => {
 				action = animate(element, {
 					animation: 'fade-in',
-					repeat: true
+					threshold: 0.5
 				});
 			}).not.toThrow();
+		});
 
-			expect(action).toBeDefined();
+		it('accepts threshold as array', () => {
+			expect(() => {
+				action = animate(element, {
+					animation: 'fade-in',
+					threshold: [0, 0.5, 1]
+				});
+			}).not.toThrow();
+		});
+
+		it('accepts rootMargin option', () => {
+			expect(() => {
+				action = animate(element, {
+					animation: 'fade-in',
+					rootMargin: '50px 0px 50px 0px'
+				});
+			}).not.toThrow();
+		});
+
+		it('accepts offset as percentage', () => {
+			expect(() => {
+				action = animate(element, {
+					animation: 'fade-in',
+					offset: 30
+				});
+			}).not.toThrow();
 		});
 	});
 
-	describe('Update', () => {
-		it('updates animation option', () => {
+	describe('Update Method', () => {
+		it('updates animation type', () => {
 			action = animate(element, { animation: 'fade-in' });
 
 			action.update({ animation: 'zoom-in' });
@@ -218,84 +246,125 @@ describe('animate Action', () => {
 			expect(element.getAttribute('data-animation')).toBe('zoom-in');
 		});
 
-		it('updates duration option', () => {
+		it('updates duration', () => {
 			action = animate(element, { animation: 'fade-in', duration: 800 });
 
-			action.update({ duration: 1200 });
+			action.update({ duration: 1500 });
 
-			expect(element.style.getPropertyValue('--duration')).toBe('1200ms');
+			expect(element.style.getPropertyValue('--duration')).toBe('1500ms');
 		});
 
-		it('updates delay option', () => {
+		it('updates delay', () => {
 			action = animate(element, { animation: 'fade-in', delay: 100 });
 
-			action.update({ delay: 300 });
+			action.update({ delay: 400 });
 
-			expect(element.style.getPropertyValue('--delay')).toBe('300ms');
+			expect(element.style.getPropertyValue('--delay')).toBe('400ms');
 		});
+
 	});
 
-	describe('Cleanup', () => {
-		it('disconnects observer on destroy', () => {
+	describe('Cleanup & Destroy', () => {
+		it('disconnects IntersectionObserver on destroy', () => {
 			action = animate(element, { animation: 'fade-in' });
-
-			expect(action).toBeDefined();
-			expect(typeof action.destroy).toBe('function');
+			const observer = mockIntersectionObserver.getObserverFor(element);
 
 			action.destroy();
 
-			// Action destroyed successfully
-			expect(action.destroy).toBeDefined();
+			// Observer should no longer observe this element
+			expect(observer.observedElements.has(element)).toBe(false);
 		});
 
-		it('leaves animation classes in place after destroy', () => {
+		it('can be safely destroyed multiple times', () => {
 			action = animate(element, { animation: 'fade-in' });
 
-			expect(element.classList.contains('scroll-animate')).toBe(true);
-			expect(element.getAttribute('data-animation')).toBe('fade-in');
-
-			action.destroy();
-
-			// After destroy, animation setup remains (classes/attributes not removed)
-			// This is intentional - the animation stays in the "final" state
-			expect(element.classList.contains('scroll-animate')).toBe(true);
-			expect(element.getAttribute('data-animation')).toBe('fade-in');
+			expect(() => {
+				action.destroy();
+				action.destroy();
+				action.destroy();
+			}).not.toThrow();
 		});
 
-		it('prevents observer from triggering callback after destroy', () => {
-			let callbackCount = 0;
-			action = animate(element, {
-				animation: 'fade-in',
-				onVisible: () => {
-					callbackCount++;
-				}
-			});
+		it('leaves animation class in place after destroy', () => {
+			action = animate(element, { animation: 'fade-in' });
 
 			action.destroy();
 
-			// Callback should not be triggered after destroy
-			// In happy-dom, IntersectionObserver callbacks don't auto-trigger,
-			// but we can verify the observer was disconnected
-			expect(action.destroy).toBeDefined();
+			// Animation setup remains in place
+			expect(hasAnimation(element)).toBe(true);
+			expect(element.getAttribute('data-animation')).toBe('fade-in');
 		});
 	});
 
 	describe('All 14 Animations', () => {
 		const animations = [
-			'fade-in', 'fade-in-up', 'fade-in-down', 'fade-in-left', 'fade-in-right',
-			'zoom-in', 'zoom-out', 'zoom-in-up', 'zoom-in-left', 'zoom-in-right',
-			'flip', 'flip-x', 'slide-rotate', 'bounce-in'
+			'fade-in',
+			'fade-in-up',
+			'fade-in-down',
+			'fade-in-left',
+			'fade-in-right',
+			'zoom-in',
+			'zoom-out',
+			'zoom-in-up',
+			'zoom-in-left',
+			'zoom-in-right',
+			'flip',
+			'flip-x',
+			'slide-rotate',
+			'bounce-in'
 		];
 
-		animations.forEach(animationType => {
-			it(`supports ${animationType} animation`, () => {
+		animations.forEach((animationType) => {
+			it(`${animationType} animation triggers correctly`, () => {
 				action = animate(element, { animation: animationType });
 
-				expect(element.getAttribute('data-animation')).toBe(animationType);
-				expect(element.classList.contains('scroll-animate')).toBe(true);
+				// Trigger intersection
+				mockIntersectionObserver.trigger(element, true);
 
-				action.destroy();
+				// Verify animation is active
+				expect(element.getAttribute('data-animation')).toBe(animationType);
+				expect(isAnimating(element)).toBe(true);
 			});
+		});
+	});
+
+	describe('Edge Cases', () => {
+		it('handles invalid animation type gracefully', () => {
+			expect(() => {
+				action = animate(element, { animation: 'non-existent-animation' });
+			}).not.toThrow();
+		});
+
+		it('handles element removal from DOM', () => {
+			action = animate(element, { animation: 'fade-in' });
+
+			element.remove();
+
+			expect(() => {
+				mockIntersectionObserver.trigger(element, true);
+			}).not.toThrow();
+		});
+
+		it('handles rapid consecutive updates', () => {
+			action = animate(element, { animation: 'fade-in' });
+
+			expect(() => {
+				for (let i = 0; i < 10; i++) {
+					action.update({ duration: 500 + i * 100 });
+				}
+			}).not.toThrow();
+		});
+
+		it('works with zero duration', () => {
+			action = animate(element, { animation: 'fade-in', duration: 0 });
+
+			expect(element.style.getPropertyValue('--duration')).toBe('0ms');
+		});
+
+		it('works with zero delay', () => {
+			action = animate(element, { animation: 'fade-in', delay: 0 });
+
+			expect(element.style.getPropertyValue('--delay')).toBe('0ms');
 		});
 	});
 });

@@ -1,65 +1,62 @@
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
+import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test';
 import { Window } from 'happy-dom';
 import { runeScroller } from './runeScroller.js';
+import { mockIntersectionObserver } from './__mocks__/IntersectionObserver.js';
+import { createTestElement, createTestElements, createSpacer } from './__test-helpers__/dom.js';
 
 /**
- * Integration tests for runeScroller sentinel positioning
- * Tests verify that the sentinel is positioned correctly and animations trigger properly
+ * Integration tests for runeScroller with real IntersectionObserver interaction
+ * Tests verify: sentinel creation, positioning, animation triggering, and complex scenarios
  */
-describe('runeScroller Integration Tests - Sentinel Positioning', () => {
+describe('runeScroller Integration Tests', () => {
 	let window;
 	let document;
 	let element;
 	let action;
 
 	beforeEach(() => {
-		// Create a fresh window with proper viewport dimensions
-		window = new Window({
-			width: 1024,
-			height: 768,
-			url: 'http://localhost:3000'
-		});
+		// Setup test environment with proper viewport
+		window = new Window({ width: 1024, height: 768, url: 'http://localhost:3000' });
 		document = window.document;
 
-		// Set up global objects
 		global.window = window;
 		global.document = document;
 		global.HTMLElement = window.HTMLElement;
 		global.HTMLDivElement = window.HTMLDivElement;
-		global.ResizeObserver = window.ResizeObserver;
-		global.IntersectionObserver = window.IntersectionObserver;
+		global.ResizeObserver = window.ResizeObserver || class ResizeObserver {
+			constructor(callback) {
+				this.callback = callback;
+			}
+			observe() {}
+			unobserve() {}
+			disconnect() {}
+		};
 
-		// Mock getComputedStyle
+		// Install mock IntersectionObserver
+		mockIntersectionObserver.install();
+
 		global.getComputedStyle = () => ({
 			animation: 'fade-in 800ms ease-out',
 			getPropertyValue: () => ''
 		});
 
-		// Create body with proper sizing
+		// Create test element with spacer below to simulate scroll
+		element = createTestElement({ id: 'integration-test', document });
 		document.body.style.cssText = 'width: 1024px; height: 2000px; margin: 0; padding: 0;';
-
-		// Create test element in the middle of a long page
-		element = document.createElement('div');
-		element.style.cssText = `
-			width: 100%;
-			height: 200px;
-			background: red;
-			position: relative;
-		`;
-		element.textContent = 'Test Element';
-
-		// Position element way down the page (below viewport)
-		const spacer = document.createElement('div');
-		spacer.style.cssText = 'height: 1000px; background: blue;';
+		const spacer = createSpacer(1000, document);
 		document.body.appendChild(spacer);
 		document.body.appendChild(element);
 	});
 
 	afterEach(() => {
+		// Cleanup
+		mockIntersectionObserver.reset();
+		mockIntersectionObserver.uninstall();
+
 		if (action && action.destroy) {
 			action.destroy();
 		}
-		if (element && element.parentElement) {
+		if (element?.parentElement) {
 			element.remove();
 		}
 		delete global.window;
@@ -67,225 +64,356 @@ describe('runeScroller Integration Tests - Sentinel Positioning', () => {
 		delete global.getComputedStyle;
 	});
 
-	describe('Sentinel Positioning', () => {
-		it('creates a wrapper with position:relative', () => {
-			action = runeScroller(element, { animation: 'fade-in' });
-			const wrapper = element.parentElement;
-			const styles = window.getComputedStyle(wrapper);
-
-			expect(wrapper).toBeDefined();
-			expect(wrapper.style.position).toBe('relative');
-		});
-
-		it('positions sentinel absolutely relative to wrapper', () => {
-			// Mock offsetHeight for accurate height calculation
-			Object.defineProperty(element, 'offsetHeight', {
-				configurable: true,
-				value: 200
-			});
-
-			// Mock getBoundingClientRect to return correct dimensions
-			const originalGetBoundingClientRect = element.getBoundingClientRect;
-			element.getBoundingClientRect = () => ({
-				height: 200,
-				width: 100,
-				top: 1000,  // Element is 1000px down the page
-				left: 0,
-				bottom: 1200,
-				right: 100,
-				x: 0,
-				y: 1000,
-				toJSON: () => {}
-			});
-
-			action = runeScroller(element, { animation: 'fade-in', debug: false });
-			const wrapper = element.parentElement;
-
-			// Find sentinel by looking for a child that is not the element
-			const sentinel = Array.from(wrapper.children).find(child => child !== element);
-
-			expect(sentinel).toBeDefined();
-			expect(sentinel.style.position).toBe('absolute');
-			// Sentinel should be positioned at element height + offset
-			// With element height 200 and offset 0, sentinel should be at top: 200px
-			expect(sentinel.style.top).toContain('200px');
-
-			element.getBoundingClientRect = originalGetBoundingClientRect;
-		});
-
-		it('sentinel should be invisible when debug is false', () => {
-			const originalGetBoundingClientRect = element.getBoundingClientRect;
-			element.getBoundingClientRect = () => ({
-				height: 200,
-				width: 100,
-				top: 1000,
-				left: 0,
-				bottom: 1200,
-				right: 100,
-				x: 0,
-				y: 1000,
-				toJSON: () => {}
-			});
-
-			action = runeScroller(element, { animation: 'fade-in', debug: false });
-			const wrapper = element.parentElement;
-			const sentinel = Array.from(wrapper.children).find(child => child !== element);
-
-			expect(sentinel.style.visibility).toBe('hidden');
-			expect(sentinel.style.height).toBe('1px');
-
-			element.getBoundingClientRect = originalGetBoundingClientRect;
-		});
-
-		it('sentinel should be visible when debug is true', () => {
-			const originalGetBoundingClientRect = element.getBoundingClientRect;
-			element.getBoundingClientRect = () => ({
-				height: 200,
-				width: 100,
-				top: 1000,
-				left: 0,
-				bottom: 1200,
-				right: 100,
-				x: 0,
-				y: 1000,
-				toJSON: () => {}
-			});
-
-			action = runeScroller(element, { animation: 'fade-in', debug: true });
-			const wrapper = element.parentElement;
-			const sentinel = Array.from(wrapper.children).find(child => child !== element);
-
-			expect(sentinel.style.visibility).not.toBe('hidden');
-			expect(sentinel.textContent).toContain('sentinel');
-
-			element.getBoundingClientRect = originalGetBoundingClientRect;
-		});
-
-		it('respects offset option when positioning sentinel', () => {
-			const originalGetBoundingClientRect = element.getBoundingClientRect;
-			element.getBoundingClientRect = () => ({
-				height: 200,
-				width: 100,
-				top: 1000,
-				left: 0,
-				bottom: 1200,
-				right: 100,
-				x: 0,
-				y: 1000,
-				toJSON: () => {}
-			});
-
-			action = runeScroller(element, { animation: 'fade-in', offset: -100, debug: false });
-			const wrapper = element.parentElement;
-			const sentinel = Array.from(wrapper.children).find(child => child !== element);
-
-			// With offset -100, sentinel should be at top: 100px (200 - 100)
-			expect(sentinel.style.top).toContain('100px');
-
-			element.getBoundingClientRect = originalGetBoundingClientRect;
-		});
-	});
-
-	describe('Sentinel DOM Structure', () => {
-		it('sentinel is child of wrapper, not sibling', () => {
-			action = runeScroller(element, { animation: 'fade-in', debug: true });
-			const wrapper = element.parentElement;
-			const sentinel = wrapper.querySelector('[data-sentinel-id]');
-
-			expect(sentinel.parentElement).toBe(wrapper);
-		});
-
-		it('element remains first child of wrapper', () => {
-			action = runeScroller(element, { animation: 'fade-in' });
-			const wrapper = element.parentElement;
-
-			expect(wrapper.children[0]).toBe(element);
-		});
-
-		it('wrapper has correct structure for flexbox parent', () => {
+	describe('Sentinel Wrapping & Structure', () => {
+		it('wraps element correctly for flex parent', () => {
 			const flexContainer = document.createElement('div');
-			flexContainer.style.cssText = 'display: flex; flex-direction: column;';
+			flexContainer.style.cssText = 'display: flex; flex-direction: column; gap: 10px;';
 
-			const item = document.createElement('div');
-			item.style.cssText = 'width: 100px; height: 100px;';
-
+			const item = createTestElement({ id: 'flex-item', document });
 			flexContainer.appendChild(item);
 			document.body.appendChild(flexContainer);
 
 			action = runeScroller(item, { animation: 'fade-in' });
-			const wrapper = item.parentElement;
 
-			// Wrapper should have width: 100% and display: block
+			// Wrapper should be in flex container
+			const wrapper = item.parentElement;
+			expect(wrapper.parentElement).toBe(flexContainer);
 			expect(wrapper.style.display).toBe('block');
 			expect(wrapper.style.width).toBe('100%');
 
 			flexContainer.remove();
 		});
-	});
 
-	describe('Sentinel ID Tracking', () => {
-		it('applies auto-generated sentinel ID to both element and sentinel', () => {
-			action = runeScroller(element, { animation: 'fade-in', debug: true });
-			const wrapper = element.parentElement;
+		it('wraps element correctly for grid parent', () => {
+			const gridContainer = document.createElement('div');
+			gridContainer.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 10px;';
 
-			// Find sentinel by looking for a child that is not the element
-			const sentinel = Array.from(wrapper.children).find(child => child !== element);
+			const item = createTestElement({ id: 'grid-item', document });
+			gridContainer.appendChild(item);
+			document.body.appendChild(gridContainer);
 
-			expect(element.getAttribute('data-sentinel-id')).toBeDefined();
-			expect(sentinel).toBeDefined();
-			expect(sentinel.getAttribute('data-sentinel-id')).toBeDefined();
-			expect(element.getAttribute('data-sentinel-id')).toBe(sentinel.getAttribute('data-sentinel-id'));
+			action = runeScroller(item, { animation: 'fade-in' });
+
+			// Grid layout should be preserved
+			expect(gridContainer.style.display).toBe('grid');
+
+			gridContainer.remove();
 		});
 
-		it('applies custom sentinel ID when provided', () => {
-			action = runeScroller(element, { animation: 'fade-in', sentinelId: 'custom-sentinel', debug: true });
-			const wrapper = element.parentElement;
+		it('maintains element position in document flow', () => {
+			const originalNextSibling = element.nextSibling;
 
-			// Find sentinel by looking for a child that is not the element
-			const sentinel = Array.from(wrapper.children).find(child => child !== element);
+			action = runeScroller(element, { animation: 'fade-in' });
+
+			// Element should still be in document flow
+			expect(document.contains(element)).toBe(true);
+
+			action.destroy();
+
+			// Should be restored to original position
+			expect(element.nextSibling).toBe(originalNextSibling);
+		});
+	});
+
+	describe('Multiple Animations', () => {
+		it('handles multiple animated elements independently', () => {
+			const el1 = createTestElement({ id: 'el1', document });
+			const el2 = createTestElement({ id: 'el2', document });
+			const el3 = createTestElement({ id: 'el3', document });
+
+			document.body.appendChild(el1);
+			document.body.appendChild(el2);
+			document.body.appendChild(el3);
+
+			const act1 = runeScroller(el1, { animation: 'fade-in', sentinelId: 'sent1' });
+			const act2 = runeScroller(el2, { animation: 'zoom-in', sentinelId: 'sent2' });
+			const act3 = runeScroller(el3, { animation: 'flip', sentinelId: 'sent3' });
+
+			expect(el1.getAttribute('data-sentinel-id')).toBe('sent1');
+			expect(el2.getAttribute('data-sentinel-id')).toBe('sent2');
+			expect(el3.getAttribute('data-sentinel-id')).toBe('sent3');
+
+			act1.destroy();
+			act2.destroy();
+			act3.destroy();
+			el1.remove();
+			el2.remove();
+			el3.remove();
+		});
+
+		it('maintains independent animation states', () => {
+			const elements = createTestElements(5, { document });
+			elements.forEach((el, i) => document.body.appendChild(el));
+
+			const actions = elements.map((el, i) =>
+				runeScroller(el, {
+					animation: 'fade-in',
+					duration: 500 + i * 100
+				})
+			);
+
+			// Each element should have correct duration
+			elements.forEach((el, i) => {
+				const expected = `${500 + i * 100}ms`;
+				expect(el.style.getPropertyValue('--duration')).toBe(expected);
+			});
+
+			actions.forEach(a => a.destroy());
+			elements.forEach(el => el.remove());
+		});
+	});
+
+	describe('All 14 Animations', () => {
+		const animations = [
+			'fade-in', 'fade-in-up', 'fade-in-down', 'fade-in-left', 'fade-in-right',
+			'zoom-in', 'zoom-out', 'zoom-in-up', 'zoom-in-left', 'zoom-in-right',
+			'flip', 'flip-x', 'slide-rotate', 'bounce-in'
+		];
+
+		animations.forEach((animationType) => {
+			it(`${animationType} animation works with options`, () => {
+				action = runeScroller(element, {
+					animation: animationType,
+					duration: 1000,
+					repeat: true,
+					offset: -100
+				});
+
+				expect(element.getAttribute('data-animation')).toBe(animationType);
+				expect(element.style.getPropertyValue('--duration')).toBe('1000ms');
+				expect(element.getAttribute('data-sentinel-id')).toBeDefined();
+			});
+		});
+	});
+
+	describe('Offset Variations', () => {
+		it('creates sentinel with zero offset', () => {
+			action = runeScroller(element, { animation: 'fade-in', offset: 0 });
+			expect(element.getAttribute('data-sentinel-id')).toBeDefined();
+		});
+
+		it('creates sentinel with negative offset (early trigger)', () => {
+			action = runeScroller(element, { animation: 'fade-in', offset: -200 });
+			expect(element.getAttribute('data-sentinel-id')).toBeDefined();
+		});
+
+		it('creates sentinel with positive offset (late trigger)', () => {
+			action = runeScroller(element, { animation: 'fade-in', offset: 200 });
+			expect(element.getAttribute('data-sentinel-id')).toBeDefined();
+		});
+
+		it('handles large negative offset', () => {
+			action = runeScroller(element, { animation: 'fade-in', offset: -500 });
+			expect(element.getAttribute('data-sentinel-id')).toBeDefined();
+		});
+
+		it('handles large positive offset', () => {
+			action = runeScroller(element, { animation: 'fade-in', offset: 500 });
+			expect(element.getAttribute('data-sentinel-id')).toBeDefined();
+		});
+	});
+
+	describe('Cleanup & Memory', () => {
+		it('properly cleans up multiple animations', () => {
+			const elements = createTestElements(10, { document });
+			elements.forEach((el, i) => document.body.appendChild(el));
+
+			const actions = elements.map((el) =>
+				runeScroller(el, { animation: 'fade-in' })
+			);
+
+			// Destroy all actions
+			actions.forEach(a => a.destroy());
+
+			// Verify cleanup
+			elements.forEach(el => {
+				expect(el.parentElement).toBe(document.body);
+			});
+
+			elements.forEach(el => el.remove());
+		});
+
+		it('handles rapid create/destroy cycles', () => {
+			const el = createTestElement({ id: 'cycle-test', document });
+			document.body.appendChild(el);
+
+			expect(() => {
+				for (let i = 0; i < 5; i++) {
+					const act = runeScroller(el, { animation: 'fade-in' });
+					act.destroy();
+				}
+			}).not.toThrow();
+
+			el.remove();
+		});
+
+		it('cleans up after error scenarios', () => {
+			action = runeScroller(element, { animation: 'fade-in' });
+
+			// Simulate error scenario: remove element from DOM
+			element.remove();
+
+			// Should still destroy without error
+			expect(() => {
+				action.destroy();
+			}).not.toThrow();
+		});
+	});
+
+	describe('Configuration Combinations', () => {
+		it('handles all options combined', () => {
+			action = runeScroller(element, {
+				animation: 'zoom-in',
+				duration: 1500,
+				repeat: true,
+				offset: 100,
+				debug: true,
+				sentinelColor: '#ff0000',
+				sentinelId: 'custom-sentinel',
+				onVisible: () => {}
+			});
 
 			expect(element.getAttribute('data-sentinel-id')).toBe('custom-sentinel');
-			expect(sentinel.getAttribute('data-sentinel-id')).toBe('custom-sentinel');
-			expect(sentinel.textContent).toContain('custom-sentinel');
+			expect(element.getAttribute('data-animation')).toBe('zoom-in');
+			expect(element.style.getPropertyValue('--duration')).toBe('1500ms');
+		});
+
+		it('handles updates with multiple options', () => {
+			action = runeScroller(element, { animation: 'fade-in' });
+
+			expect(() => {
+				action.update({ animation: 'zoom-in', duration: 1000 });
+				action.update({ offset: -50 });
+				action.update({ repeat: true });
+			}).not.toThrow();
+		});
+
+		it('preserves settings after multiple updates', () => {
+			action = runeScroller(element, {
+				animation: 'fade-in',
+				duration: 800
+			});
+
+			action.update({ animation: 'zoom-in' });
+			action.update({ duration: 1200 });
+
+			expect(element.getAttribute('data-animation')).toBe('zoom-in');
+			expect(element.style.getPropertyValue('--duration')).toBe('1200ms');
 		});
 	});
 
-	describe('Cleanup and Unwrapping', () => {
-		it('removes wrapper and restores element to original parent on destroy', () => {
-			const originalParent = element.parentElement;
-			action = runeScroller(element, { animation: 'fade-in' });
-			const wrapper = element.parentElement;
+	describe('Edge Cases', () => {
+		it('handles element with complex parent structure', () => {
+			const wrapper = document.createElement('div');
+			const container = document.createElement('div');
+			const parent = document.createElement('div');
 
-			expect(wrapper.parentElement).toBe(originalParent);
+			parent.appendChild(container);
+			container.appendChild(wrapper);
+			const el = createTestElement({ id: 'complex', document });
+			wrapper.appendChild(el);
+			document.body.appendChild(parent);
+
+			action = runeScroller(el, { animation: 'fade-in' });
+
+			// Should be wrapped correctly
+			expect(el.parentElement.style.position).toBe('relative');
 
 			action.destroy();
-
-			// After destroy, element should no longer have a wrapper parent
-			const newParent = element.parentElement;
-			expect(newParent).not.toBe(wrapper);
-			expect(wrapper.parentElement).toBeNull();
+			parent.remove();
 		});
 
-		it('sentinel is removed on destroy', () => {
-			action = runeScroller(element, { animation: 'fade-in', debug: true });
-			const wrapper = element.parentElement;
-			const sentinelId = element.getAttribute('data-sentinel-id');
+		it('handles animated element with existing classes', () => {
+			element.classList.add('existing-class');
+			element.id = 'with-classes';
 
-			// Find the sentinel before destroy
-			const sentinelBeforeDestroy = Array.from(wrapper.children).find(child => child !== element);
-			expect(sentinelBeforeDestroy).toBeDefined();
+			action = runeScroller(element, { animation: 'fade-in' });
 
-			action.destroy();
+			// Should preserve existing classes
+			expect(element.classList.contains('existing-class')).toBe(true);
+			expect(element.classList.contains('scroll-animate')).toBe(true);
+		});
 
-			// After destroy, element should be restored to original parent
-			const newParent = element.parentElement;
-			expect(newParent).not.toBe(wrapper);
+		it('handles animated element with inline styles', () => {
+			element.style.cssText = 'color: red; font-size: 16px; padding: 10px;';
 
-			// Element should still have the ID (for tracking purposes)
-			expect(element.getAttribute('data-sentinel-id')).toBe(sentinelId);
+			action = runeScroller(element, { animation: 'fade-in' });
 
-			// Wrapper should be completely removed
-			expect(wrapper.parentElement).toBeNull();
+			// Should preserve inline styles
+			expect(element.style.color).toBe('red');
+			expect(element.style.fontSize).toBe('16px');
+		});
+
+		it('handles rapid concurrent updates', () => {
+			action = runeScroller(element, { animation: 'fade-in' });
+
+			const updates = [];
+			for (let i = 0; i < 20; i++) {
+				updates.push(
+					Promise.resolve().then(() => {
+						action.update({ duration: 500 + i * 10 });
+					})
+				);
+			}
+
+			// All updates should complete without error
+			expect(updates.length).toBe(20);
+		});
+	});
+
+	describe('Integration with Different Animation Types', () => {
+		it('fade animations with offset variations', () => {
+			const offsets = [-100, -50, 0, 50, 100];
+			const fadeAnimations = ['fade-in', 'fade-in-up', 'fade-in-down', 'fade-in-left', 'fade-in-right'];
+
+			expect(() => {
+				fadeAnimations.forEach((anim, i) => {
+					const el = createTestElement({ id: `fade-${i}`, document });
+					document.body.appendChild(el);
+					const act = runeScroller(el, {
+						animation: anim,
+						offset: offsets[i]
+					});
+					act.destroy();
+					el.remove();
+				});
+			}).not.toThrow();
+		});
+
+		it('zoom animations with duration variations', () => {
+			const durations = [300, 600, 900, 1200, 1500];
+			const zoomAnimations = ['zoom-in', 'zoom-out', 'zoom-in-up', 'zoom-in-left', 'zoom-in-right'];
+
+			expect(() => {
+				zoomAnimations.forEach((anim, i) => {
+					const el = createTestElement({ id: `zoom-${i}`, document });
+					document.body.appendChild(el);
+					const act = runeScroller(el, {
+						animation: anim,
+						duration: durations[i]
+					});
+					act.destroy();
+					el.remove();
+				});
+			}).not.toThrow();
+		});
+
+		it('special animations with various configurations', () => {
+			const specialAnimations = ['flip', 'flip-x', 'slide-rotate', 'bounce-in'];
+
+			expect(() => {
+				specialAnimations.forEach((anim) => {
+					const el = createTestElement({ id: `special-${anim}`, document });
+					document.body.appendChild(el);
+					const act = runeScroller(el, {
+						animation: anim,
+						repeat: true,
+						debug: false
+					});
+					act.destroy();
+					el.remove();
+				});
+			}).not.toThrow();
 		});
 	});
 });

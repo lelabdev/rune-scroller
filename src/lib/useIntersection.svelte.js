@@ -1,5 +1,3 @@
-import { onMount } from 'svelte';
-
 /**
  * Composable for handling IntersectionObserver logic
  * Reduces duplication between animation components
@@ -22,7 +20,7 @@ function createIntersectionObserver(options = {}, onIntersect = undefined, once 
 	/** @type {IntersectionObserver | null} */
 	let observer = null;
 
-	onMount(() => {
+	$effect(() => {
 		if (!element) return;
 
 		observer = new IntersectionObserver(

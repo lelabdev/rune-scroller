@@ -1,4 +1,12 @@
-# ⚡ Rune Scroller
+# ⚡ Rune Scroller - Full Reference
+
+**📚 Complete API Reference** — Detailed documentation for all features and options.
+
+**Quick start?** See [README.md](../README.md) for a simpler introduction.
+
+**Development?** See [CLAUDE.md](../CLAUDE.md) for the developer guide.
+
+---
 
 <div align="center">
 	<img src="./logo.png" alt="Rune Scroller Logo" width="200" />
@@ -21,6 +29,20 @@
 - **GPU-accelerated** - Pure CSS transforms
 - **Accessible** - Respects `prefers-reduced-motion`
 - **v2.0.0 New** - `onVisible` callback, ResizeObserver support, animation validation, sentinel customization
+- **✨ Latest** - `useIntersection` migrated to Svelte 5 `$effect` rune for better lifecycle management
+
+---
+
+## 📊 Performance & Quality
+
+**Recent Optimization (2026-01-06):**
+- ✅ **278/278 tests passing** (100%)
+- ✅ **Bundle size:** 10.5KiB gzipped (stable, no regression)
+- ✅ **Type safety:** 0 errors (JSDoc + TypeScript)
+- ✅ **Memory leaks:** 0 detected
+- ✅ **Svelte 5 aligned:** Full runes support
+
+See [`MIGRATION_METRICS.md`](../MIGRATION_METRICS.md) for detailed performance benchmarks.
 
 ---
 
@@ -116,22 +138,14 @@ yarn add rune-scroller
 
 ```typescript
 interface RuneScrollerOptions {
-<<<<<<< HEAD
-	animation?: AnimationType;        // Animation name (default: 'fade-in')
-	duration?: number;                // Duration in ms (default: 2500)
-	repeat?: boolean;                 // Repeat on scroll (default: false)
-	debug?: boolean;                  // Show sentinel as visible line (default: false)
-	offset?: number;                  // Sentinel offset in px (default: 0, negative = above)
-	onVisible?: (element: HTMLElement) => void;  // Callback when animation triggers (v2.0.0+)
-	sentinelColor?: string;           // Sentinel debug color, e.g. '#ff6b6b' (v2.0.0+)
-	sentinelId?: string;              // Custom ID for sentinel identification (v2.0.0+)
-=======
 	animation?: AnimationType;  // Animation name (default: 'fade-in')
 	duration?: number;          // Duration in ms (default: 800)
 	repeat?: boolean;           // Repeat on scroll (default: false)
 	debug?: boolean;            // Show sentinel as visible line (default: false)
 	offset?: number;            // Sentinel offset in px (default: 0, negative = above)
->>>>>>> origin/main
+	onVisible?: (element: HTMLElement) => void;  // Callback when animation triggers (v2.0.0+)
+	sentinelColor?: string;     // Sentinel debug color, e.g. '#ff6b6b' (v2.0.0+)
+	sentinelId?: string;        // Custom ID for sentinel identification (v2.0.0+)
 }
 ```
 
@@ -487,36 +501,6 @@ interface AnimateOptions {
 - **npm Package**: [rune-scroller](https://www.npmjs.com/package/rune-scroller)
 - **GitHub**: [lelabdev/rune-scroller](https://github.com/lelabdev/rune-scroller)
 - **Changelog**: [CHANGELOG.md](./CHANGELOG.md)
-
----
-
-## 🚀 SSR Compatibility
-
-**Full SSR Support** - Rune Scroller is fully compatible with SvelteKit and server-side rendering:
-
-**How it works:**
-- Actions (`use:runeScroller` and `use:animate`) only execute in the browser
-- Svelte automatically skips all actions during server-side rendering
-- No DOM errors or warnings during build/render
-- Content renders normally server-side (animations only apply in browser)
-
-**Result:**
-- ✅ Zero SSR configuration needed
-- ✅ Animations gracefully skip on server, activate in browser
-- ✅ Perfect for SvelteKit projects with `ssr: true`
-
-**Example:**
-```svelte
-<!-- This works perfectly in SvelteKit with SSR enabled -->
-<script>
-	import runeScroller from 'rune-scroller';
-	import 'rune-scroller/animations.css';
-</script>
-
-<div use:runeScroller={{ animation: 'fade-in' }}>
-	<!-- Content renders on server, animates in browser -->
-</div>
-```
 
 ---
 

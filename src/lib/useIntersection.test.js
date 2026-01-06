@@ -50,27 +50,42 @@ describe('useIntersection Composable', () => {
 		it('has proper JSDoc comments', () => {
 			// This verifies the file has documentation
 			const fs = require('fs');
-			const content = fs.readFileSync('./src/lib/useIntersection.svelte.js', 'utf8');
+			const { fileURLToPath } = require('url');
+			const { dirname } = require('path');
+			const __filename = fileURLToPath(import.meta.url);
+			const __dirname = dirname(__filename);
+			const filePath = `${__dirname}/useIntersection.svelte.js`;
+			const content = fs.readFileSync(filePath, 'utf8');
 			expect(content).toContain('@param');
 			expect(content).toContain('Composable');
 		});
 
 		it('uses Svelte 5 runes correctly', () => {
 			const fs = require('fs');
-			const content = fs.readFileSync('./src/lib/useIntersection.svelte.js', 'utf8');
+			const { fileURLToPath } = require('url');
+			const { dirname } = require('path');
+			const __filename = fileURLToPath(import.meta.url);
+			const __dirname = dirname(__filename);
+			const filePath = `${__dirname}/useIntersection.svelte.js`;
+			const content = fs.readFileSync(filePath, 'utf8');
 			expect(content).toContain('$state');
-			expect(content).toContain('onMount');
+			expect(content).toContain('$effect');
 		});
 	});
 
 	describe('Integration Notes', () => {
 		it('documentation indicates Svelte environment requirement', () => {
 			const fs = require('fs');
-			const content = fs.readFileSync('./src/lib/useIntersection.svelte.js', 'utf8');
+			const { fileURLToPath } = require('url');
+			const { dirname } = require('path');
+			const __filename = fileURLToPath(import.meta.url);
+			const __dirname = dirname(__filename);
+			const filePath = `${__dirname}/useIntersection.svelte.js`;
+			const content = fs.readFileSync(filePath, 'utf8');
 			// Should mention IntersectionObserver usage
 			expect(content).toContain('IntersectionObserver');
-			// Should mention onMount lifecycle
-			expect(content).toContain('onMount');
+			// Should mention $effect lifecycle (Svelte 5 best practice)
+			expect(content).toContain('$effect');
 		});
 
 		it('exports are accessible for import', () => {
