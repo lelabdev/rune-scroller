@@ -117,7 +117,7 @@ yarn add rune-scroller
 ```typescript
 interface RuneScrollerOptions {
 	animation?: AnimationType;        // Animation name (default: 'fade-in')
-	duration?: number;                // Duration in ms (default: 1000)
+	duration?: number;                // Duration in ms (default: 1500)
 	repeat?: boolean;                 // Repeat on scroll (default: false)
 	debug?: boolean;                  // Show sentinel as visible line (default: false)
 	offset?: number;                  // Sentinel offset in px (default: 0, negative = above)
@@ -403,7 +403,7 @@ interface RuneScrollerOptions {
 
 interface AnimateOptions {
 	animation?: AnimationType;
-	duration?: number;                               // default: 1000
+	duration?: number;                               // default: 1500
 	delay?: number;
 	threshold?: number;
 	rootMargin?: string;

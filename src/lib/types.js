@@ -14,7 +14,7 @@
  *
  * @typedef {Object} RuneScrollerOptions
  * @property {AnimationType} [animation='fade-in'] - Animation type to apply
- * @property {number} [duration=1000] - Animation duration in milliseconds
+ * @property {number} [duration=1500] - Animation duration in milliseconds
  * @property {boolean} [repeat=false] - Repeat animation on every scroll
  * @property {boolean} [debug=false] - Show sentinel as visible line for debugging
  * @property {string} [sentinelColor='#00e0ff'] - Sentinel color for debug mode (hex or CSS color)
@@ -30,7 +30,7 @@
  *
  * @typedef {Object} AnimateOptions
  * @property {AnimationType} [animation='fade-in'] - Animation type to apply
- * @property {number} [duration=1000] - Animation duration in milliseconds
+ * @property {number} [duration=1500] - Animation duration in milliseconds
  * @property {number} [delay=0] - Animation delay in milliseconds
  * @property {number} [offset] - Viewport offset percentage (0-100)
  * @property {number} [threshold=0] - Intersection ratio to trigger (0-1)

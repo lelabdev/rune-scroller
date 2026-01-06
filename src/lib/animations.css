@@ -7,7 +7,7 @@
 .scroll-animate,
 .animated-element {
 	opacity: 0;
-	transition: all var(--duration, 1000ms) cubic-bezier(0.34, 1.56, 0.64, 1);
+	transition: opacity var(--duration, 1500ms) cubic-bezier(0.34, 1.56, 0.64, 1), transform var(--duration, 1500ms) cubic-bezier(0.34, 1.56, 0.64, 1);
 	transition-delay: var(--delay, 0ms);
 }
 
@@ -146,7 +146,7 @@
 
 [data-animation='bounce-in'].is-visible {
 	transform: scale(1);
-	animation: bounce var(--duration, 1000ms) cubic-bezier(0.68, -0.55, 0.265, 1.55);
+	animation: bounce var(--duration, 1500ms) cubic-bezier(0.68, -0.55, 0.265, 1.55);
 	animation-delay: var(--delay, 0ms);
 }
 
