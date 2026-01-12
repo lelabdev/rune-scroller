@@ -2,10 +2,6 @@
 
 **📚 Complete API Reference** — Detailed documentation for all features and options.
 
-**Quick start?** See [README.md](https://github.com/lelabdev/rune-scroller/blob/main/README.md) for a simpler introduction.
-
-**Development?** See [CLAUDE.md](https://github.com/lelabdev/rune-scroller/blob/main/CLAUDE.md) for the developer guide.
-
 ---
 
 <div align="center">
