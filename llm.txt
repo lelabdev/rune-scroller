@@ -1,167 +1,139 @@
 # Rune Scroller - Library Guide for LLMs
 
-Lightweight (12.7KB gzipped) scroll animation library for Svelte 5 using IntersectionObserver and CSS animations (GPU-accelerated).
+Lightweight scroll animation library for Svelte 5 using IntersectionObserver and CSS animations (GPU-accelerated).
 
-## Core Concepts
-
-### Sentinel-Based Triggering
-`runeScroller` action creates an invisible 1px sentinel below the animated element. When the sentinel enters the viewport, it triggers the animation. Sentinel automatically repositions on element resize via ResizeObserver.
-
-### 14 Animations
-- **Fade (5):** fade-in, fade-in-up, fade-in-down, fade-in-left, fade-in-right
-- **Zoom (5):** zoom-in, zoom-out, zoom-in-up, zoom-in-left, zoom-in-right
-- **Other (4):** flip, flip-x, slide-rotate, bounce-in
-
-All animations use CSS custom properties (`--tx`, `--ty`, `--scale`, `--rx`, `--ry`, `--rotate`) and respect `prefers-reduced-motion`.
-
-## File Organization
-
-```
-lib/
-├── src/lib/
-│   ├── index.js                  # Main exports
-│   ├── types.js                  # JSDoc type definitions
-│   ├── animations.js             # Animation types & utilities
-│   ├── animations.css            # Animation keyframes (optimized with CSS custom properties)
-│   ├── runeScroller.js           # Action with sentinel triggering
-│   ├── useIntersection.svelte.js # Composables using Svelte 5 $effect
-│   ├── dom-utils.js              # DOM utilities
-│   └── observer-utils.js         # Observer setup
-│
-├── tests/                        # Test files (excluded from npm)
-│   ├── *.test.js                 # Unit and integration tests (121 tests)
-│   ├── __mocks__/                # Mocks for IntersectionObserver, Svelte runes
-│   └── __test-helpers__/         # DOM helpers
-│
-└── dist/                         # Built output (svelte-package)
-```
-
-## Main API
-
-```javascript
-// Recommended: Sentinel-based action
-import runeScroller from 'rune-scroller';
-import 'rune-scroller/animations.css';
-
-// Composables for manual control
-import { useIntersection, useIntersectionOnce } from 'rune-scroller';
-
-// Utility
-import { calculateRootMargin } from 'rune-scroller';
-```
-
-## Usage
-
-```svelte
-<div use:runeScroller={{
-  animation: 'fade-in-up',
-  duration: 1000,
-  repeat: false,
-  offset: 0,
-  onVisible: (el) => console.log('Visible!'),
-  sentinelColor: '#00e0ff',
-  sentinelId: 'my-animation'
-}}>
-  Content animates when scrolled into view
-</div>
-```
-
-**Options:**
-- `animation` - Animation type (required for animation, defaults to 'fade-in')
-- `duration` - Duration in ms (default: 800)
-- `repeat` - Repeat on scroll (default: false)
-- `debug` - Show sentinel line (default: false)
-- `offset` - Sentinel offset in px (default: 0, negative = trigger earlier)
-- `onVisible` - Callback when animation triggers
-- `sentinelColor` - Debug sentinel color (e.g., '#ff6b6b')
-- `sentinelId` - Custom sentinel identifier
-
-## Implementation Details
-
-### Svelte 5 Runes
-- `$state()` for reactive state
-- `$effect()` for cleanup and lifecycle
-- `$props()` with destructuring
-
-### CSS Variables
-- `--duration` - Animation duration
-- `--delay` - Animation delay
-- `--tx`, `--ty` - Translate values
-- `--scale` - Scale value
-- `--rx`, `--ry` - Rotation values
-- `--rotate` - Rotation value
-
-### Performance
-- Native IntersectionObserver (no scroll listeners)
-- CSS transforms only (GPU-accelerated)
-- Class-based triggering (`.is-visible`)
-- Proper cleanup on unmount (no memory leaks)
-
-## Composables
+## Quick Start
 
 ```svelte
 <script>
-  import { useIntersectionOnce } from 'rune-scroller';
+  import runeScroller from 'rune-scroller';
+</script>
 
+<div use:runeScroller={{ animation: 'fade-in-up' }}>
+  Content animates on scroll
+</div>
+```
+
+**Important:** CSS is automatically included. No manual CSS import needed.
+
+## Core Architecture
+
+**Sentinel-Based Triggering:** Creates invisible 1px sentinel below element. When sentinel enters viewport, animation triggers. Sentinel repositions on resize (ResizeObserver). More accurate than observing element directly.
+
+**14 Animations:** Fade (5), Zoom (5), Special (4: flip, flip-x, slide-rotate, bounce-in). All use 300px translation and respect `prefers-reduced-motion`.
+
+## API Reference
+
+### runeScroller Action
+
+```typescript
+{
+  animation?: AnimationType,   // Default: 'fade-in'
+  duration?: number,           // Default: 800ms
+  repeat?: boolean,            // Default: false
+  debug?: boolean,             // Default: false
+  offset?: number,             // Default: 0px (negative = trigger earlier)
+  onVisible?: (el) => void,
+  sentinelColor?: string,      // Default: '#00e0ff'
+  sentinelId?: string
+}
+```
+
+### Composables
+
+```svelte
+<script>
+  import { useIntersection, useIntersectionOnce } from 'rune-scroller';
   const intersection = useIntersectionOnce({ threshold: 0.5 });
 </script>
 
 <div bind:this={intersection.element}>
-  {#if intersection.isVisible}
-    Custom content when visible
-  {/if}
+  {#if intersection.isVisible}Content visible!{/if}
 </div>
 ```
 
-## Modifying the Library
+### Utility
 
-### Add Animation
-1. Add to `ANIMATION_TYPES` in `src/lib/animations.js`
-2. Add CSS rule to `src/lib/animations.css`:
-   ```css
-   [data-animation='my-anim'] { --tx: 100px; --scale: 0.5; }
-   ```
-3. Run `bun test` and verify in playground
-
-### Update Types
-Edit `src/lib/types.js` (centralized JSDoc types)
-
-### Core Logic
-- Sentinel creation: `src/lib/dom-utils.js`
-- Animation triggering: `src/lib/runeScroller.js`
-- Observers: `src/lib/observer-utils.js` and `src/lib/useIntersection.svelte.js`
-
-## Testing
-
-```bash
-bun test           # All 121 tests
-bun test --watch   # Watch mode
-bun run build      # Build library
+```javascript
+import { calculateRootMargin } from 'rune-scroller';
 ```
 
-Tests import from `../src/lib/` (source, not dist/). Test files excluded from npm via `.npmignore`.
+## File Structure
+
+```
+lib/src/lib/
+├── index.js              # Auto-imports CSS, exports all APIs
+├── runeScroller.js       # Main action (sentinel-based)
+├── useIntersection.svelte.js  # Composables (Svelte 5 $effect)
+├── animations.js         # Animation types, calculateRootMargin()
+├── animations.css        # CSS keyframes with custom properties
+├── dom-utils.js          # setCSSVariables(), createSentinel()
+├── observer-utils.js     # IntersectionObserver setup
+└── types.js             # JSDoc type definitions
+
+tests/                    # Excluded from npm
+├── *.test.js            # 121 tests
+├── __mocks__/           # IntersectionObserver, Svelte runes
+└── __test-helpers__/    # DOM helpers
+
+dist/                     # Built output (svelte-package)
+```
+
+## Development
+
+```bash
+cd lib
+bun test              # All tests
+bun test --watch      # Watch mode
+bun run build         # Build
+bun run check         # Type check
+bun run lint          # Format + lint
+npm publish          # Publish
+```
 
 ## Code Style
 
-- **Tabs** for indentation
-- **Single quotes** for strings
-- **100 character line width**
-- **Svelte 5 runes only** ($state, $effect, $props())
-- **JSDoc types** (no TypeScript compilation)
-- **Zero dependencies** - Pure Svelte + IntersectionObserver
-- **Mobile-first CSS** with custom properties
+- Tabs, single quotes, 100 char line width
+- JSDoc annotations (no TypeScript)
+- Svelte 5 runes only ($state, $effect, $props())
+- Pure CSS, zero dependencies
 
-## Status
+## Implementation Details
 
-- ✅ 121/121 tests passing
-- ✅ Zero memory leaks
-- ✅ Full TypeScript support via JSDoc
-- ✅ SSR compatible (SvelteKit ready)
-- ✅ Accessibility (prefers-reduced-motion)
-- ✅ Zero breaking changes
+**CSS Custom Properties:** `--duration`, `--delay`, `--tx`, `--ty`, `--scale`, `--rx`, `--ry`, `--rotate`
+
+**Performance:** Native IntersectionObserver, CSS transforms (GPU), proper cleanup
+
+**SSR:** Actions check `typeof window === 'undefined'`, return no-op during SSR
+
+**Svelte 5 Runes:** $state() for state, $effect() for cleanup, $props() for props
+
+## Adding Animations
+
+1. Add to `VALID_ANIMATIONS` in `src/lib/animations.js`
+2. Add CSS rule to `src/lib/animations.css`:
+
+```css
+[data-animation='my-anim'] { --tx: 100px; --scale: 0.5; }
+[data-animation='my-anim'].is-visible { transform: translate(0) scale(1); }
+```
+
+3. Run `bun test && cd .. && bun run dev`
+
+## Testing
+
+Tests import from `../src/lib/` (source, not dist/). Uses Bun test + happy-dom. Test files excluded from npm.
+
+## Current Metrics (v2.2.0)
+
+- Package: 12.4KB (compressed), 40.3KB (unpacked)
+- Tests: 121/121 (100%)
+- Verify with: `npm pack` and `bun test`
 
 ## Links
 
 - GitHub: https://github.com/ludoloops/rune-scroller
 - npm: https://www.npmjs.com/package/rune-scroller
 - Creator: ludoloops @ LeLab.dev
+
+**Package Manager:** Bun (project-specific)

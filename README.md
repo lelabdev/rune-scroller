@@ -26,7 +26,7 @@
 
 ## ✨ Features
 
-- **12.7KB gzipped** (40.3KB uncompressed) - Minimal overhead, optimized for production
+- **14KB gzipped** (47KB uncompressed) - Minimal overhead, optimized for production
 - **Zero dependencies** - Pure Svelte 5 + IntersectionObserver
 - **14 animations** - Fade, Zoom, Flip, Slide, Bounce variants
 - **Full TypeScript support** - Type definitions generated from JSDoc
@@ -53,37 +53,9 @@ yarn add rune-scroller
 
 ## 🚀 Quick Start
 
-### Step 1: Import CSS (required)
-
-**⚠️ Important:** You must import the CSS file once in your app.
-
-**Option A - In your root layout (recommended for SvelteKit):**
-
-```svelte
-<!-- src/routes/+layout.svelte -->
-<script>
-	import 'rune-scroller/animations.css';
-	let { children } = $props();
-</script>
-
-{@render children()}
-```
-
-**Option B - In each component that uses animations:**
-
 ```svelte
 <script>
 	import runeScroller from 'rune-scroller';
-	import 'rune-scroller/animations.css';
-</script>
-```
-
-### Step 2: Use the animations
-
-```svelte
-<script>
-	import runeScroller from 'rune-scroller';
-	// CSS already imported in layout or above
 </script>
 
 <!-- Simple animation -->
@@ -99,6 +71,46 @@ yarn add rune-scroller
 <!-- Repeat on every scroll -->
 <div use:runeScroller={{ animation: 'bounce-in', repeat: true }}>
 	<button>Bounces on every scroll</button>
+</div>
+```
+
+That's it! The CSS animations are included automatically when you import rune-scroller.
+
+### Option 2: Manual CSS Import
+
+For fine-grained control, import CSS manually:
+
+**Step 1: Import CSS in your root layout (recommended for SvelteKit):**
+
+```svelte
+<!-- src/routes/+layout.svelte -->
+<script>
+	import 'rune-scroller/animations.css';
+	let { children } = $props();
+</script>
+
+{@render children()}
+```
+
+**Or import in each component:**
+
+```svelte
+<script>
+	import runeScroller from 'rune-scroller';
+	import 'rune-scroller/animations.css';
+</script>
+```
+
+**Step 2: Use the animations**
+
+```svelte
+<script>
+	import runeScroller from 'rune-scroller';
+	// CSS already imported in layout or above
+</script>
+
+<div use:runeScroller={{ animation: 'fade-in' }}>
+	Animated content
 </div>
 ```
 
@@ -271,12 +283,12 @@ Rune Scroller uses **sentinel-based triggering**:
 
 ## 🌐 SSR Compatibility
 
-Works seamlessly with SvelteKit. Import CSS in your root layout:
+Works seamlessly with SvelteKit. Simply import rune-scroller in your root layout:
 
 ```svelte
 <!-- src/routes/+layout.svelte -->
 <script>
-	import 'rune-scroller/animations.css';
+	import runeScroller from 'rune-scroller';
 	let { children } = $props();
 </script>
 
@@ -336,7 +348,7 @@ Rune Scroller exports a **single action-based API** (no components):
 ### Main Export
 
 ```typescript
-// Default export
+// CSS is automatically included
 import runeScroller from 'rune-scroller';
 
 // Named exports
@@ -384,7 +396,6 @@ interface RuneScrollerOptions {
 ```svelte
 <script>
 	import runeScroller from 'rune-scroller';
-	import 'rune-scroller/animations.css';
 
 	const items = [
 		{ title: 'Feature 1', description: 'Description 1' },
