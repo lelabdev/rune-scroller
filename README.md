@@ -17,6 +17,15 @@
 > 🚀 **Open Source** by [ludoloops](https://github.com/ludoloops) at [LeLab.dev](https://lelab.dev)
 > 📜 Licensed under **MIT**
 
+<div align="center">
+	<a href="https://bundlephobia.com/package/rune-scroller">
+		<img src="https://img.shields.io/bundlephobia/minzip/rune-scroller" alt="minzipped size" />
+	</a>
+	<a href="https://bundlephobia.com/package/rune-scroller">
+		<img src="https://img.shields.io/bundlephobia/min/rune-scroller" alt="minified size" />
+	</a>
+</div>
+
 ---
 
 ## ✨ Features
