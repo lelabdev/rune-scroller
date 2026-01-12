@@ -32,7 +32,9 @@
     "./animations.css": "./dist/animations.css"
   },
   "files": [
-    "dist"
+    "dist",
+    "!dist/**/*.test.js",
+    "!dist/**/*.test.d.ts"
   ],
   "main": "./dist/index.js",
   "svelte": "./dist/index.js",

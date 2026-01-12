@@ -21,7 +21,7 @@
 
 ## ✨ Features
 
-- **~3.4KB gzipped** (11.5KB uncompressed) - Minimal overhead
+- **~8KB gzipped** (28KB uncompressed) - Minimal overhead
 - **Zero dependencies** - Pure Svelte 5 + IntersectionObserver
 - **14 animations** - Fade, Zoom, Flip, Slide, Bounce variants
 - **Full TypeScript support** - Type definitions generated from JSDoc
@@ -35,12 +35,21 @@
 
 ## 📊 Performance & Quality
 
-**Recent Optimization (2026-01-06):**
-- ✅ **278/278 tests passing** (100%)
-- ✅ **Bundle size:** 10.5KiB gzipped (stable, no regression)
+**Recent Optimization (2026-01-12):**
+- ✅ **121/121 tests passing** (100%)
+- ✅ **Bundle size:** ~8KB gzipped (main bundle)
 - ✅ **Type safety:** 0 errors (JSDoc + TypeScript)
 - ✅ **Memory leaks:** 0 detected
 - ✅ **Svelte 5 aligned:** Full runes support
+- ✅ **Removed deprecated `animate` action** - Simplified API
+
+**Bundle breakdown:**
+- `runeScroller.js`: 2.1KB
+- `dom-utils.js`: 1.8KB
+- `animations.css`: 1.0KB
+- `types.js`: 0.9KB
+- `observer-utils.js`: 0.6KB
+- `useIntersection.svelte.js`: 0.9KB (advanced usage)
 
 See [`MIGRATION_METRICS.md`](../MIGRATION_METRICS.md) for detailed performance benchmarks.
 
@@ -253,35 +262,6 @@ interface RuneScrollerOptions {
 
 ## 🔧 Advanced Usage
 
-### Using the `animate` Action (Direct Control)
-
-For advanced use cases, use `animate` for fine-grained IntersectionObserver control:
-
-```svelte
-<script>
-	import { animate } from 'rune-scroller';
-	import 'rune-scroller/animations.css';
-</script>
-
-<div use:animate={{
-	animation: 'fade-in-up',
-	duration: 1000,
-	delay: 200,
-	threshold: 0.5,
-	offset: 20
-}}>
-	Advanced control
-</div>
-```
-
-**Options:**
-- `threshold` - Intersection ratio to trigger (0-1, default: 0)
-- `offset` - Viewport offset percentage (0-100)
-- `rootMargin` - Custom IntersectionObserver margin
-- `delay` - Animation delay in ms (default: 0)
-
-**Note:** `animate` triggers the animation **once** when the element enters the viewport (it's one-time by default, unlike `runeScroller` with `repeat: true`)
-
 ### Using Composables
 
 ```svelte
@@ -379,13 +359,11 @@ Users who prefer reduced motion will see content without animations.
 ---
 
 ## 📚 API Reference
-
 ### Public API
 
-Rune Scroller exports **2 action-based APIs** (no components):
+Rune Scroller exports a **single action-based API** (no components):
 
-1. **`runeScroller`** (default) - Recommended, sentinel-based, simple
-2. **`animate`** (advanced) - Direct observation, fine-grained control
+1. **`runeScroller`** (default) - Sentinel-based, simple, powerful
 
 **Why actions instead of components?**
 - Actions are lightweight directives
@@ -396,12 +374,11 @@ Rune Scroller exports **2 action-based APIs** (no components):
 ### Main Export
 
 ```typescript
-// Default export (recommended)
+// Default export
 import runeScroller from 'rune-scroller';
 
 // Named exports
 import {
-	animate,                    // Alternative action
 	useIntersection,            // Composable
 	useIntersectionOnce,        // Composable
 	calculateRootMargin         // Utility
@@ -411,7 +388,6 @@ import {
 import type {
 	AnimationType,
 	RuneScrollerOptions,
-	AnimateOptions,
 	IntersectionOptions,
 	UseIntersectionReturn
 } from 'rune-scroller';
@@ -431,19 +407,6 @@ interface RuneScrollerOptions {
 	repeat?: boolean;
 	debug?: boolean;
 	offset?: number;
-	onVisible?: (element: HTMLElement) => void;      // v2.0.0+
-	sentinelColor?: string;                          // v2.0.0+
-	sentinelId?: string;                             // v2.0.0+
-}
-
-interface AnimateOptions {
-	animation?: AnimationType;
-	duration?: number;                               // default: 2500
-	delay?: number;
-	threshold?: number;
-	rootMargin?: string;
-	offset?: number;
-	once?: boolean;
 	onVisible?: (element: HTMLElement) => void;      // v2.0.0+
 	sentinelColor?: string;                          // v2.0.0+
 	sentinelId?: string;                             // v2.0.0+

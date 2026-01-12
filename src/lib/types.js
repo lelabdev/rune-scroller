@@ -24,22 +24,7 @@
  * @property {(element: HTMLElement) => void} [onVisible] - Callback fired when animation becomes visible
  */
 
-/**
- * Options for the animate action
- * Direct DOM node animation control with threshold/offset support
- *
- * @typedef {Object} AnimateOptions
- * @property {AnimationType} [animation='fade-in'] - Animation type to apply
- * @property {number} [duration=2500] - Animation duration in milliseconds
- * @property {number} [delay=0] - Animation delay in milliseconds
- * @property {number} [offset] - Viewport offset percentage (0-100)
- * @property {number} [threshold=0] - Intersection ratio to trigger (0-1)
- * @property {string} [rootMargin] - Custom IntersectionObserver margin
- * @property {string} [sentinelColor='#00e0ff'] - Sentinel color for debug mode (hex or CSS color)
- * @property {string} [sentinelId] - Unique identifier for sentinel (auto-generated if not provided)
- * @property {string} [debugLabel] - Debug label to show on sentinel (e.g., animation name)
- * @property {(element: HTMLElement) => void} [onVisible] - Callback fired when animation becomes visible
- */
+
 
 /**
  * Configuration options for IntersectionObserver
