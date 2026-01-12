@@ -21,7 +21,7 @@
 
 ## ✨ Features
 
-- **~8KB gzipped** (28KB uncompressed) - Minimal overhead
+- **14KB gzipped** (47KB uncompressed) - Minimal overhead
 - **Zero dependencies** - Pure Svelte 5 + IntersectionObserver
 - **14 animations** - Fade, Zoom, Flip, Slide, Bounce variants
 - **Full TypeScript support** - Type definitions generated from JSDoc
@@ -37,20 +37,22 @@
 
 **Recent Optimization (2026-01-12):**
 - ✅ **121/121 tests passing** (100%)
-- ✅ **Bundle size:** ~8KB gzipped (main bundle)
+- ✅ **Bundle size:** 14KB gzipped (npm pack)
 - ✅ **Type safety:** 0 errors (JSDoc + TypeScript)
 - ✅ **Memory leaks:** 0 detected
 - ✅ **Svelte 5 aligned:** Full runes support
 - ✅ **Removed deprecated `animate` action** - Simplified API
 - ✅ **Tests optimized for npm** - Excluded from package (tests/ directory)
 
-**Bundle breakdown:**
-- `runeScroller.js`: 2.1KB
-- `dom-utils.js`: 1.8KB
-- `animations.css`: 1.0KB
-- `types.js`: 0.9KB
-- `observer-utils.js`: 0.6KB
-- `useIntersection.svelte.js`: 0.9KB (advanced usage)
+**Bundle breakdown (unpacked):**
+- `runeScroller.js`: 5.7KB
+- `dom-utils.js`: 4.5KB
+- `animations.css`: 4.0KB
+- `types.js`: 2.1KB
+- `useIntersection.svelte.js`: 2.7KB
+- `observer-utils.js`: 1.6KB
+- Type definitions (.d.ts): 6.6KB
+- Other (index.js, LICENSE, package.json): 2.8KB
 
 See [`MIGRATION_METRICS.md`](../MIGRATION_METRICS.md) for detailed performance benchmarks.
 

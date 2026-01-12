@@ -4,7 +4,7 @@ This file helps AI assistants understand the Rune Scroller library architecture 
 
 ## Quick Overview
 
-Rune Scroller is a lightweight (~2KB) scroll animation library for Svelte 5. It uses:
+Rune Scroller is a lightweight (14KB gzipped) scroll animation library for Svelte 5. It uses:
 - Svelte 5 runes ($state, $props())
 - IntersectionObserver API for performance
 - CSS animations (GPU-accelerated)
