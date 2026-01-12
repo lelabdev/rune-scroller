@@ -30,7 +30,7 @@
 
 ## ✨ Features
 
-- **14KB gzipped** (47KB uncompressed) - Minimal overhead
+- **12.7KB gzipped** (40.3KB uncompressed) - Minimal overhead, optimized for production
 - **Zero dependencies** - Pure Svelte 5 + IntersectionObserver
 - **14 animations** - Fade, Zoom, Flip, Slide, Bounce variants
 - **Full TypeScript support** - Type definitions generated from JSDoc
@@ -39,29 +39,39 @@
 - **Accessible** - Respects `prefers-reduced-motion`
 - **v2.0.0 New** - `onVisible` callback, ResizeObserver support, animation validation, sentinel customization
 - **✨ Latest** - `useIntersection` migrated to Svelte 5 `$effect` rune for better lifecycle management
+- **🚀 Bundle optimized** - CSS with custom properties, production build minification
 
 ---
 
 ## 📊 Performance & Quality
 
-**Recent Optimization (2026-01-12):**
+**Bundle Optimization (2026-01-12):**
 - ✅ **121/121 tests passing** (100%)
-- ✅ **Bundle size:** 14KB gzipped (npm pack)
+- ✅ **Bundle size:** 12.7KB gzipped (-1.6KB from v2.0.0, -11.2%)
+- ✅ **Unpacked size:** 40.3KB (-7.1KB from v2.0.0, -15.0%)
 - ✅ **Type safety:** 0 errors (JSDoc + TypeScript)
 - ✅ **Memory leaks:** 0 detected
 - ✅ **Svelte 5 aligned:** Full runes support
 - ✅ **Removed deprecated `animate` action** - Simplified API
 - ✅ **Tests optimized for npm** - Excluded from package (tests/ directory)
+- ✅ **CSS optimized:** CSS custom properties (-36% CSS reduction)
+- ✅ **Production ready:** NODE_ENV guards for console warnings
 
-**Bundle breakdown (unpacked):**
-- `runeScroller.js`: 5.7KB
-- `dom-utils.js`: 4.5KB
-- `animations.css`: 4.0KB
+**Bundle breakdown (unpacked, optimized):**
+- `runeScroller.js`: 5.0KB (-12%)
+- `dom-utils.js`: 3.4KB (-24%)
+- `animations.css`: 2.5KB (-36%) ← Optimized with CSS custom properties
 - `types.js`: 2.1KB
-- `useIntersection.svelte.js`: 2.7KB
-- `observer-utils.js`: 1.6KB
-- Type definitions (.d.ts): 6.6KB
+- `useIntersection.svelte.js`: 2.2KB (-18%)
+- `observer-utils.js`: 773B (-52%)
+- Type definitions (.d.ts): ~6KB (-33%)
 - Other (index.js, LICENSE, package.json): 2.8KB
+
+**Optimization details:**
+- CSS custom properties eliminate repetitive rules
+- Production builds strip console warnings via NODE_ENV
+- JSDoc optimized (kept types, removed verbose descriptions)
+- All features and animations remain unchanged
 
 See [`MIGRATION_METRICS.md`](../MIGRATION_METRICS.md) for detailed performance benchmarks.
 

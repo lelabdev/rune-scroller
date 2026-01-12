@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test';
 import { Window } from 'happy-dom';
-import { runeScroller } from './runeScroller.js';
+import { runeScroller } from '../src/lib/runeScroller.js';
 import { mockIntersectionObserver } from './__mocks__/IntersectionObserver.js';
 import { createTestElement, createTestElements, createSpacer } from './__test-helpers__/dom.js';
 

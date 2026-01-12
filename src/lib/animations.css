@@ -1,176 +1,80 @@
 /**
- * Reusable scroll animation styles
- * These styles define animation effects for scroll-triggered elements
+ * Reusable scroll animation styles - Optimized with CSS custom properties
+ * Reduces bundle size while maintaining all 14 animations
  */
 
-/* Base animation container */
+/* Base animation container with optimized transitions */
 .scroll-animate,
 .animated-element {
 	opacity: 0;
-	transition: opacity var(--duration, 2500ms) linear var(--delay, 0ms), transform var(--duration, 2500ms) cubic-bezier(0.34, 1.56, 0.64, 1) var(--delay, 0ms);
+	transition: opacity var(--duration, 2500ms) linear var(--delay, 0ms),
+		transform var(--duration, 2500ms) cubic-bezier(0.34, 1.56, 0.64, 1) var(--delay, 0ms);
+	transform: perspective(1000px) translate(var(--tx, 0), var(--ty, 0)) scale(var(--scale, 1)) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) rotate(var(--rotate, 0deg));
 }
 
 .scroll-animate.is-visible,
 .animated-element.is-visible {
 	opacity: 1 !important;
-	/* GPU acceleration only for visible elements to reduce initial memory pressure */
 	will-change: transform, opacity;
+	transform: perspective(1000px) translate(var(--tx, 0), var(--ty, 0)) scale(var(--scale, 1)) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) rotate(var(--rotate, 0deg));
 }
 
-/* Animation states - transform-specific initial states */
-/* (opacity: 0 is already set in .scroll-animate base class) */
+/* Initial state - transform values before animation */
+[data-animation='fade-in'] { --tx: 0; --ty: 0; }
+[data-animation='fade-in-up'] { --ty: var(--translate-distance, 300px); }
+[data-animation='fade-in-down'] { --ty: calc(-1 * var(--translate-distance, 300px)); }
+[data-animation='fade-in-left'] { --tx: calc(-1 * var(--translate-distance, 300px)); }
+[data-animation='fade-in-right'] { --tx: var(--translate-distance, 300px); }
 
-/* Fade In (no transform, just opacity) */
-[data-animation='fade-in'] {
-	transform: translateY(0);
-}
+[data-animation='zoom-in'] { --scale: 0.3; }
+[data-animation='zoom-out'] { --scale: 2; }
+[data-animation='zoom-in-up'] { --scale: 0.5; --ty: var(--translate-distance, 300px); }
+[data-animation='zoom-in-left'] { --scale: 0.5; --tx: calc(-1 * var(--translate-distance, 300px)); }
+[data-animation='zoom-in-right'] { --scale: 0.5; --tx: var(--translate-distance, 300px); }
 
-[data-animation='fade-in'].is-visible {
-	/* Inherits opacity: 1 from .scroll-animate.is-visible */
-	transform: translateY(0);
-}
+[data-animation='flip'] { --ry: 90deg; }
+[data-animation='flip-x'] { --rx: 90deg; }
 
-/* Fade In Up */
-[data-animation='fade-in-up'] {
-	transform: translateY(var(--translate-distance, 300px));
-}
+[data-animation='slide-rotate'] { --tx: calc(-1 * var(--translate-distance, 300px)); --rotate: -45deg; }
+[data-animation='bounce-in'] { --scale: 0; }
 
-[data-animation='fade-in-up'].is-visible {
-	transform: translateY(0);
-}
+/* Visible state - reset transform values to final position */
+[data-animation='fade-in-up'].is-visible { --ty: 0; }
+[data-animation='fade-in-down'].is-visible { --ty: 0; }
+[data-animation='fade-in-left'].is-visible { --tx: 0; }
+[data-animation='fade-in-right'].is-visible { --tx: 0; }
 
-/* Fade In Down */
-[data-animation='fade-in-down'] {
-	transform: translateY(calc(-1 * var(--translate-distance, 300px)));
-}
+[data-animation='zoom-in'].is-visible { --scale: 1; }
+[data-animation='zoom-out'].is-visible { --scale: 1; }
+[data-animation='zoom-in-up'].is-visible { --scale: 1; --ty: 0; }
+[data-animation='zoom-in-left'].is-visible { --scale: 1; --tx: 0; }
+[data-animation='zoom-in-right'].is-visible { --scale: 1; --tx: 0; }
 
-[data-animation='fade-in-down'].is-visible {
-	transform: translateY(0);
-}
+[data-animation='flip'].is-visible { --ry: 0deg; }
+[data-animation='flip-x'].is-visible { --rx: 0deg; }
 
-/* Fade In Left */
-[data-animation='fade-in-left'] {
-	transform: translateX(calc(-1 * var(--translate-distance, 300px)));
-}
-
-[data-animation='fade-in-left'].is-visible {
-	transform: translateX(0);
-}
-
-/* Fade In Right */
-[data-animation='fade-in-right'] {
-	transform: translateX(var(--translate-distance, 300px));
-}
-
-[data-animation='fade-in-right'].is-visible {
-	transform: translateX(0);
-}
-
-/* Zoom In */
-[data-animation='zoom-in'] {
-	transform: scale(0.3);
-}
-
-[data-animation='zoom-in'].is-visible {
-	transform: scale(1);
-}
-
-/* Zoom Out */
-[data-animation='zoom-out'] {
-	transform: scale(2);
-}
-
-[data-animation='zoom-out'].is-visible {
-	transform: scale(1);
-}
-
-/* Zoom In Up */
-[data-animation='zoom-in-up'] {
-	transform: scale(0.5) translateY(var(--translate-distance, 300px));
-}
-
-[data-animation='zoom-in-up'].is-visible {
-	transform: scale(1) translateY(0);
-}
-
-/* Zoom In Left */
-[data-animation='zoom-in-left'] {
-	transform: scale(0.5) translateX(calc(-1 * var(--translate-distance, 300px)));
-}
-
-[data-animation='zoom-in-left'].is-visible {
-	transform: scale(1) translateX(0);
-}
-
-/* Zoom In Right */
-[data-animation='zoom-in-right'] {
-	transform: scale(0.5) translateX(var(--translate-distance, 300px));
-}
-
-[data-animation='zoom-in-right'].is-visible {
-	transform: scale(1) translateX(0);
-}
-
-/* Flip */
-[data-animation='flip'] {
-	transform: perspective(1000px) rotateY(90deg);
-}
-
-[data-animation='flip'].is-visible {
-	transform: perspective(1000px) rotateY(0deg);
-}
-
-/* Flip X */
-[data-animation='flip-x'] {
-	transform: perspective(1000px) rotateX(90deg);
-}
-
-[data-animation='flip-x'].is-visible {
-	transform: perspective(1000px) rotateX(0deg);
-}
-
-/* Slide Rotate */
-[data-animation='slide-rotate'] {
-	transform: translateX(calc(-1 * var(--translate-distance, 300px))) rotate(-45deg);
-}
-
-[data-animation='slide-rotate'].is-visible {
-	transform: translateX(0) rotate(0deg);
-}
-
-/* Bounce In */
-[data-animation='bounce-in'] {
-	transform: scale(0);
-}
-
-[data-animation='bounce-in'].is-visible {
-	transform: scale(1);
-	animation: bounce var(--duration, 1500ms) cubic-bezier(0.68, -0.55, 0.265, 1.55);
-	animation-delay: var(--delay, 0ms);
-}
+[data-animation='slide-rotate'].is-visible { --tx: 0; --rotate: 0deg; }
 
 @keyframes bounce {
-	0% {
-		transform: scale(0);
-	}
-	50% {
-		transform: scale(1.1);
-	}
-	100% {
-		transform: scale(1);
-	}
+	0% { transform: scale(0); }
+	50% { transform: scale(1.1); }
+	100% { transform: scale(1); }
+}
+
+/* Bounce animation - special case with keyframes */
+[data-animation='bounce-in'].is-visible {
+	animation: bounce var(--duration, 1500ms) cubic-bezier(0.68, -0.55, 0.265, 1.55);
+	animation-delay: var(--delay, 0ms);
 }
 
 /* Accessibility: Respect user's motion preferences */
 @media (prefers-reduced-motion: reduce) {
 	.scroll-animate,
 	.animated-element {
-		/* Disable animations for users who prefer reduced motion */
 		transition: none;
 		animation: none !important;
 	}
 
-	/* Still show final state without animation */
 	.scroll-animate.is-visible,
 	.animated-element.is-visible {
 		opacity: 1;

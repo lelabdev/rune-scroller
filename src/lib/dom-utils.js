@@ -5,11 +5,9 @@
 let sentinelCounter = 0;
 
 /**
- * Set CSS custom properties on an element
- * @param {HTMLElement} element - Target DOM element
- * @param {number} [duration] - Animation duration in milliseconds
- * @param {number} [delay=0] - Animation delay in milliseconds
- * @returns {void}
+ * @param {HTMLElement} element
+ * @param {number} [duration]
+ * @param {number} [delay=0]
  */
 export function setCSSVariables(element, duration, delay = 0) {
 	if (duration !== undefined) {
@@ -19,10 +17,8 @@ export function setCSSVariables(element, duration, delay = 0) {
 }
 
 /**
- * Setup animation element with required classes and attributes
- * @param {HTMLElement} element - Target DOM element
- * @param {import('./types.js').AnimationType} animation - Animation type to apply
- * @returns {void}
+ * @param {HTMLElement} element
+ * @param {import('./types.js').AnimationType} animation
  */
 export function setupAnimationElement(element, animation) {
 	element.classList.add('scroll-animate');
@@ -30,15 +26,13 @@ export function setupAnimationElement(element, animation) {
 }
 
 /**
- * Create sentinel element for observer-based triggering
- * Positioned absolutely relative to element (no layout impact)
- * @param {HTMLElement} element - Reference element (used to position sentinel)
- * @param {boolean} [debug=false] - If true, shows the sentinel as a visible line for debugging
- * @param {number} [offset=0] - Offset in pixels from element bottom (negative = above element)
- * @param {string} [sentinelColor='#00e0ff'] - Color for debug sentinel
- * @param {string} [debugLabel] - Label text to display on sentinel (e.g., animation name)
- * @param {string} [sentinelId] - Unique identifier for sentinel (auto-generated if not provided)
- * @returns {{ element: HTMLElement, id: string }} The created sentinel element and its ID
+ * @param {HTMLElement} element
+ * @param {boolean} [debug=false]
+ * @param {number} [offset=0]
+ * @param {string} [sentinelColor='#00e0ff']
+ * @param {string} [debugLabel]
+ * @param {string} [sentinelId]
+ * @returns {{ element: HTMLElement, id: string }}
  */
 export function createSentinel(element, debug = false, offset = 0, sentinelColor = '#00e0ff', debugLabel = '', sentinelId) {
 	const sentinel = document.createElement('div');
@@ -76,21 +70,13 @@ export function createSentinel(element, debug = false, offset = 0, sentinelColor
 }
 
 /**
- * Check if CSS animations are loaded and warn if not
+ * Check if CSS animations are loaded and warn if not (dev only)
  * @returns {boolean} True if CSS appears to be loaded
- */
-export function isCSSLoaded() {
-	if (typeof document === 'undefined') return true;
-	const style = getComputedStyle(document.documentElement);
-	return style.getPropertyValue('--duration') !== undefined || style.getPropertyValue('--delay') !== undefined;
-}
-
-/**
- * Warn if CSS is not loaded
- * @returns {void}
  */
 export function checkAndWarnIfCSSNotLoaded() {
 	if (typeof document === 'undefined') return;
+	if (process.env.NODE_ENV === 'production') return;
+
 	// Try to detect if animations.css is loaded by checking for animation classes
 	const test = document.createElement('div');
 	test.className = 'scroll-animate is-visible';

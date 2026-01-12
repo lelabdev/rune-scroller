@@ -3,25 +3,9 @@ import { createManagedObserver, disconnectObserver } from './observer-utils.js';
 import { ANIMATION_TYPES } from './animations.js';
 
 /**
- * Svelte action for scroll animations using an invisible sentinel element
- * Trigger animations when the sentinel enters the viewport instead of the element itself
- *
- * @param {HTMLElement} element - The element to animate
- * @param {import('./types.js').RuneScrollerOptions} [options] - Animation options (animation type, duration, and repeat)
- * @returns {{ update: (newOptions?: import('./types.js').RuneScrollerOptions) => void, destroy: () => void }} Svelte action object
- *
- * @example
- * ```svelte
- * <!-- One-time animation -->
- * <div use:runeScroller={{ animation: 'fade-in-up', duration: 1000 }}>
- *   Content
- * </div>
- *
- * <!-- Repeat animation on every scroll -->
- * <div use:runeScroller={{ animation: 'fade-in-up', duration: 1000, repeat: true }}>
- *   Content
- * </div>
- * ```
+ * @param {HTMLElement} element
+ * @param {import('./types.js').RuneScrollerOptions} [options]
+ * @returns {{ update: (newOptions?: import('./types.js').RuneScrollerOptions) => void, destroy: () => void }}
  */
 export function runeScroller(element, options) {
 	// SSR Guard: Return no-op action when running on server
@@ -40,10 +24,12 @@ export function runeScroller(element, options) {
 	// Validate animation type
 	let animation = options?.animation ?? 'fade-in';
 	if (animation && !ANIMATION_TYPES.includes(animation)) {
-		console.warn(
-			`[rune-scroller] Invalid animation "${animation}". Using "fade-in" instead. ` +
-			`Valid options: ${ANIMATION_TYPES.join(', ')}`
-		);
+		if (process.env.NODE_ENV !== 'production') {
+			console.warn(
+				`[rune-scroller] Invalid animation "${animation}". Using "fade-in" instead. ` +
+				`Valid options: ${ANIMATION_TYPES.join(', ')}`
+			);
+		}
 		animation = 'fade-in';
 	}
 
@@ -65,11 +51,8 @@ export function runeScroller(element, options) {
 	void element.offsetHeight;
 
 	// Create a wrapper div around the element to position the sentinel
-	// This prevents breaking the parent's flex/grid flow
 	const wrapper = document.createElement('div');
 	wrapper.style.cssText = 'position:relative;display:block;width:100%;margin:0;padding:0;box-sizing:border-box';
-
-	// Insert the wrapper before the element
 	element.insertAdjacentElement('beforebegin', wrapper);
 	wrapper.appendChild(element);
 

@@ -1,7 +1,7 @@
 {
   "name": "rune-scroller",
-  "version": "2.0.0",
-  "description": "Lightweight, high-performance scroll animations for Svelte 5. ~3.4KB gzipped, zero dependencies.",
+  "version": "2.1.0",
+  "description": "Lightweight, high-performance scroll animations for Svelte 5. 12.7KB gzipped, zero dependencies.",
   "type": "module",
   "sideEffects": false,
   "license": "MIT",
@@ -33,8 +33,8 @@
   },
   "files": [
     "dist",
-    "!dist/**/*.test.js",
-    "!dist/**/*.test.d.ts"
+    "README.md",
+    "LICENSE"
   ],
   "main": "./dist/index.js",
   "svelte": "./dist/index.js",

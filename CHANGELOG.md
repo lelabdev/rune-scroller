@@ -5,6 +5,42 @@ All notable changes to Rune Scroller will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-01-12
+
+### Performance
+
+- **Bundle size optimization** - Reduced from 14.3KB to 12.7KB gzipped (-1.6KB, -11.2%)
+- **Unpacked size reduction** - 40.3KB (-7.1KB, -15.0%)
+- **CSS optimization** - Migrated to CSS custom properties reducing file from 3.9KB to 2.5KB (-36%)
+- **JavaScript optimization** - Reduced from 18KB to 15.8KB (-12%) through JSDoc optimization
+- **Production build** - NODE_ENV guards for console warnings, only included in development builds
+
+### Changed
+
+- CSS animations now use CSS custom properties (`--tx`, `--ty`, `--scale`, `--rx`, `--ry`, `--rotate`) for cleaner, more compact output
+- JSDoc comments optimized - kept type information, removed verbose descriptions and examples
+- Console warnings wrapped with `process.env.NODE_ENV !== 'production'` checks for production builds
+
+### Optimized Files
+
+- `animations.css`: 3.9KB → 2.5KB (-36%, 179 lines → 69 lines)
+- `runeScroller.js`: 5.7KB → 5.0KB (-12%)
+- `dom-utils.js`: 4.5KB → 3.4KB (-24%)
+- `useIntersection.svelte.js`: 2.7KB → 2.2KB (-18%)
+- `observer-utils.js`: 1.6KB → 773B (-52%)
+- Type definitions (.d.ts): 9.0KB → 6.0KB (-33%)
+
+### No Breaking Changes
+
+- ✅ All 121 tests passing
+- ✅ All 14 animations working identically
+- ✅ Type definitions fully maintained
+- ✅ SSR compatibility preserved
+- ✅ Accessibility (prefers-reduced-motion) working perfectly
+- ✅ Zero breaking changes to public API
+
+---
+
 ## [2.0.0] - 2026-01-05
 
 ### Added

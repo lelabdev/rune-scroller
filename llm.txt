@@ -1,278 +1,167 @@
 # Rune Scroller - Library Guide for LLMs
 
-This file helps AI assistants understand the Rune Scroller library architecture and conventions.
-
-## Quick Overview
-
-Rune Scroller is a lightweight (14KB gzipped) scroll animation library for Svelte 5. It uses:
-- Svelte 5 runes ($state, $props())
-- IntersectionObserver API for performance
-- CSS animations (GPU-accelerated)
-- Zero external dependencies
-
-Live demo: https://runescroller.lelab.dev/
-npm package: https://www.npmjs.com/package/rune-scroller
+Lightweight (12.7KB gzipped) scroll animation library for Svelte 5 using IntersectionObserver and CSS animations (GPU-accelerated).
 
 ## Core Concepts
 
-### 1. Sentinel-Based Triggering (runeScroller action)
-The `runeScroller` action creates an invisible 20px sentinel element below the animated element.
-When the sentinel enters the viewport, it triggers the animation on the parent.
+### Sentinel-Based Triggering
+`runeScroller` action creates an invisible 1px sentinel below the animated element. When the sentinel enters the viewport, it triggers the animation. Sentinel automatically repositions on element resize via ResizeObserver.
 
-Why sentinels? They provide consistent, accurate animation timing across all screen sizes.
+### 14 Animations
+- **Fade (5):** fade-in, fade-in-up, fade-in-down, fade-in-left, fade-in-right
+- **Zoom (5):** zoom-in, zoom-out, zoom-in-up, zoom-in-left, zoom-in-right
+- **Other (4):** flip, flip-x, slide-rotate, bounce-in
+
+All animations use CSS custom properties (`--tx`, `--ty`, `--scale`, `--rx`, `--ry`, `--rotate`) and respect `prefers-reduced-motion`.
+
+## File Organization
+
+```
+lib/
+├── src/lib/
+│   ├── index.js                  # Main exports
+│   ├── types.js                  # JSDoc type definitions
+│   ├── animations.js             # Animation types & utilities
+│   ├── animations.css            # Animation keyframes (optimized with CSS custom properties)
+│   ├── runeScroller.js           # Action with sentinel triggering
+│   ├── useIntersection.svelte.js # Composables using Svelte 5 $effect
+│   ├── dom-utils.js              # DOM utilities
+│   └── observer-utils.js         # Observer setup
+│
+├── tests/                        # Test files (excluded from npm)
+│   ├── *.test.js                 # Unit and integration tests (121 tests)
+│   ├── __mocks__/                # Mocks for IntersectionObserver, Svelte runes
+│   └── __test-helpers__/         # DOM helpers
+│
+└── dist/                         # Built output (svelte-package)
+```
+
+## Main API
+
+```javascript
+// Recommended: Sentinel-based action
+import runeScroller from 'rune-scroller';
+import 'rune-scroller/animations.css';
+
+// Composables for manual control
+import { useIntersection, useIntersectionOnce } from 'rune-scroller';
+
+// Utility
+import { calculateRootMargin } from 'rune-scroller';
+```
+
+## Usage
 
 ```svelte
-<div use:runeScroller={{ animation: 'fade-in-up', duration: 1000 }}>
+<div use:runeScroller={{
+  animation: 'fade-in-up',
+  duration: 1000,
+  repeat: false,
+  offset: 0,
+  onVisible: (el) => console.log('Visible!'),
+  sentinelColor: '#00e0ff',
+  sentinelId: 'my-animation'
+}}>
   Content animates when scrolled into view
 </div>
 ```
 
-### 2. Animations System
-- 14 built-in animations: Fade (5), Zoom (5), Flip (2), Slide, Bounce
-- Defined in `animations.ts` with type `AnimationType`
-- CSS keyframes in `animations.css`
-- All animations use CSS custom properties: `--duration`, `--delay`
-- Support `prefers-reduced-motion` for accessibility
+**Options:**
+- `animation` - Animation type (required for animation, defaults to 'fade-in')
+- `duration` - Duration in ms (default: 800)
+- `repeat` - Repeat on scroll (default: false)
+- `debug` - Show sentinel line (default: false)
+- `offset` - Sentinel offset in px (default: 0, negative = trigger earlier)
+- `onVisible` - Callback when animation triggers
+- `sentinelColor` - Debug sentinel color (e.g., '#ff6b6b')
+- `sentinelId` - Custom sentinel identifier
 
-### 3. File Organization
+## Implementation Details
 
-```
-lib/
-├── src/lib/                      # Library source (published to npm)
-│   ├── index.js                  # Main exports
-│   ├── types.js                  # Type definitions (JSDoc)
-│   ├── animations.js             # Animation types & utilities
-│   ├── animations.css            # Animation keyframes & styles
-│   ├── runeScroller.js           # Action with sentinel triggering
-│   ├── useIntersection.svelte.js # Composables (Svelte 5 $effect)
-│   ├── dom-utils.js              # DOM manipulation utilities
-│   └── observer-utils.js         # Observer setup utilities
-│
-├── tests/                        # Test files (NOT published to npm)
-│   ├── animations.test.js        # Animation validation tests
-│   ├── dom-utils.test.js         # DOM utilities tests
-│   ├── runeScroller.test.js      # Core action unit tests
-│   ├── runeScroller.integration.test.js  # Integration tests
-│   ├── useIntersection.test.js   # Composable tests
-│   ├── __mocks__/
-│   │   ├── IntersectionObserver.js
-│   │   └── svelte-runes.js
-│   └── __test-helpers__/
-│       └── dom.js
-│
-└── dist/                         # Built output (generated by svelte-package)
-```
+### Svelte 5 Runes
+- `$state()` for reactive state
+- `$effect()` for cleanup and lifecycle
+- `$props()` with destructuring
 
-## Type Definitions (in types.ts)
+### CSS Variables
+- `--duration` - Animation duration
+- `--delay` - Animation delay
+- `--tx`, `--ty` - Translate values
+- `--scale` - Scale value
+- `--rx`, `--ry` - Rotation values
+- `--rotate` - Rotation value
 
-All types are centralized in `types.ts` for clarity:
+### Performance
+- Native IntersectionObserver (no scroll listeners)
+- CSS transforms only (GPU-accelerated)
+- Class-based triggering (`.is-visible`)
+- Proper cleanup on unmount (no memory leaks)
 
-```typescript
-// Sentinel-based action
-interface RuneScrollerOptions {
-  animation?: AnimationType;
-  duration?: number;
-  repeat?: boolean;
-}
+## Composables
 
-// Direct DOM control action
-interface AnimateOptions {
-  animation?: AnimationType;
-  duration?: number;
-  delay?: number;
-  offset?: number;        // 0-100% viewport position
-  threshold?: number;     // IntersectionObserver threshold
-  rootMargin?: string;    // IntersectionObserver margin
-}
-
-// IntersectionObserver configuration
-interface IntersectionOptions {
-  threshold?: number | number[];
-  rootMargin?: string;
-  root?: Element | null;
-}
-
-// Return type for composables
-interface UseIntersectionReturn {
-  element: HTMLElement | null;
-  isVisible: boolean;
-}
-```
-
-## Main Exports (from index.ts)
-
-```typescript
-// Component
-export { default as RuneScroller } from './runeScroller.svelte';
-
-// Actions
-export { runeScroller as default } from './runeScroller.svelte.ts';  // Default export
-export { animate } from './animate.svelte';
-
-// Composables
-export { useIntersection, useIntersectionOnce } from './useIntersection.svelte';
-
-// Types
-export type {
-  RuneScrollerOptions,
-  AnimateOptions,
-  IntersectionOptions,
-  UseIntersectionReturn,
-  AnimationType
-} from './types';
-
-// Utilities
-export { calculateRootMargin } from './animations';
-```
-
-## Common Patterns
-
-### Pattern 1: Simple Scroll Animation (Recommended)
-```svelte
-<div use:runeScroller={{ animation: 'fade-in-up', duration: 1000 }}>
-  Animates when scrolled into view (once)
-</div>
-
-<div use:runeScroller={{ animation: 'bounce-in', duration: 800, repeat: true }}>
-  Repeats every time you scroll past it
-</div>
-```
-
-### Pattern 2: Custom Scroll Detection
 ```svelte
 <script>
-  import { useIntersection } from 'rune-scroller';
+  import { useIntersectionOnce } from 'rune-scroller';
 
-  const { element, isVisible } = useIntersection({ threshold: 0.5 });
+  const intersection = useIntersectionOnce({ threshold: 0.5 });
 </script>
 
-<div bind:this={element}>
-  {#if isVisible}
+<div bind:this={intersection.element}>
+  {#if intersection.isVisible}
     Custom content when visible
   {/if}
 </div>
 ```
 
-### Pattern 3: Direct DOM Control
-```svelte
-<div use:animate={{
-  animation: 'zoom-in',
-  duration: 1200,
-  delay: 200,
-  offset: 30  // Trigger at 30% from bottom
-}}>
-  Fine-grained control
-</div>
-```
+## Modifying the Library
 
-## Important Implementation Details
+### Add Animation
+1. Add to `ANIMATION_TYPES` in `src/lib/animations.js`
+2. Add CSS rule to `src/lib/animations.css`:
+   ```css
+   [data-animation='my-anim'] { --tx: 100px; --scale: 0.5; }
+   ```
+3. Run `bun test` and verify in playground
 
-### Svelte 5 Runes
-The library uses Svelte 5 runes exclusively:
-- `$state()` for reactive state
-- `$props()` with destructuring for component props
-- No `export let` or `let:` syntax
+### Update Types
+Edit `src/lib/types.js` (centralized JSDoc types)
 
-### CSS Variables
-All animations use these CSS custom properties:
-- `--duration`: Animation duration in ms (e.g., "1000ms")
-- `--delay`: Animation delay in ms (e.g., "200ms")
-
-These are set dynamically via `setCSSVariables()` in dom-utils.
-
-### Memory Management
-- IntersectionObservers are properly disconnected on unmount
-- Sentinels are removed when actions are destroyed
-- No memory leaks on long-scroll pages
-
-### Performance
-- Uses IntersectionObserver (native browser API, no scroll listeners)
-- CSS transforms (GPU-accelerated)
-- Class-based animation triggering (is-visible class)
-- Minimal JavaScript execution
+### Core Logic
+- Sentinel creation: `src/lib/dom-utils.js`
+- Animation triggering: `src/lib/runeScroller.js`
+- Observers: `src/lib/observer-utils.js` and `src/lib/useIntersection.svelte.js`
 
 ## Testing
 
-Test files are organized in `tests/` directory (separate from source code):
-
-**Test Files:**
-- `animations.test.js` - Animation configuration validation
-- `dom-utils.test.js` - DOM utilities (sentinel, CSS variables, setup)
-- `runeScroller.test.js` - Core action unit tests
-- `runeScroller.integration.test.js` - Full integration with IntersectionObserver
-- `useIntersection.test.js` - Composable structure and exports
-
-**Test Helpers:**
-- `tests/__mocks__/` - IntersectionObserver and Svelte runes mocks
-- `tests/__test-helpers__/` - DOM creation utilities for tests
-
-**Run tests:**
 ```bash
-bun test      # Run all tests (121 tests)
-bun test --watch  # Watch mode
+bun test           # All 121 tests
+bun test --watch   # Watch mode
+bun run build      # Build library
 ```
 
-**Important:** Test files are in `tests/` (not `src/lib/`) and are excluded from npm package via `.npmignore`.
-
-## Development Workflow
-
-1. **Edit library**: `src/lib/` files in rune-scroller-lib
-2. **Build library**: `pnpm build`
-3. **Test in site**: Site at `rune-scroller-site` syncs automatically with `pnpm dev:full`
-4. **Publish**: `npm publish` in library repo
+Tests import from `../src/lib/` (source, not dist/). Test files excluded from npm via `.npmignore`.
 
 ## Code Style
 
 - **Tabs** for indentation
 - **Single quotes** for strings
 - **100 character line width**
-- **Svelte 5 runes** syntax (`$state`, `$effect`, `$props()`)
-- **JSDoc types** (no TypeScript compilation, JSDoc annotations only)
-- **No external dependencies** - Pure Svelte + native APIs only
-- **Mobile-first CSS** - Use CSS custom properties for animation configuration
-- **GPU acceleration** - Only transform/opacity properties in animations
+- **Svelte 5 runes only** ($state, $effect, $props())
+- **JSDoc types** (no TypeScript compilation)
+- **Zero dependencies** - Pure Svelte + IntersectionObserver
+- **Mobile-first CSS** with custom properties
 
-## When Modifying the Library
+## Status
 
-### Adding a New Animation
-1. Add type to `AnimationType` in `src/lib/animations.js`
-2. Add CSS keyframes to `src/lib/animations.css`
-3. Test with `bun test`
-4. Verify in playground
-
-### Modifying Types
-Update `src/lib/types.js` (centralized JSDoc types).
-
-### Modifying Core Logic
-- Sentinel creation: `src/lib/dom-utils.js`
-- Animation triggering: `src/lib/runeScroller.js`
-- Observer setup: `src/lib/observer-utils.js` and `src/lib/useIntersection.svelte.js`
-
-### Updating Exports
-Modify `src/lib/index.js` to control the public API.
-
-### Running Tests After Changes
-```bash
-bun test      # All tests must pass
-bun run build # Verify build succeeds
-```
-
-## Important Notes
-
-### Test Organization
-- Tests are in `tests/` (separate from `src/lib/`)
-- Tests import from `../src/lib/` (the source, not dist/)
-- Tests are excluded from npm via `.npmignore`
-- Run `bun test` before publishing
-
-### Files NOT to Modify
-- `dist/` - Built output (auto-generated, run `bun run build`)
-- `node_modules/` - Dependencies
-- `.svelte-kit/` - Build cache
+- ✅ 121/121 tests passing
+- ✅ Zero memory leaks
+- ✅ Full TypeScript support via JSDoc
+- ✅ SSR compatible (SvelteKit ready)
+- ✅ Accessibility (prefers-reduced-motion)
+- ✅ Zero breaking changes
 
 ## Links
 
 - GitHub: https://github.com/ludoloops/rune-scroller
-- Live Demo: https://runescroller.lelab.dev/
-- npm Package: https://www.npmjs.com/package/rune-scroller
+- npm: https://www.npmjs.com/package/rune-scroller
 - Creator: ludoloops @ LeLab.dev
