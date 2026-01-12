@@ -2,9 +2,9 @@
 
 **📚 Complete API Reference** — Detailed documentation for all features and options.
 
-**Quick start?** See [README.md](../README.md) for a simpler introduction.
+**Quick start?** See [README.md](https://github.com/lelabdev/rune-scroller/blob/main/README.md) for a simpler introduction.
 
-**Development?** See [CLAUDE.md](../CLAUDE.md) for the developer guide.
+**Development?** See [CLAUDE.md](https://github.com/lelabdev/rune-scroller/blob/main/CLAUDE.md) for the developer guide.
 
 ---
 
@@ -43,40 +43,6 @@
 
 ---
 
-## 📊 Performance & Quality
-
-**Bundle Optimization (2026-01-12):**
-- ✅ **121/121 tests passing** (100%)
-- ✅ **Bundle size:** 12.7KB gzipped (-1.6KB from v2.0.0, -11.2%)
-- ✅ **Unpacked size:** 40.3KB (-7.1KB from v2.0.0, -15.0%)
-- ✅ **Type safety:** 0 errors (JSDoc + TypeScript)
-- ✅ **Memory leaks:** 0 detected
-- ✅ **Svelte 5 aligned:** Full runes support
-- ✅ **Removed deprecated `animate` action** - Simplified API
-- ✅ **Tests optimized for npm** - Excluded from package (tests/ directory)
-- ✅ **CSS optimized:** CSS custom properties (-36% CSS reduction)
-- ✅ **Production ready:** NODE_ENV guards for console warnings
-
-**Bundle breakdown (unpacked, optimized):**
-- `runeScroller.js`: 5.0KB (-12%)
-- `dom-utils.js`: 3.4KB (-24%)
-- `animations.css`: 2.5KB (-36%) ← Optimized with CSS custom properties
-- `types.js`: 2.1KB
-- `useIntersection.svelte.js`: 2.2KB (-18%)
-- `observer-utils.js`: 773B (-52%)
-- Type definitions (.d.ts): ~6KB (-33%)
-- Other (index.js, LICENSE, package.json): 2.8KB
-
-**Optimization details:**
-- CSS custom properties eliminate repetitive rules
-- Production builds strip console warnings via NODE_ENV
-- JSDoc optimized (kept types, removed verbose descriptions)
-- All features and animations remain unchanged
-
-See [`MIGRATION_METRICS.md`](../MIGRATION_METRICS.md) for detailed performance benchmarks.
-
----
-
 ## 📦 Installation
 
 ```bash
@@ -101,9 +67,10 @@ yarn add rune-scroller
 <!-- src/routes/+layout.svelte -->
 <script>
 	import 'rune-scroller/animations.css';
+	let { children } = $props();
 </script>
 
-<slot />
+{@render children()}
 ```
 
 **Option B - In each component that uses animations:**
@@ -282,30 +249,6 @@ interface RuneScrollerOptions {
 
 ---
 
-## 🔧 Advanced Usage
-
-### Using Composables
-
-```svelte
-<script>
-	import { useIntersectionOnce } from 'rune-scroller';
-	import 'rune-scroller/animations.css';
-
-	const intersection = useIntersectionOnce({ threshold: 0.5 });
-</script>
-
-<div
-	bind:this={intersection.element}
-	class="scroll-animate"
-	class:is-visible={intersection.isVisible}
-	data-animation="fade-in-up"
->
-	Manual control over intersection state
-</div>
-```
-
----
-
 ## 🎯 How It Works
 
 Rune Scroller uses **sentinel-based triggering**:
@@ -338,9 +281,10 @@ Works seamlessly with SvelteKit. Import CSS in your root layout:
 <!-- src/routes/+layout.svelte -->
 <script>
 	import 'rune-scroller/animations.css';
+	let { children } = $props();
 </script>
 
-<slot />
+{@render children()}
 ```
 
 Then use animations anywhere in your app:
@@ -485,7 +429,7 @@ interface RuneScrollerOptions {
 
 - **npm Package**: [rune-scroller](https://www.npmjs.com/package/rune-scroller)
 - **GitHub**: [lelabdev/rune-scroller](https://github.com/lelabdev/rune-scroller)
-- **Changelog**: [CHANGELOG.md](./CHANGELOG.md)
+- **Changelog**: [CHANGELOG.md](https://github.com/lelabdev/rune-scroller/blob/main/lib/CHANGELOG.md)
 
 ---
 
