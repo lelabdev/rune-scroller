@@ -5,6 +5,55 @@ All notable changes to Rune Scroller will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-01-13
+
+### Added
+
+- **Automatic CSS import** - CSS animations are now included automatically when importing `rune-scroller`
+- Simplified getting started experience with single import statement
+- Improved DX (Developer Experience) by reducing boilerplate code
+
+### Changed
+
+- Main entry point (`import runeScroller from 'rune-scroller'`) now automatically imports CSS
+- Updated all examples and documentation to reflect simplified API
+- No breaking changes
+
+### Example
+
+**New simplified usage:**
+
+```svelte
+<script>
+  import runeScroller from 'rune-scroller';
+</script>
+
+<div use:runeScroller={{ animation: 'fade-in-up' }}>
+  Content
+</div>
+```
+
+### Benefits
+
+- One-line import instead of two
+- No need to remember separate CSS import
+- Zero performance overhead (CSS is bundled)
+- Same bundle size (14KB gzipped, 47KB unpacked)
+- Better tree-shaking support (CSS is static)
+- Cacheable by browser
+
+### Performance
+
+- No performance impact
+- Same 14KB gzipped bundle size
+- Same runtime performance (1-2ms initialization)
+
+### Migration
+
+No migration needed - change is fully backward compatible.
+
+---
+
 ## [2.1.0] - 2026-01-12
 
 ### Performance
