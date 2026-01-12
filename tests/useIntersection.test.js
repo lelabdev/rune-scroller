@@ -18,7 +18,7 @@ describe('useIntersection Composable', () => {
 
 	beforeEach(() => {
 		// Import composables
-		const module = require('./useIntersection.svelte.js');
+		const module = require('../src/lib/useIntersection.svelte.js');
 		useIntersection = module.useIntersection;
 		useIntersectionOnce = module.useIntersectionOnce;
 	});
@@ -43,7 +43,7 @@ describe('useIntersection Composable', () => {
 	describe('File Structure and Syntax', () => {
 		it('module is importable without errors', () => {
 			expect(() => {
-				require('./useIntersection.svelte.js');
+				require('../src/lib/useIntersection.svelte.js');
 			}).not.toThrow();
 		});
 
@@ -54,7 +54,7 @@ describe('useIntersection Composable', () => {
 			const { dirname } = require('path');
 			const __filename = fileURLToPath(import.meta.url);
 			const __dirname = dirname(__filename);
-			const filePath = `${__dirname}/useIntersection.svelte.js`;
+			const filePath = `${__dirname}/../src/lib/useIntersection.svelte.js`;
 			const content = fs.readFileSync(filePath, 'utf8');
 			expect(content).toContain('@param');
 			expect(content).toContain('Composable');
@@ -66,7 +66,7 @@ describe('useIntersection Composable', () => {
 			const { dirname } = require('path');
 			const __filename = fileURLToPath(import.meta.url);
 			const __dirname = dirname(__filename);
-			const filePath = `${__dirname}/useIntersection.svelte.js`;
+			const filePath = `${__dirname}/../src/lib/useIntersection.svelte.js`;
 			const content = fs.readFileSync(filePath, 'utf8');
 			expect(content).toContain('$state');
 			expect(content).toContain('$effect');
@@ -80,7 +80,7 @@ describe('useIntersection Composable', () => {
 			const { dirname } = require('path');
 			const __filename = fileURLToPath(import.meta.url);
 			const __dirname = dirname(__filename);
-			const filePath = `${__dirname}/useIntersection.svelte.js`;
+			const filePath = `${__dirname}/../src/lib/useIntersection.svelte.js`;
 			const content = fs.readFileSync(filePath, 'utf8');
 			// Should mention IntersectionObserver usage
 			expect(content).toContain('IntersectionObserver');
@@ -90,7 +90,7 @@ describe('useIntersection Composable', () => {
 
 		it('exports are accessible for import', () => {
 			// Verify we can destructure the exports
-			const { useIntersection, useIntersectionOnce } = require('./useIntersection.svelte.js');
+			const { useIntersection, useIntersectionOnce } = require('../src/lib/useIntersection.svelte.js');
 			expect(useIntersection).toBeDefined();
 			expect(useIntersectionOnce).toBeDefined();
 		});

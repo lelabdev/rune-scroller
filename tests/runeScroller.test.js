@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
 import { Window } from 'happy-dom';
-import { runeScroller } from './runeScroller.js';
+import { runeScroller } from '../src/lib/runeScroller.js';
 import { createTestElement, hasAnimation, getAnimationType } from './__test-helpers__/dom.js';
 
 /**

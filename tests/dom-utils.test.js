@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
 import { Window } from 'happy-dom';
-import { setCSSVariables, setupAnimationElement, createSentinel } from './dom-utils.js';
+import { setCSSVariables, setupAnimationElement, createSentinel } from '../src/lib/dom-utils.js';
 
 // Setup happy-dom environment
 const window = new Window();

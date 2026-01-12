@@ -4,11 +4,9 @@
  */
 
 /**
- * Factory function to create intersection observer composables
- * Eliminates duplication between useIntersection and useIntersectionOnce
- * @param {import('./types.js').IntersectionOptions} [options={}] - IntersectionObserver configuration
- * @param {((entry: IntersectionObserverEntry, isVisible: boolean) => void) | undefined} onIntersect - Callback handler for intersection changes
- * @param {boolean} [once=false] - Whether to trigger only once
+ * @param {import('./types.js').IntersectionOptions} [options={}]
+ * @param {((entry: IntersectionObserverEntry, isVisible: boolean) => void) | undefined} onIntersect
+ * @param {boolean} [once=false]
  * @returns {import('./types.js').UseIntersectionReturn}
  */
 function createIntersectionObserver(options = {}, onIntersect = undefined, once = false) {
@@ -69,10 +67,8 @@ function createIntersectionObserver(options = {}, onIntersect = undefined, once 
 }
 
 /**
- * Track element visibility with IntersectionObserver
- * Updates isVisible whenever visibility changes
- * @param {import('./types.js').IntersectionOptions} [options={}] - IntersectionObserver configuration
- * @param {(isVisible: boolean) => void} [onVisible] - Optional callback when visibility changes
+ * @param {import('./types.js').IntersectionOptions} [options={}]
+ * @param {(isVisible: boolean) => void} [onVisible]
  * @returns {import('./types.js').UseIntersectionReturn}
  */
 export function useIntersection(options = {}, onVisible) {
@@ -86,9 +82,7 @@ export function useIntersection(options = {}, onVisible) {
 }
 
 /**
- * Track element visibility once (until first trigger)
- * Unobserves after first visibility
- * @param {import('./types.js').IntersectionOptions} [options={}] - IntersectionObserver configuration
+ * @param {import('./types.js').IntersectionOptions} [options={}]
  * @returns {import('./types.js').UseIntersectionReturn}
  */
 export function useIntersectionOnce(options = {}) {
