@@ -5,8 +5,7 @@ const config = {
 	preprocess: vitePreprocess(),
 	kit: {
 		files: {
-			lib: 'src/lib',
-			exclude: ['**/*.test.js', '**/*.test.ts']
+			lib: 'src/lib'
 		}
 	}
 };

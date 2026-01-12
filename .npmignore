@@ -1,24 +1,26 @@
-# Development
+# Source code (development only)
 src/
+tests/
+
+# Build tools
 .svelte-kit/
 .vercel
 .netlify
 .wrangler
 vite.config.ts
-tsconfig.json
+vite.config.js
 svelte.config.js
+tsconfig.json
+jsconfig.json
 prettier.config.js
 eslint.config.js
+bunfig.toml
 
-# Build outputs to exclude
-build/
-.output/
-
-# Demo/Documentation
-node_modules/
+# Lock files
 pnpm-lock.yaml
 yarn.lock
 package-lock.json
+bun.lock
 
 # IDE
 .vscode/
@@ -28,16 +30,10 @@ package-lock.json
 *~
 .DS_Store
 
-# Testing
+# Git
 .github/
 .gitignore
 CLAUDE.md
-*.test.ts
-*.test.js
-dist/**/*.test.js
-dist/**/*.test.ts
 
-# Development files
-.env
-.env.local
-.env.*.local
+# Dependencies (not needed in npm package)
+node_modules/

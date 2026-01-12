@@ -42,6 +42,7 @@
 - ✅ **Memory leaks:** 0 detected
 - ✅ **Svelte 5 aligned:** Full runes support
 - ✅ **Removed deprecated `animate` action** - Simplified API
+- ✅ **Tests optimized for npm** - Excluded from package (tests/ directory)
 
 **Bundle breakdown:**
 - `runeScroller.js`: 2.1KB
