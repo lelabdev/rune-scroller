@@ -10,6 +10,9 @@ node_modules
 /build
 /dist
 
+# npm pack artifacts
+*.tgz
+
 # OS
 .DS_Store
 Thumbs.db

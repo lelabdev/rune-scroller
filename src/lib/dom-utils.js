@@ -5,6 +5,13 @@
 let sentinelCounter = 0;
 
 /**
+ * Cache to check CSS only once per page load
+ * Avoids expensive getComputedStyle() calls
+ * @type {boolean | null}
+ */
+let cssCheckResult = null;
+
+/**
  * @param {HTMLElement} element
  * @param {number} [duration]
  * @param {number} [delay=0]
@@ -38,7 +45,7 @@ export function createSentinel(element, debug = false, offset = 0, sentinelColor
 	const sentinel = document.createElement('div');
 	// Use offsetHeight instead of getBoundingClientRect for accurate dimensions
 	// getBoundingClientRect returns transformed dimensions (affected by scale, etc)
-	// offsetHeight returns the actual element height independent of CSS transforms
+	// offsetHeight returns actual element height independent of CSS transforms
 	const elementHeight = element.offsetHeight;
 	const sentinelTop = elementHeight + offset;
 
@@ -48,7 +55,7 @@ export function createSentinel(element, debug = false, offset = 0, sentinelColor
 		sentinelId = `sentinel-${sentinelCounter}`;
 	}
 
-	// Always set the data-sentinel-id attribute
+	// Always set to data-sentinel-id attribute
 	sentinel.setAttribute('data-sentinel-id', sentinelId);
 
 	if (debug) {
@@ -71,11 +78,15 @@ export function createSentinel(element, debug = false, offset = 0, sentinelColor
 
 /**
  * Check if CSS animations are loaded and warn if not (dev only)
+ * Uses cache to avoid expensive getComputedStyle() on every element creation
  * @returns {boolean} True if CSS appears to be loaded
  */
 export function checkAndWarnIfCSSNotLoaded() {
-	if (typeof document === 'undefined') return;
-	if (process.env.NODE_ENV === 'production') return;
+	if (typeof document === 'undefined') return false;
+	if (process.env.NODE_ENV === 'production') return true;
+
+	// Return cached result if already checked (avoids expensive reflows)
+	if (cssCheckResult !== null) return cssCheckResult;
 
 	// Try to detect if animations.css is loaded by checking for animation classes
 	const test = document.createElement('div');
@@ -94,4 +105,8 @@ export function checkAndWarnIfCSSNotLoaded() {
 			'Documentation: https://github.com/lelabdev/rune-scroller#installation'
 		);
 	}
+
+	// Cache the result for future calls
+	cssCheckResult = hasAnimation;
+	return hasAnimation;
 }
