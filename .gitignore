@@ -13,6 +13,9 @@ node_modules
 # Tests (excluded from npm)
 /tests
 
+# npm pack artifacts
+*.tgz
+
 # OS
 .DS_Store
 Thumbs.db
