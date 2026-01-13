@@ -10,9 +10,6 @@ node_modules
 /build
 /dist
 
-# Tests (excluded from npm)
-/tests
-
 # npm pack artifacts
 *.tgz
 
