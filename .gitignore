@@ -10,6 +10,9 @@ node_modules
 /build
 /dist
 
+# Tests (excluded from npm)
+/tests
+
 # OS
 .DS_Store
 Thumbs.db
