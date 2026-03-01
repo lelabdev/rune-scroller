@@ -1,8 +1,4 @@
-# ⚡ Rune Scroller - Full Reference
-
-**📚 Complete API Reference** — Detailed documentation for all features and options.
-
----
+# ⚡ Rune Scroller
 
 <div align="center">
 	<img src="./logo.png" alt="Rune Scroller Logo" width="200" />
@@ -26,177 +22,20 @@
 
 ## ✨ Features
 
-- **14KB gzipped** (47KB uncompressed) - Minimal overhead, optimized for production
+- **5.7KB gzipped** (JS+CSS) - Minimal overhead
 - **Zero dependencies** - Pure Svelte 5 + IntersectionObserver
-- **14 animations** - Fade, Zoom, Flip, Slide, Bounce variants
-- **Full TypeScript support** - Type definitions generated from JSDoc
+- **14 animations** - Fade, Zoom, Flip, Slide, Bounce
+- **TypeScript support** - Full type definitions
 - **SSR-ready** - SvelteKit compatible
 - **GPU-accelerated** - Pure CSS transforms
 - **Accessible** - Respects `prefers-reduced-motion`
-- **v2.0.0 New** - `onVisible` callback, ResizeObserver support, animation validation, sentinel customization
-- **✨ Latest** - `useIntersection` migrated to Svelte 5 `$effect` rune for better lifecycle management
-- **🚀 Bundle optimized** - CSS with custom properties, production build minification
-- **🚀 v2.2.0** - Cache CSS check to eliminate 99% of reflows
 
 ---
- 
-## 🚀 Performance
 
-### Cache CSS Validation (v2.2.0)
-
-**Problem:**
-- `checkAndWarnIfCSSNotLoaded()` was called for EVERY element
-- Each call did:
-  - `document.createElement('div')`
-  - `document.body.appendChild(test)`
-  - `getComputedStyle(test)` ⚠️ **Expensive!** Forces full page reflow
-  - `test.remove()`
-- For 100 animated elements = **100 reflows + 100 DOM operations**
-
-**Solution:**
-```javascript
-// Cache to check only once per page load
-let cssCheckResult = null;
-
-export function checkAndWarnIfCSSNotLoaded() {
-  if (cssCheckResult !== null) return cssCheckResult;
-  // ... expensive check ...
-  cssCheckResult = hasAnimation;
-  return hasAnimation;
-}
-```
-
-**Impact:**
-- Validation runs ONLY ONCE per page load
-- Eliminates layout thrashing from repeated `getComputedStyle()` calls
-- For 100 elements: **99 fewer reflows** (100 → 1)
-- Zero memory overhead (single boolean)
-
-### Current Performance Metrics
-
-| Metric | Value |
-|---------|--------|
-| **Bundle size** | 12.4KB (compressed), 40.3KB (unpacked) |
-| **Initialization** | ~1-2ms per element |
-| **Observer callback** | <0.5ms per frame |
-| **CSS validation** | ~0.1ms total (v2.2.0, with cache) |
-| **Memory per observer** | ~1.2KB |
-| **Animation performance** | 60fps maintained |
-| **Memory leaks** | 0 detected |
-
-### Why Performance Matters
-
-**Layout Thrashing:**
-- Synchronous reflows block the main thread
-- Each reflow can take 10-20ms
-- For 100 elements = **1-2 seconds blocked**
-- User sees stuttering/jank while scrolling
-
-**Solution:**
-- Cache = 1 reflow instead of N
-- 99% improvement on pages with many animations
-- Smoother scrolling, better UX
-
-### Optimized Code Patterns
-
-**IntersectionObserver:**
-- Native API (no scroll listeners)
-- Fast callback (<0.5ms per frame)
-- No debounce needed (browser handles this efficiently)
-
-**CSS Animations:**
-- Transforms only (GPU-accelerated)
-- No layout/repaint during animation
-- `will-change` on visible elements only
-
-**DOM Operations:**
-- `insertAdjacentElement('beforebegin')` instead of `insertBefore`
-- `offsetHeight` instead of `getBoundingClientRect()` (avoids transform issues)
-- Complete cleanup on destroy
-
-**Memory Management:**
-- All observers disconnected
-- Sentinel and wrapper removed
-- State prevents double-disconnects
-- 0 memory leaks detected (121/121 tests)
-
-### Future Considerations
-
-**1. `will-change` Timing**
-- Currently: `.is-visible { will-change: transform, opacity; }`
-- Trade-off: Stays active after animation (consumes GPU memory)
-- Consideration: Use `transitionend` event to remove `will-change`
-- Recommendation: Keep current (GPU memory is cheap)
-
-**2. Threshold Tuning**
-- Current: `threshold: 0` (triggers as soon as 1px is visible)
-- Alternative: `threshold: 0.1` or `threshold: 0.25`
-- Trade-off: Higher threshold = later trigger = smoother stagger
-- Recommendation: Keep `threshold: 0` for immediate feedback
-
-**3. requestIdleCallback**
-- Potential: Defer non-critical setup to browser idle time
-- Trade-off: Complex to implement, marginal benefit
-- Recommendation: Not needed (current performance is excellent)
-
-**4. Testing on Low-End Devices**
-- Test on mobile phones, older browsers
-- Use DevTools CPU throttling
-- Consider Lighthouse/Puppeteer for automated testing
-- Ensure 60fps maintained on real devices
-
-### What NOT to Optimize
-
-**Anti-patterns to avoid:**
-
-1. ❌ **Premature optimization**
-   - Don't optimize without measurements
-   - Profile first, optimize later
-   - "Premature optimization is the root of all evil"
-
-2. ❌ **Over-engineering**
-   - Complex solutions for small gains
-   - Keep it simple when possible
-   - Don't sacrifice readability for micro-optimizations
-
-3. ❌ **Breaking performance for size**
-   - Bundle size matters (12.4KB is excellent)
-   - Don't add huge dependencies for minor improvements
-
-4. ❌ **Optimizing unused paths**
-   - Focus on hot paths (element creation, scroll, intersection)
-   - Cold paths (initialization, destroy) less critical
-
-5. ❌ **Sacrificing maintainability**
-   - Don't sacrifice code clarity for micro-optimizations
-   - Comments should explain WHY, not just WHAT
-   - Keep code simple and understandable
-
-### Performance Testing
-
-**Recommended approach:**
-1. Create a benchmark with 100-1000 animated elements
-2. Measure: initialization, first animation, scroll performance, cleanup
-3. Profile with DevTools Performance tab
-4. Test on real pages (not just benchmarks)
-5. Verify 60fps is maintained during scroll
-
-**Tools:**
-- Chrome DevTools Performance tab
-- Firefox Performance Profiler
-- Web Inspector (Safari)
-- Lighthouse (PageSpeed, accessibility, best practices)
-
----
- 
 ## 📦 Installation
 
 ```bash
 npm install rune-scroller
-# or
-pnpm add rune-scroller
-# or
-yarn add rune-scroller
 ```
 
 ---
@@ -224,51 +63,12 @@ yarn add rune-scroller
 </div>
 ```
 
-That's it! The CSS animations are included automatically when you import rune-scroller.
-
-### Option 2: Manual CSS Import
-
-For fine-grained control, import CSS manually:
-
-**Step 1: Import CSS in your root layout (recommended for SvelteKit):**
-
-```svelte
-<!-- src/routes/+layout.svelte -->
-<script>
-	import 'rune-scroller/animations.css';
-	let { children } = $props();
-</script>
-
-{@render children()}
-```
-
-**Or import in each component:**
-
-```svelte
-<script>
-	import runeScroller from 'rune-scroller';
-	import 'rune-scroller/animations.css';
-</script>
-```
-
-**Step 2: Use the animations**
-
-```svelte
-<script>
-	import runeScroller from 'rune-scroller';
-	// CSS already imported in layout or above
-</script>
-
-<div use:runeScroller={{ animation: 'fade-in' }}>
-	Animated content
-</div>
-```
-
 ---
 
 ## 🎨 Available Animations
 
 ### Fade (5)
+
 - `fade-in` - Simple opacity fade
 - `fade-in-up` - Fade + move up 300px
 - `fade-in-down` - Fade + move down 300px
@@ -276,6 +76,7 @@ For fine-grained control, import CSS manually:
 - `fade-in-right` - Fade + move from left 300px
 
 ### Zoom (5)
+
 - `zoom-in` - Scale from 0.3 to 1
 - `zoom-out` - Scale from 2 to 1
 - `zoom-in-up` - Zoom (0.5→1) + move up 300px
@@ -283,6 +84,7 @@ For fine-grained control, import CSS manually:
 - `zoom-in-right` - Zoom (0.5→1) + move from left 300px
 
 ### Others (4)
+
 - `flip` - 3D flip on Y-axis
 - `flip-x` - 3D flip on X-axis
 - `slide-rotate` - Slide + rotate 10°
@@ -294,114 +96,45 @@ For fine-grained control, import CSS manually:
 
 ```typescript
 interface RuneScrollerOptions {
-	animation?: AnimationType;  // Animation name (default: 'fade-in')
-	duration?: number;          // Duration in ms (default: 800)
-	repeat?: boolean;           // Repeat on scroll (default: false)
-	debug?: boolean;            // Show sentinel as visible line (default: false)
-	offset?: number;            // Sentinel offset in px (default: 0, negative = above)
-	onVisible?: (element: HTMLElement) => void;  // Callback when animation triggers (v2.0.0+)
-	sentinelColor?: string;     // Sentinel debug color, e.g. '#ff6b6b' (v2.0.0+)
-	sentinelId?: string;        // Custom ID for sentinel identification (v2.0.0+)
+  animation?: AnimationType // Animation name (default: 'fade-in')
+  duration?: number // Duration in ms (default: 800)
+  repeat?: boolean // Repeat on scroll (default: false)
+  debug?: boolean // Show sentinel as visible line (default: false)
+  offset?: number // Sentinel offset in px (default: 0, negative = earlier)
+  onVisible?: (element: HTMLElement) => void // Callback when visible
+  sentinelColor?: string // Debug sentinel color (e.g. '#ff6b6b')
+  sentinelId?: string // Custom sentinel ID
 }
 ```
-
-### Option Details
-
-- **`animation`** - Type of animation to play. Choose from 14 built-in animations listed above. Invalid animations automatically fallback to 'fade-in' with a console warning.
-- **`duration`** - How long the animation lasts in milliseconds (default: 800ms).
-- **`repeat`** - If `true`, animation plays every time sentinel enters viewport. If `false`, plays only once.
-- **`debug`** - If `true`, displays the sentinel element as a visible line below your element. Useful for seeing exactly when animations trigger. Default color is cyan (#00e0ff), customize with `sentinelColor`.
-- **`offset`** - Offset of the sentinel in pixels. Positive values move sentinel down (delays animation), negative values move it up (triggers earlier). Useful for large elements where you want animation to trigger before the entire element is visible.
-- **`onVisible`** *(v2.0.0+)* - Callback function triggered when the animation becomes visible. Receives the animated element as parameter. Useful for analytics, lazy loading, or triggering custom effects.
-- **`sentinelColor`** *(v2.0.0+)* - Customize the debug sentinel color (e.g., '#ff6b6b' for red). Only visible when `debug: true`. Useful for distinguishing multiple sentinels on the same page.
-- **`sentinelId`** *(v2.0.0+)* - Set a custom ID for the sentinel element. If not provided, an auto-ID is generated (`sentinel-1`, `sentinel-2`, etc.). Useful for identifying sentinels in DevTools and tracking which element owns which sentinel.
 
 ### Examples
 
 ```svelte
 <!-- Basic -->
-<div use:runeScroller={{ animation: 'zoom-in' }}>
-	Content
-</div>
+<div use:runeScroller={{ animation: 'zoom-in' }}>Content</div>
 
 <!-- Custom duration -->
-<div use:runeScroller={{ animation: 'fade-in-up', duration: 1000 }}>
-	Fast animation
-</div>
+<div use:runeScroller={{ animation: 'fade-in-up', duration: 1000 }}>Fast</div>
 
 <!-- Repeat mode -->
-<div use:runeScroller={{ animation: 'bounce-in', repeat: true }}>
-	Repeats every time you scroll
+<div use:runeScroller={{ animation: 'bounce-in', repeat: true }}>Repeats</div>
+
+<!-- Debug mode -->
+<div use:runeScroller={{ animation: 'fade-in', debug: true }}>Debug</div>
+
+<!-- Trigger earlier with negative offset -->
+<div use:runeScroller={{ animation: 'fade-in-up', offset: -200 }}>
+	Triggers 200px before element bottom
 </div>
 
-<!-- Debug mode - shows cyan line marking sentinel position -->
-<div use:runeScroller={{ animation: 'fade-in', debug: true }}>
-	The cyan line below this shows when animation will trigger
-</div>
-
-<!-- Multiple options -->
-<div use:runeScroller={{
-	animation: 'fade-in-up',
-	duration: 1200,
-	repeat: true,
-	debug: true
-}}>
-	Full featured example
-</div>
-
-<!-- Large element - trigger animation earlier with negative offset -->
-<div use:runeScroller={{
-	animation: 'fade-in-up',
-	offset: -200  // Trigger 200px before element bottom
-}}>
-	Large content that needs early triggering
-</div>
-
-<!-- Delay animation by moving sentinel down -->
-<div use:runeScroller={{
-	animation: 'zoom-in',
-	offset: 300  // Trigger 300px after element bottom
-}}>
-	Content with delayed animation
-</div>
-
-<!-- v2.0.0: onVisible callback for analytics tracking -->
+<!-- onVisible callback for analytics -->
 <div use:runeScroller={{
 	animation: 'fade-in-up',
 	onVisible: (el) => {
-		console.log('Animation visible!', el);
-		// Track analytics, load images, trigger API calls, etc.
-		window.gtag?.('event', 'animation_visible', { element: el.id });
+		window.gtag?.('event', 'section_viewed', { id: el.id });
 	}
 }}>
-	Tracked animation
-</div>
-
-<!-- v2.0.0: Custom sentinel color for debugging -->
-<div use:runeScroller={{
-	animation: 'fade-in',
-	debug: true,
-	sentinelColor: '#ff6b6b'  // Red instead of default cyan
-}}>
-	Red debug sentinel
-</div>
-
-<!-- v2.0.0: Custom sentinel ID for identification -->
-<div use:runeScroller={{
-	animation: 'zoom-in',
-	sentinelId: 'hero-zoom',
-	debug: true
-}}>
-	Identified sentinel (shows "hero-zoom" in debug mode)
-</div>
-
-<!-- v2.0.0: Auto-ID (sentinel-1, sentinel-2, etc) -->
-<div use:runeScroller={{
-	animation: 'fade-in-up',
-	debug: true
-	// sentinelId omitted → auto generates "sentinel-1", "sentinel-2", etc
-}}>
-	Auto-identified sentinel
+	Tracked section
 </div>
 ```
 
@@ -409,31 +142,25 @@ interface RuneScrollerOptions {
 
 ## 🎯 How It Works
 
-Rune Scroller uses **sentinel-based triggering**:
+**Sentinel-based triggering:**
 
-1. An invisible 1px sentinel element is created below your element
-2. When the sentinel enters the viewport, animation triggers
-3. This ensures precise timing regardless of element size
-4. Uses native IntersectionObserver for performance
-5. Pure CSS animations (GPU-accelerated)
-6. *(v2.0.0)* Sentinel automatically repositions on element resize via ResizeObserver
+1. Invisible 1px sentinel created below your element
+2. When sentinel enters viewport, animation triggers
+3. Uses native IntersectionObserver for performance
+4. Pure CSS animations (GPU-accelerated)
+5. ResizeObserver auto-repositions sentinel
 
 **Why sentinels?**
+
 - Accurate timing across all screen sizes
 - No complex offset calculations
-- Handles staggered animations naturally
-- Sentinel stays fixed while element animates (no observer confusion with transforms)
-
-**Automatic ResizeObserver** *(v2.0.0+)*
-- Sentinel repositions automatically when element resizes
-- Works with responsive layouts and dynamic content
-- No configuration needed—it just works
+- Works with animated elements (transforms don't affect observer)
 
 ---
 
 ## 🌐 SSR Compatibility
 
-Works seamlessly with SvelteKit. Simply import rune-scroller in your root layout:
+Works seamlessly with SvelteKit:
 
 ```svelte
 <!-- src/routes/+layout.svelte -->
@@ -445,22 +172,6 @@ Works seamlessly with SvelteKit. Simply import rune-scroller in your root layout
 {@render children()}
 ```
 
-Then use animations anywhere in your app:
-
-```svelte
-<!-- src/routes/+page.svelte -->
-<script>
-	import runeScroller from 'rune-scroller';
-</script>
-
-<!-- No special handling needed -->
-<div use:runeScroller={{ animation: 'fade-in-up' }}>
-	Works in SvelteKit SSR!
-</div>
-```
-
-The library checks for browser environment and gracefully handles server-side rendering.
-
 ---
 
 ## ♿ Accessibility
@@ -468,73 +179,32 @@ The library checks for browser environment and gracefully handles server-side re
 Respects `prefers-reduced-motion`:
 
 ```css
-/* In animations.css */
 @media (prefers-reduced-motion: reduce) {
-	.scroll-animate {
-		animation: none !important;
-		opacity: 1 !important;
-		transform: none !important;
-	}
+  .scroll-animate {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 ```
-
-Users who prefer reduced motion will see content without animations.
 
 ---
 
 ## 📚 API Reference
-### Public API
-
-Rune Scroller exports a **single action-based API** (no components):
-
-1. **`runeScroller`** (default) - Sentinel-based, simple, powerful
-
-**Why actions instead of components?**
-- Actions are lightweight directives
-- No DOM wrapper overhead
-- Better performance
-- More flexible
-
-### Main Export
 
 ```typescript
-// CSS is automatically included
-import runeScroller from 'rune-scroller';
+// Default export
+import runeScroller from "rune-scroller"
 
 // Named exports
 import {
-	useIntersection,            // Composable
-	useIntersectionOnce,        // Composable
-	calculateRootMargin         // Utility
-} from 'rune-scroller';
+  useIntersection, // Composable
+  useIntersectionOnce, // Composable
+  calculateRootMargin, // Utility
+} from "rune-scroller"
 
 // Types
-import type {
-	AnimationType,
-	RuneScrollerOptions,
-	IntersectionOptions,
-	UseIntersectionReturn
-} from 'rune-scroller';
-```
-
-### TypeScript Types
-
-```typescript
-type AnimationType =
-	| 'fade-in' | 'fade-in-up' | 'fade-in-down' | 'fade-in-left' | 'fade-in-right'
-	| 'zoom-in' | 'zoom-out' | 'zoom-in-up' | 'zoom-in-left' | 'zoom-in-right'
-	| 'flip' | 'flip-x' | 'slide-rotate' | 'bounce-in';
-
-interface RuneScrollerOptions {
-	animation?: AnimationType;
-	duration?: number;
-	repeat?: boolean;
-	debug?: boolean;
-	offset?: number;
-	onVisible?: (element: HTMLElement) => void;      // v2.0.0+
-	sentinelColor?: string;                          // v2.0.0+
-	sentinelId?: string;                             // v2.0.0+
-}
+import type { AnimationType, RuneScrollerOptions } from "rune-scroller"
 ```
 
 ---
@@ -546,45 +216,33 @@ interface RuneScrollerOptions {
 ```svelte
 <script>
 	import runeScroller from 'rune-scroller';
-
-	const items = [
-		{ title: 'Feature 1', description: 'Description 1' },
-		{ title: 'Feature 2', description: 'Description 2' },
-		{ title: 'Feature 3', description: 'Description 3' }
-	];
+	const items = ['Item 1', 'Item 2', 'Item 3'];
 </script>
 
-<div class="grid">
-	{#each items as item}
-		<div use:runeScroller={{ animation: 'fade-in-up', duration: 800 }}>
-			<h3>{item.title}</h3>
-			<p>{item.description}</p>
-		</div>
-	{/each}
-</div>
+{#each items as item, i}
+	<div use:runeScroller={{
+		animation: 'fade-in-up',
+		duration: 800,
+		style: `--delay: ${i * 100}ms`
+	}}>
+		{item}
+	</div>
+{/each}
 ```
 
 ### Hero Section
 
 ```svelte
-<div use:runeScroller={{ animation: 'fade-in-down', duration: 1000 }}>
-	<h1>Welcome</h1>
-</div>
-
-<div use:runeScroller={{ animation: 'fade-in-up', duration: 1200 }}>
-	<p>Engaging content</p>
-</div>
-
-<div use:runeScroller={{ animation: 'zoom-in', duration: 1000 }}>
-	<button>Get Started</button>
-</div>
+<h1 use:runeScroller={{ animation: 'fade-in-down', duration: 1000 }}>Welcome</h1>
+<p use:runeScroller={{ animation: 'fade-in-up', duration: 1200 }}>Subtitle</p>
+<button use:runeScroller={{ animation: 'zoom-in', duration: 800 }}>Get Started</button>
 ```
 
 ---
 
 ## 🔗 Links
 
-- **npm Package**: [rune-scroller](https://www.npmjs.com/package/rune-scroller)
+- **npm**: [rune-scroller](https://www.npmjs.com/package/rune-scroller)
 - **GitHub**: [lelabdev/rune-scroller](https://github.com/lelabdev/rune-scroller)
 - **Changelog**: [CHANGELOG.md](https://github.com/lelabdev/rune-scroller/blob/main/lib/CHANGELOG.md)
 
@@ -593,20 +251,6 @@ interface RuneScrollerOptions {
 ## 📄 License
 
 MIT © [ludoloops](https://github.com/ludoloops)
-
----
-
-## 🤝 Contributing
-
-Contributions welcome! Please open an issue or PR on GitHub.
-
-```bash
-# Development
-bun install
-bun run dev
-bun test
-bun run build
-```
 
 ---
 
