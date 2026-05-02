@@ -54,26 +54,26 @@ That's it. Same API as AOS. Works everywhere.
 
 ### React
 
-```jsx
+````jsx
 import { useEffect } from "react";
-import AOS from "rune-scroller/aos";
+### React (not tested — should work)
+
+```jsx
+import { useEffect } from 'react';
+import AOS from 'rune-scroller/aos';
 
 function App() {
-  useEffect(() => {
-    AOS.init();
-  }, []);
-  return (
-    <>
-      <h1 data-aos="fade-down">Welcome</h1>
-      <p data-aos="fade-up" data-aos-delay="200">
-        Subtitle
-      </p>
-    </>
-  );
+	useEffect(() => { AOS.init(); }, []);
+	return (
+		<>
+			<h1 data-aos="fade-down">Welcome</h1>
+			<p data-aos="fade-up" data-aos-delay="200">Subtitle</p>
+		</>
+	);
 }
-```
+````
 
-### Vue
+### Vue (not tested — should work)
 
 ```vue
 <script setup>
@@ -87,7 +87,7 @@ onMounted(() => AOS.init());
 </template>
 ```
 
-### Angular
+### Angular (not tested — should work)
 
 ```typescript
 // app.component.ts
@@ -107,7 +107,7 @@ export class AppComponent implements OnInit {
 <div data-aos="fade-up">Animated</div>
 ```
 
-### Vanilla JS (no bundler)
+### CDN (not tested — should work)
 
 ```html
 <script type="module">
