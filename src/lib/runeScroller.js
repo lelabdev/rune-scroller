@@ -24,12 +24,10 @@ export function runeScroller(element, options) {
 	// Validate animation type
 	let animation = options?.animation ?? 'fade-in';
 	if (animation && !ANIMATION_TYPES.includes(animation)) {
-		if (process.env.NODE_ENV !== 'production') {
-			console.warn(
-				`[rune-scroller] Invalid animation "${animation}". Using "fade-in" instead. ` +
-				`Valid options: ${ANIMATION_TYPES.join(', ')}`
-			);
-		}
+		console.warn(
+			`[rune-scroller] Invalid animation "${animation}". Using "fade-in" instead. ` +
+			`Valid options: ${ANIMATION_TYPES.join(', ')}`
+		);
 		animation = 'fade-in';
 	}
 

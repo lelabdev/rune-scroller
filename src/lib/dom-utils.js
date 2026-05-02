@@ -83,7 +83,6 @@ export function createSentinel(element, debug = false, offset = 0, sentinelColor
  */
 export function checkAndWarnIfCSSNotLoaded() {
 	if (typeof document === 'undefined') return false;
-	if (process.env.NODE_ENV === 'production') return true;
 
 	// Return cached result if already checked (avoids expensive reflows)
 	if (cssCheckResult !== null) return cssCheckResult;
