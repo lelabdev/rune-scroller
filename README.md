@@ -4,7 +4,9 @@
 	<img src="./logo.png" alt="Rune Scroller Logo" width="200" />
 </div>
 
-**Lightweight scroll animations for Svelte 5** — Built with IntersectionObserver API. Drop-in AOS replacement.
+**Lightweight scroll animations. AOS replacement. Works everywhere.**
+
+Built with native IntersectionObserver — zero JS on scroll, GPU-accelerated, 5KB gzipped.
 
 > 🚀 **Open Source** by [ludoloops](https://github.com/ludoloops) at [LeLab.dev](https://lelab.dev)
 > 📜 Licensed under **MIT**
@@ -20,130 +22,13 @@
 
 ---
 
-## ✨ Features
-
-- **Zero dependencies** — Pure JS + IntersectionObserver
-- **~5KB gzipped** — Half the size of AOS
-- **30 animations** — Fade, Zoom, Flip, Slide, Bounce
-- **AOS compatible** — Drop-in replacement, same `data-aos` attributes
-- **TypeScript support** — Full type definitions
-- **SSR-ready** — SvelteKit compatible
-- **GPU-accelerated** — CSS transforms via `translate3d`
-- **Accessible** — Respects `prefers-reduced-motion`
-
-### AOS vs rune-scroller
-
-|                           | rune-scroller                          | AOS                                        |
-| ------------------------- | -------------------------------------- | ------------------------------------------ |
-| **Bundle size (gzipped)** | **~5.1KB** JS+CSS                      | ~11KB JS+CSS                               |
-| **Dependencies**          | **0**                                  | lodash.throttle, lodash.debounce           |
-| **Scroll detection**      | **IntersectionObserver** (native, C++) | Scroll event + throttle (JS)               |
-| **Per-scroll cost**       | **0** — browser handles it             | Iterates ALL elements every 99ms           |
-| **Layout reads**          | **1 per element** (init only)          | `offsetParent` loop per element per scroll |
-| **Resize handling**       | **ResizeObserver** (native)            | debounced scroll recalc                    |
-| **100 animated elements** | **~0ms per scroll**                    | ~2-5ms per scroll (layout thrashing)       |
-| **Animations**            | 30                                     | 28                                         |
-| **Framework**             | Any (Svelte action + AOS mode)         | Vanilla JS                                 |
-
-The key difference: **AOS runs JavaScript on every scroll event** for every element. rune-scroller delegates detection to the browser's native IntersectionObserver — zero JS execution until an element actually enters the viewport.
-
----
-
-## 📦 Installation
-
-```bash
-npm install rune-scroller
-```
-
-### SvelteKit Setup
-
-**1.** Install the package:
-
-```bash
-npm install rune-scroller
-```
-
-**2.** Use in any `.svelte` component:
-
-```svelte
-<script>
-	import rs from 'rune-scroller';
-</script>
-
-<div use:rs={{ animation: 'fade-up' }}>
-	Animates on scroll
-</div>
-```
-
-That's it. CSS is auto-imported. No layout changes needed — use it wherever you want.
-
-### AOS Drop-in Setup
-
-**1.** Install:
-
-```bash
-npm install rune-scroller
-```
-
-**2.** Initialize in your app entry point:
-
-```js
-// src/app.html (SvelteKit) or main.js (Vite) or index.js
-import AOS from "rune-scroller/aos";
-AOS.init();
-```
-
-**3.** Add `data-aos` attributes to your HTML:
-
-```html
-<div data-aos="fade-up" data-aos-duration="800">Animated</div>
-```
-
-### Replacing AOS
-
-```bash
-npm uninstall aos
-npm install rune-scroller
-```
-
-Then change your import:
-
-```diff
-- import AOS from 'aos';
-- import 'aos/dist/aos.css';
-+ import AOS from 'rune-scroller/aos';
-```
-
-Everything else stays the same. Same `data-aos` attributes, same `init()` options.
-
----
-
 ## 🚀 Quick Start
 
-### Svelte Action (recommended)
+### Any framework — Svelte, React, Vue, Angular, Vanilla JS
 
-```svelte
-<script>
-	import rs from 'rune-scroller';
-</script>
-
-<!-- Simple -->
-<div use:rs={{ animation: 'fade-up' }}>
-	<h2>Animated Heading</h2>
-</div>
-
-<!-- With options -->
-<div use:rs={{ animation: 'fade-up', duration: 800, delay: 200 }}>
-	<div class="card">Delayed fade</div>
-</div>
-
-<!-- Repeat on every scroll -->
-<div use:rs={{ animation: 'bounce-in', repeat: true }}>
-	<button>Bounces on every scroll</button>
-</div>
+```bash
+npm install rune-scroller
 ```
-
-### AOS Drop-in (framework agnostic)
 
 ```js
 import AOS from "rune-scroller/aos";
@@ -155,11 +40,121 @@ AOS.init();
 <div data-aos="zoom-in" data-aos-delay="200">Delayed zoom</div>
 ```
 
-Replaces `import AOS from 'aos'` — same API, same attributes. Works with any framework.
+That's it. Same API as AOS. Works everywhere.
+
+### Svelte (native action)
+
+```svelte
+<script>
+	import rs from 'rune-scroller';
+</script>
+
+<div use:rs={{ animation: 'fade-up' }}>Animates on scroll</div>
+```
+
+### React
+
+```jsx
+import { useEffect } from "react";
+import AOS from "rune-scroller/aos";
+
+function App() {
+  useEffect(() => {
+    AOS.init();
+  }, []);
+  return (
+    <>
+      <h1 data-aos="fade-down">Welcome</h1>
+      <p data-aos="fade-up" data-aos-delay="200">
+        Subtitle
+      </p>
+    </>
+  );
+}
+```
+
+### Vue
+
+```vue
+<script setup>
+import { onMounted } from "vue";
+import AOS from "rune-scroller/aos";
+onMounted(() => AOS.init());
+</script>
+
+<template>
+  <div data-aos="fade-up">Animated</div>
+</template>
+```
+
+### Angular
+
+```typescript
+// app.component.ts
+import { Component, OnInit } from "@angular/core";
+import AOS from "rune-scroller/aos";
+
+@Component({ selector: "app-root", templateUrl: "./app.component.html" })
+export class AppComponent implements OnInit {
+  ngOnInit() {
+    AOS.init();
+  }
+}
+```
+
+```html
+<!-- app.component.html -->
+<div data-aos="fade-up">Animated</div>
+```
+
+### Vanilla JS (no bundler)
+
+```html
+<script type="module">
+  import AOS from "https://esm.sh/rune-scroller/aos";
+  AOS.init();
+</script>
+
+<div data-aos="fade-up">Works without any build step</div>
+```
 
 ---
 
-## 🎨 Available Animations
+## ✨ Features
+
+- **Framework agnostic** — Svelte, React, Vue, Angular, Vanilla JS, CDN
+- **AOS drop-in** — Same `data-aos` attributes, same `init()` API
+- **Zero dependencies** — Pure JS + native IntersectionObserver
+- **~5KB gzipped** — Half the size of AOS
+- **30 animations** — Fade, Zoom, Flip, Slide, Bounce
+- **Zero JS on scroll** — Browser handles detection natively
+- **TypeScript support** — Full type definitions
+- **SSR-ready** — SvelteKit, Next.js, Nuxt compatible
+- **GPU-accelerated** — CSS transforms via `translate3d`
+- **Accessible** — Respects `prefers-reduced-motion`
+- **No wrapper divs** — Your layouts stay intact
+
+---
+
+### AOS vs rune-scroller
+
+|                           | rune-scroller                                  | AOS                                        |
+| ------------------------- | ---------------------------------------------- | ------------------------------------------ |
+| **Bundle size (gzipped)** | **~5.1KB** JS+CSS                              | ~11KB JS+CSS                               |
+| **Dependencies**          | **0**                                          | lodash.throttle, lodash.debounce           |
+| **Scroll detection**      | **IntersectionObserver** (native, C++)         | Scroll event + throttle (JS)               |
+| **Per-scroll cost**       | **0** — browser handles it                     | Iterates ALL elements every 99ms           |
+| **Layout reads**          | **1 per element** (init only)                  | `offsetParent` loop per element per scroll |
+| **Resize handling**       | **ResizeObserver** (native)                    | debounced scroll recalc                    |
+| **100 animated elements** | **~0ms per scroll**                            | ~2-5ms per scroll (layout thrashing)       |
+| **Animations**            | 30                                             | 28                                         |
+| **Framework**             | **Any** (Svelte, React, Vue, Angular, Vanilla) | Vanilla JS only                            |
+
+The key difference: **AOS runs JavaScript on every scroll event** for every element. rune-scroller delegates detection to the browser's native IntersectionObserver — zero JS execution until an element actually enters the viewport.
+
+---
+
+## 🎨 Available Animations (30)
 
 ### Fade (10)
 
@@ -191,32 +186,13 @@ Replaces `import AOS from 'aos'` — same API, same attributes. Works with any f
 
 All animations use the `--rs-distance` CSS variable (default: `100px`):
 
-```svelte
-<div use:rs={{ animation: 'fade-up' }} style="--rs-distance: 200px">
-	Farther slide
-</div>
+```html
+<div data-aos="fade-up" style="--rs-distance: 200px">Farther slide</div>
 ```
 
 ---
 
 ## ⚙️ Options
-
-### Svelte Action
-
-```typescript
-interface RuneScrollerOptions {
-  animation?: AnimationType; // Animation name (default: 'fade-up')
-  duration?: number; // Duration in ms (default: 400)
-  delay?: number; // Delay in ms (default: 0)
-  easing?: string; // CSS timing function (default: 'ease')
-  repeat?: boolean; // Repeat on scroll (default: false)
-  debug?: boolean; // Show sentinel as visible line (default: false)
-  offset?: number; // Sentinel offset in px (default: 0, negative = earlier)
-  onVisible?: (element: HTMLElement) => void; // Callback when visible
-  sentinelColor?: string; // Debug sentinel color (e.g. '#ff6b6b')
-  sentinelId?: string; // Custom sentinel ID
-}
-```
 
 ### AOS Mode (data attributes)
 
@@ -244,11 +220,26 @@ AOS.init({
 });
 ```
 
+### Svelte Action options
+
+```typescript
+interface RuneScrollerOptions {
+  animation?: AnimationType; // default: 'fade-up'
+  duration?: number; // default: 400
+  delay?: number; // default: 0
+  easing?: string; // default: 'ease'
+  repeat?: boolean; // default: false
+  debug?: boolean;
+  offset?: number; // negative = earlier trigger
+  onVisible?: (el: HTMLElement) => void;
+  sentinelColor?: string;
+  sentinelId?: string;
+}
+```
+
 ---
 
 ## 🎯 How It Works
-
-**Sentinel-based triggering:**
 
 1. Invisible 1px sentinel appended as child of the animated element
 2. When sentinel enters viewport, animation triggers via IntersectionObserver
@@ -256,12 +247,6 @@ AOS.init({
 4. ResizeObserver auto-repositions sentinel
 
 **No wrapper divs** — the element itself becomes the positioning context. Your flex/grid layouts stay intact.
-
----
-
-## 🌐 SSR Compatibility
-
-Works seamlessly with SvelteKit. Import in any `.svelte` file — SSR guard included.
 
 ---
 
@@ -274,23 +259,23 @@ Respects `prefers-reduced-motion` — animations are disabled automatically.
 ## 📚 API Reference
 
 ```typescript
+// Framework agnostic (AOS mode)
+import AOS from "rune-scroller/aos";
+AOS.init();
+AOS.refresh();
+AOS.refreshHard();
+
 // Svelte action (default)
 import rs from "rune-scroller";
 
 // Named exports
 import {
-  runeScroller, // Same as default
-  useIntersection, // Composable
-  useIntersectionOnce, // Composable (once)
-  calculateRootMargin, // Utility
-  ANIMATION_TYPES, // Array of all animation names
+  runeScroller,
+  useIntersection,
+  useIntersectionOnce,
+  calculateRootMargin,
+  ANIMATION_TYPES,
 } from "rune-scroller";
-
-// AOS compatibility
-import AOS from "rune-scroller/aos";
-AOS.init();
-AOS.refresh();
-AOS.refreshHard();
 
 // Types
 import type { AnimationType, RuneScrollerOptions } from "rune-scroller";
@@ -317,23 +302,28 @@ import type { AnimationType, RuneScrollerOptions } from "rune-scroller";
 
 ### Hero Section
 
-```svelte
-<h1 use:rs={{ animation: 'fade-down', duration: 1000 }}>Welcome</h1>
-<p use:rs={{ animation: 'fade-up', duration: 1200 }}>Subtitle</p>
-<button use:rs={{ animation: 'zoom-in', duration: 800 }}>Get Started</button>
-```
-
-### AOS Drop-in
-
 ```html
-<script type="module">
-  import AOS from "rune-scroller/aos";
-  AOS.init({ duration: 800, once: true });
-</script>
-
-<div data-aos="fade-up">Animates on scroll</div>
-<div data-aos="zoom-in" data-aos-delay="300">Delayed zoom</div>
+<h1 data-aos="fade-down" data-aos-duration="1000">Welcome</h1>
+<p data-aos="fade-up" data-aos-duration="1200">Subtitle</p>
+<button data-aos="zoom-in" data-aos-duration="800">Get Started</button>
 ```
+
+---
+
+## 🔄 Replacing AOS
+
+```bash
+npm uninstall aos
+npm install rune-scroller
+```
+
+```diff
+- import AOS from 'aos';
+- import 'aos/dist/aos.css';
++ import AOS from 'rune-scroller/aos';
+```
+
+Everything else stays the same. Same attributes, same options.
 
 ---
 
