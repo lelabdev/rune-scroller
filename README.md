@@ -55,6 +55,67 @@ The key difference: **AOS runs JavaScript on every scroll event** for every elem
 npm install rune-scroller
 ```
 
+### SvelteKit Setup
+
+**1.** Install the package:
+
+```bash
+npm install rune-scroller
+```
+
+**2.** Use in any `.svelte` component:
+
+```svelte
+<script>
+	import rs from 'rune-scroller';
+</script>
+
+<div use:rs={{ animation: 'fade-up' }}>
+	Animates on scroll
+</div>
+```
+
+That's it. CSS is auto-imported. No layout changes needed — use it wherever you want.
+
+### AOS Drop-in Setup
+
+**1.** Install:
+
+```bash
+npm install rune-scroller
+```
+
+**2.** Initialize in your app entry point:
+
+```js
+// src/app.html (SvelteKit) or main.js (Vite) or index.js
+import AOS from "rune-scroller/aos";
+AOS.init();
+```
+
+**3.** Add `data-aos` attributes to your HTML:
+
+```html
+<div data-aos="fade-up" data-aos-duration="800">Animated</div>
+```
+
+### Replacing AOS
+
+```bash
+npm uninstall aos
+npm install rune-scroller
+```
+
+Then change your import:
+
+```diff
+- import AOS from 'aos';
+- import 'aos/dist/aos.css';
++ import AOS from 'rune-scroller/aos';
+```
+
+Everything else stays the same. Same `data-aos` attributes, same `init()` options.
+
 ---
 
 ## 🚀 Quick Start
@@ -273,15 +334,6 @@ import type { AnimationType, RuneScrollerOptions } from "rune-scroller";
 <div data-aos="fade-up">Animates on scroll</div>
 <div data-aos="zoom-in" data-aos-delay="300">Delayed zoom</div>
 ```
-
----
-
-## 🔄 Migration from AOS
-
-1. `npm uninstall aos && npm install rune-scroller`
-2. Change `import AOS from 'aos'` → `import AOS from 'rune-scroller/aos'`
-3. Change `import 'aos/dist/aos.css'` → `import 'rune-scroller/animations.css'` (or remove if using auto-import)
-4. Everything else stays the same
 
 ---
 
