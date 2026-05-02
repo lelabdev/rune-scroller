@@ -13,6 +13,7 @@ import './animations.css';
 import { runeScroller } from './runeScroller.js';
 export default runeScroller;
 export { runeScroller };
+export { runeScroller as rs };
 
 // Composables
 export { useIntersection, useIntersectionOnce } from './useIntersection.svelte.js';
