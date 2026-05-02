@@ -69,14 +69,15 @@ describe('runeScroller Action', () => {
 	});
 
 	describe('Wrapping & Structure', () => {
-		it('wraps element in a container', () => {
-			const originalParent = element.parentElement;
+		it('makes element position:relative and appends sentinel as child', () => {
 			action = runeScroller(element, { animation: 'fade-in' });
 
-			const wrapper = element.parentElement;
-			expect(wrapper).toBeDefined();
-			expect(wrapper).not.toBe(originalParent);
-			expect(wrapper.style.position).toBe('relative');
+			// Element should be position:relative (was static)
+			expect(element.style.position).toBe('relative');
+			// Sentinel should be a child of the element
+			const sentinel = element.querySelector('[data-sentinel-id]');
+			expect(sentinel).toBeDefined();
+			expect(sentinel.style.position).toBe('absolute');
 		});
 
 		it('keeps element in document after wrapping', () => {
@@ -247,29 +248,31 @@ describe('runeScroller Action', () => {
 			expect(() => action.destroy()).not.toThrow();
 		});
 
-		it('unwraps element on destroy', () => {
-			const originalParent = element.parentElement;
+		it('restores element position on destroy', () => {
+			// Create element with no explicit position (static by default)
+			const staticEl = document.createElement('div');
+			staticEl.style.cssText = 'width:100px;height:100px;';
+			document.body.appendChild(staticEl);
 
-			action = runeScroller(element, { animation: 'fade-in' });
-			const wrapper = element.parentElement;
+			const action2 = runeScroller(staticEl, { animation: 'fade-in' });
+			expect(staticEl.style.position).toBe('relative');
 
-			expect(wrapper).not.toBe(originalParent);
+			action2.destroy();
 
-			action.destroy();
-
-			// Element should be restored to original parent
-			expect(element.parentElement).toBe(originalParent);
+			// Position should be restored to original empty string
+			expect(staticEl.style.position).toBe('');
+			staticEl.remove();
 		});
 
-		it('removes wrapper from document', () => {
+		it('removes sentinel from element on destroy', () => {
 			action = runeScroller(element, { animation: 'fade-in' });
-			const wrapper = element.parentElement;
-
-			expect(document.contains(wrapper)).toBe(true);
+			const sentinel = element.querySelector('[data-sentinel-id]');
+			expect(sentinel).toBeDefined();
 
 			action.destroy();
 
-			expect(wrapper.parentElement).toBeNull();
+			// Sentinel should be removed from the element
+			expect(element.querySelector('[data-sentinel-id]')).toBeNull();
 		});
 
 		it('can be destroyed multiple times safely', () => {
