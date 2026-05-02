@@ -372,4 +372,136 @@ describe('runeScroller Action', () => {
 			}).not.toThrow();
 		});
 	});
+
+	describe('Position Preservation', () => {
+		it('preserves pre-existing position:absolute on element', () => {
+			const el = document.createElement('div');
+			el.style.position = 'absolute';
+			el.style.width = '100px';
+			el.style.height = '100px';
+			Object.defineProperty(el, 'offsetHeight', { configurable: true, value: 100 });
+			document.body.appendChild(el);
+
+			action = runeScroller(el, { animation: 'fade-in' });
+			expect(el.style.position).toBe('absolute');
+		});
+
+		it('preserves pre-existing position:fixed on element', () => {
+			const el = document.createElement('div');
+			el.style.position = 'fixed';
+			el.style.width = '100px';
+			el.style.height = '100px';
+			Object.defineProperty(el, 'offsetHeight', { configurable: true, value: 100 });
+			document.body.appendChild(el);
+
+			action = runeScroller(el, { animation: 'fade-in' });
+			expect(el.style.position).toBe('fixed');
+		});
+	});
+
+	describe('Debug Mode Warnings', () => {
+		it('warns in console when element has overflow:hidden and debug mode is on', () => {
+			element.style.overflow = 'hidden';
+
+			const warnings = [];
+			const originalWarn = console.warn;
+			console.warn = (...args) => warnings.push(args.join(' '));
+
+			try {
+				action = runeScroller(element, { animation: 'fade-in', debug: true });
+				expect(warnings.some(w => w.includes('overflow'))).toBe(true);
+			} finally {
+				console.warn = originalWarn;
+			}
+		});
+	});
+
+	describe('Update Method - Additional', () => {
+		it('updates data-animation attribute when animation changes', () => {
+			action = runeScroller(element, { animation: 'fade-in' });
+			expect(element.getAttribute('data-animation')).toBe('fade-in');
+
+			action.update({ animation: 'zoom-in' });
+			expect(element.getAttribute('data-animation')).toBe('zoom-in');
+		});
+
+		it('recreates sentinel when offset changes via update', () => {
+			action = runeScroller(element, { animation: 'fade-in', offset: 0 });
+			const sentinelId = element.getAttribute('data-sentinel-id');
+
+			action.update({ offset: 100 });
+
+			// Sentinel should still exist in wrapper with same ID
+			const wrapper = element.parentElement;
+			const sentinel = wrapper.querySelector(`[data-sentinel-id="${sentinelId}"]`);
+			expect(sentinel).not.toBeNull();
+		});
+	});
+
+	describe('onVisible Callback', () => {
+		it('fires onVisible callback when element becomes visible', () => {
+			let observerCallback = null;
+			const OriginalIO = global.IntersectionObserver;
+
+			global.IntersectionObserver = class {
+				constructor(cb) { observerCallback = cb; }
+				observe() {}
+				disconnect() {}
+			};
+
+			let calledWith = null;
+			const onVisible = (el) => { calledWith = el; };
+
+			action = runeScroller(element, { animation: 'fade-in', onVisible });
+
+			// Simulate intersection
+			observerCallback([{ isIntersecting: true }]);
+
+			expect(calledWith).toBe(element);
+
+			global.IntersectionObserver = OriginalIO;
+		});
+	});
+
+	describe('Orphan Element', () => {
+		it('does not crash with element not in DOM', () => {
+			const orphan = document.createElement('div');
+			orphan.style.width = '100px';
+			orphan.style.height = '100px';
+			Object.defineProperty(orphan, 'offsetHeight', { configurable: true, value: 100 });
+
+			expect(() => {
+				const act = runeScroller(orphan, { animation: 'fade-in' });
+				act.destroy();
+			}).not.toThrow();
+		});
+	});
+
+	describe('Multiple runeScroller on Same Element', () => {
+		it('last call sentinel wins', () => {
+			action = runeScroller(element, { animation: 'fade-in' });
+			const id1 = element.getAttribute('data-sentinel-id');
+
+			const act2 = runeScroller(element, { animation: 'zoom-in' });
+			const id2 = element.getAttribute('data-sentinel-id');
+
+			expect(id2).toBeDefined();
+			expect(id2).not.toBe(id1);
+
+			// The element's immediate parent (wrapper2) should contain the second sentinel
+			const wrapper = element.parentElement;
+			const sentinel = wrapper.querySelector(`[data-sentinel-id="${id2}"]`);
+			expect(sentinel).not.toBeNull();
+
+			// Cleanup: destroy second action manually, first cleaned by afterEach
+			act2.destroy();
+		});
+	});
+
+	describe('Duration Edge Cases', () => {
+		it('sets --duration CSS variable to 0ms when duration is 0', () => {
+			action = runeScroller(element, { animation: 'fade-in', duration: 0 });
+			expect(element.style.getPropertyValue('--duration')).toBe('0ms');
+		});
+	});
 });

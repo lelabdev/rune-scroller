@@ -42,6 +42,13 @@ export function runeScroller(element, options) {
 		setupAnimationElement(element, animation);
 	}
 
+	// Warn about overflow:hidden in debug mode
+	if (options?.debug && element.style.overflow === 'hidden') {
+		console.warn(
+			'[rune-scroller] Element has overflow:hidden — the sentinel indicator may be clipped in debug mode.'
+		);
+	}
+
 	// Set CSS variables for duration
 	if (options?.duration !== undefined) {
 		setCSSVariables(element, options.duration);
