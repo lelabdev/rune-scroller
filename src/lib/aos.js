@@ -122,6 +122,9 @@ function applyToElement(el) {
 		repeat: !once || mirror
 	});
 
+	// Set delay CSS variable AFTER runeScroller (which sets --delay: 0ms)
+	el.style.setProperty('--delay', `${delay}ms`);
+
 	activeActions.push(action);
 }
 
@@ -256,5 +259,5 @@ function disable() {
 }
 
 // Public API — compatible with AOS
-export default { init, refresh, refreshHard };
-export { init, refresh, refreshHard };
+export default { init, refresh, refreshHard, disable };
+export { init, refresh, refreshHard, disable };
