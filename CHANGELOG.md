@@ -5,6 +5,36 @@ All notable changes to Rune Scroller will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026-05-02
+
+### Added
+
+- **AOS compatibility layer** — Drop-in replacement for AOS via `import AOS from 'rune-scroller/aos'`
+  - Same `data-aos` attributes: `data-aos`, `data-aos-duration`, `data-aos-delay`, `data-aos-easing`, `data-aos-offset`, `data-aos-once`, `data-aos-mirror`
+  - `init()`, `refresh()`, `refreshHard()` API
+  - MutationObserver for dynamic content
+- **30 animations** (up from 14)
+  - New fade: `fade`, `fade-up`, `fade-down`, `fade-left`, `fade-right`, `fade-up-right`, `fade-up-left`, `fade-down-right`, `fade-down-left`
+  - New zoom: `zoom-in-down`, `zoom-out`, `zoom-out-up`, `zoom-out-down`, `zoom-out-left`, `zoom-out-right`
+  - New slide: `slide-up`, `slide-down`, `slide-left`, `slide-right`
+  - New flip: `flip-left`, `flip-right`, `flip-up`, `flip-down`
+  - Legacy aliases preserved: `fade-in` → `fade`, `fade-in-up` → `fade-up`, etc.
+- **CSS custom properties**: `--rs-distance` (animation distance), `--easing` (timing function)
+- **No wrapper div** — Sentinel is now a child of the animated element, preserving flex/grid layouts
+- **`rs` shorthand** — `import rs from 'rune-scroller'` + `use:rs`
+
+### Changed
+
+- Removed `process.env.NODE_ENV` — was crashing in browser contexts without bundler
+- Sentinel appended as child of element instead of wrapping in `<div>`
+- Animation distance changed from 300px to 100px (configurable via `--rs-distance`)
+- Default duration changed from 2500ms to 400ms
+
+### Removed
+
+- **Breaking**: Wrapper `<div>` no longer injected around animated elements
+- **Breaking**: Animation names `fade-in-*` are now `fade-*` (legacy aliases still work)
+
 ## [2.2.0] - 2026-01-13
 
 ### Added

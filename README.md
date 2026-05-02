@@ -4,7 +4,7 @@
 	<img src="./logo.png" alt="Rune Scroller Logo" width="200" />
 </div>
 
-**Lightweight scroll animations for Svelte 5** — Built with Svelte 5 Runes and IntersectionObserver API.
+**Lightweight scroll animations for Svelte 5** — Built with IntersectionObserver API. Drop-in AOS replacement.
 
 > 🚀 **Open Source** by [ludoloops](https://github.com/ludoloops) at [LeLab.dev](https://lelab.dev)
 > 📜 Licensed under **MIT**
@@ -22,13 +22,13 @@
 
 ## ✨ Features
 
-- **5.7KB gzipped** (JS+CSS) - Minimal overhead
-- **Zero dependencies** - Pure Svelte 5 + IntersectionObserver
-- **14 animations** - Fade, Zoom, Flip, Slide, Bounce
-- **TypeScript support** - Full type definitions
-- **SSR-ready** - SvelteKit compatible
-- **GPU-accelerated** - Pure CSS transforms
-- **Accessible** - Respects `prefers-reduced-motion`
+- **Zero dependencies** — Pure JS + IntersectionObserver
+- **30 animations** — Fade, Zoom, Flip, Slide, Bounce
+- **AOS compatible** — Drop-in replacement, same `data-aos` attributes
+- **TypeScript support** — Full type definitions
+- **SSR-ready** — SvelteKit compatible
+- **GPU-accelerated** — CSS transforms via `translate3d`
+- **Accessible** — Respects `prefers-reduced-motion`
 
 ---
 
@@ -42,100 +42,128 @@ npm install rune-scroller
 
 ## 🚀 Quick Start
 
+### Svelte Action (recommended)
+
 ```svelte
 <script>
-	import runeScroller from 'rune-scroller';
+	import rs from 'rune-scroller';
 </script>
 
-<!-- Simple animation -->
-<div use:runeScroller={{ animation: 'fade-in' }}>
+<!-- Simple -->
+<div use:rs={{ animation: 'fade-up' }}>
 	<h2>Animated Heading</h2>
 </div>
 
-<!-- With custom duration -->
-<div use:runeScroller={{ animation: 'fade-in-up', duration: 1500 }}>
-	<div class="card">Smooth fade and slide</div>
+<!-- With options -->
+<div use:rs={{ animation: 'fade-up', duration: 800, delay: 200 }}>
+	<div class="card">Delayed fade</div>
 </div>
 
 <!-- Repeat on every scroll -->
-<div use:runeScroller={{ animation: 'bounce-in', repeat: true }}>
+<div use:rs={{ animation: 'bounce-in', repeat: true }}>
 	<button>Bounces on every scroll</button>
 </div>
 ```
+
+### AOS Drop-in (framework agnostic)
+
+```js
+import AOS from 'rune-scroller/aos';
+AOS.init();
+```
+
+```html
+<div data-aos="fade-up" data-aos-duration="800">Animated</div>
+<div data-aos="zoom-in" data-aos-delay="200">Delayed zoom</div>
+```
+
+Replaces `import AOS from 'aos'` — same API, same attributes. Works with any framework.
 
 ---
 
 ## 🎨 Available Animations
 
-### Fade (5)
+### Fade (10)
 
-- `fade-in` - Simple opacity fade
-- `fade-in-up` - Fade + move up 300px
-- `fade-in-down` - Fade + move down 300px
-- `fade-in-left` - Fade + move from right 300px
-- `fade-in-right` - Fade + move from left 300px
+- `fade` — Simple opacity fade
+- `fade-up` / `fade-down` / `fade-left` / `fade-right` — Fade + translate
+- `fade-up-right` / `fade-up-left` / `fade-down-right` / `fade-down-left` — Diagonal fades
 
-### Zoom (5)
+### Zoom (10)
 
-- `zoom-in` - Scale from 0.3 to 1
-- `zoom-out` - Scale from 2 to 1
-- `zoom-in-up` - Zoom (0.5→1) + move up 300px
-- `zoom-in-left` - Zoom (0.5→1) + move from right 300px
-- `zoom-in-right` - Zoom (0.5→1) + move from left 300px
+- `zoom-in` / `zoom-out` — Scale in/out
+- `zoom-in-up` / `zoom-in-down` / `zoom-in-left` / `zoom-in-right` — Zoom + translate
+- `zoom-out-up` / `zoom-out-down` / `zoom-out-left` / `zoom-out-right` — Zoom out + translate
 
-### Others (4)
+### Slide (4)
 
-- `flip` - 3D flip on Y-axis
-- `flip-x` - 3D flip on X-axis
-- `slide-rotate` - Slide + rotate 10°
-- `bounce-in` - Bouncy entrance (spring effect)
+- `slide-up` / `slide-down` / `slide-left` / `slide-right` — Slide from off-screen
+
+### Flip (4)
+
+- `flip-left` / `flip-right` — 3D flip on Y-axis
+- `flip-up` / `flip-down` — 3D flip on X-axis
+
+### Special (2)
+
+- `slide-rotate` — Slide + rotate
+- `bounce-in` — Bouncy spring entrance
+
+### Customizable distance
+
+All animations use the `--rs-distance` CSS variable (default: `100px`):
+
+```svelte
+<div use:rs={{ animation: 'fade-up' }} style="--rs-distance: 200px">
+	Farther slide
+</div>
+```
 
 ---
 
 ## ⚙️ Options
 
+### Svelte Action
+
 ```typescript
 interface RuneScrollerOptions {
-  animation?: AnimationType // Animation name (default: 'fade-in')
-  duration?: number // Duration in ms (default: 800)
-  repeat?: boolean // Repeat on scroll (default: false)
-  debug?: boolean // Show sentinel as visible line (default: false)
-  offset?: number // Sentinel offset in px (default: 0, negative = earlier)
-  onVisible?: (element: HTMLElement) => void // Callback when visible
-  sentinelColor?: string // Debug sentinel color (e.g. '#ff6b6b')
-  sentinelId?: string // Custom sentinel ID
+  animation?: AnimationType  // Animation name (default: 'fade-up')
+  duration?: number          // Duration in ms (default: 400)
+  delay?: number             // Delay in ms (default: 0)
+  easing?: string            // CSS timing function (default: 'ease')
+  repeat?: boolean           // Repeat on scroll (default: false)
+  debug?: boolean            // Show sentinel as visible line (default: false)
+  offset?: number            // Sentinel offset in px (default: 0, negative = earlier)
+  onVisible?: (element: HTMLElement) => void  // Callback when visible
+  sentinelColor?: string     // Debug sentinel color (e.g. '#ff6b6b')
+  sentinelId?: string        // Custom sentinel ID
 }
 ```
 
-### Examples
+### AOS Mode (data attributes)
 
-```svelte
-<!-- Basic -->
-<div use:runeScroller={{ animation: 'zoom-in' }}>Content</div>
+| Attribute | Example | Description |
+|-----------|---------|-------------|
+| `data-aos` | `"fade-up"` | Animation name |
+| `data-aos-duration` | `"800"` | Duration in ms |
+| `data-aos-delay` | `"200"` | Delay in ms |
+| `data-aos-easing` | `"ease-in-out"` | CSS timing function |
+| `data-aos-offset` | `"120"` | Trigger offset in px |
+| `data-aos-once` | `"true"` | Animate only once |
+| `data-aos-mirror` | `"true"` | Animate on scroll away too |
 
-<!-- Custom duration -->
-<div use:runeScroller={{ animation: 'fade-in-up', duration: 1000 }}>Fast</div>
+### AOS init options
 
-<!-- Repeat mode -->
-<div use:runeScroller={{ animation: 'bounce-in', repeat: true }}>Repeats</div>
-
-<!-- Debug mode -->
-<div use:runeScroller={{ animation: 'fade-in', debug: true }}>Debug</div>
-
-<!-- Trigger earlier with negative offset -->
-<div use:runeScroller={{ animation: 'fade-in-up', offset: -200 }}>
-	Triggers 200px before element bottom
-</div>
-
-<!-- onVisible callback for analytics -->
-<div use:runeScroller={{
-	animation: 'fade-in-up',
-	onVisible: (el) => {
-		window.gtag?.('event', 'section_viewed', { id: el.id });
-	}
-}}>
-	Tracked section
-</div>
+```js
+AOS.init({
+  offset: 120,
+  duration: 400,
+  delay: 0,
+  easing: 'ease',
+  once: false,
+  mirror: false,
+  startEvent: 'DOMContentLoaded'
+});
 ```
 
 ---
@@ -144,67 +172,50 @@ interface RuneScrollerOptions {
 
 **Sentinel-based triggering:**
 
-1. Invisible 1px sentinel created below your element
-2. When sentinel enters viewport, animation triggers
-3. Uses native IntersectionObserver for performance
-4. Pure CSS animations (GPU-accelerated)
-5. ResizeObserver auto-repositions sentinel
+1. Invisible 1px sentinel appended as child of the animated element
+2. When sentinel enters viewport, animation triggers via IntersectionObserver
+3. Pure CSS transitions (GPU-accelerated via `translate3d`)
+4. ResizeObserver auto-repositions sentinel
 
-**Why sentinels?**
-
-- Accurate timing across all screen sizes
-- No complex offset calculations
-- Works with animated elements (transforms don't affect observer)
+**No wrapper divs** — the element itself becomes the positioning context. Your flex/grid layouts stay intact.
 
 ---
 
 ## 🌐 SSR Compatibility
 
-Works seamlessly with SvelteKit:
-
-```svelte
-<!-- src/routes/+layout.svelte -->
-<script>
-	import runeScroller from 'rune-scroller';
-	let { children } = $props();
-</script>
-
-{@render children()}
-```
+Works seamlessly with SvelteKit. Import in any `.svelte` file — SSR guard included.
 
 ---
 
 ## ♿ Accessibility
 
-Respects `prefers-reduced-motion`:
-
-```css
-@media (prefers-reduced-motion: reduce) {
-  .scroll-animate {
-    animation: none !important;
-    opacity: 1 !important;
-    transform: none !important;
-  }
-}
-```
+Respects `prefers-reduced-motion` — animations are disabled automatically.
 
 ---
 
 ## 📚 API Reference
 
 ```typescript
-// Default export
-import runeScroller from "rune-scroller"
+// Svelte action (default)
+import rs from 'rune-scroller'
 
 // Named exports
 import {
-  useIntersection, // Composable
-  useIntersectionOnce, // Composable
+  runeScroller,      // Same as default
+  useIntersection,   // Composable
+  useIntersectionOnce, // Composable (once)
   calculateRootMargin, // Utility
-} from "rune-scroller"
+  ANIMATION_TYPES,   // Array of all animation names
+} from 'rune-scroller'
+
+// AOS compatibility
+import AOS from 'rune-scroller/aos'
+AOS.init()
+AOS.refresh()
+AOS.refreshHard()
 
 // Types
-import type { AnimationType, RuneScrollerOptions } from "rune-scroller"
+import type { AnimationType, RuneScrollerOptions } from 'rune-scroller'
 ```
 
 ---
@@ -215,16 +226,12 @@ import type { AnimationType, RuneScrollerOptions } from "rune-scroller"
 
 ```svelte
 <script>
-	import runeScroller from 'rune-scroller';
+	import rs from 'rune-scroller';
 	const items = ['Item 1', 'Item 2', 'Item 3'];
 </script>
 
 {#each items as item, i}
-	<div use:runeScroller={{
-		animation: 'fade-in-up',
-		duration: 800,
-		style: `--delay: ${i * 100}ms`
-	}}>
+	<div use:rs={{ animation: 'fade-up', duration: 800, delay: i * 100 }}>
 		{item}
 	</div>
 {/each}
@@ -233,10 +240,31 @@ import type { AnimationType, RuneScrollerOptions } from "rune-scroller"
 ### Hero Section
 
 ```svelte
-<h1 use:runeScroller={{ animation: 'fade-in-down', duration: 1000 }}>Welcome</h1>
-<p use:runeScroller={{ animation: 'fade-in-up', duration: 1200 }}>Subtitle</p>
-<button use:runeScroller={{ animation: 'zoom-in', duration: 800 }}>Get Started</button>
+<h1 use:rs={{ animation: 'fade-down', duration: 1000 }}>Welcome</h1>
+<p use:rs={{ animation: 'fade-up', duration: 1200 }}>Subtitle</p>
+<button use:rs={{ animation: 'zoom-in', duration: 800 }}>Get Started</button>
 ```
+
+### AOS Drop-in
+
+```html
+<script type="module">
+  import AOS from 'rune-scroller/aos';
+  AOS.init({ duration: 800, once: true });
+</script>
+
+<div data-aos="fade-up">Animates on scroll</div>
+<div data-aos="zoom-in" data-aos-delay="300">Delayed zoom</div>
+```
+
+---
+
+## 🔄 Migration from AOS
+
+1. `npm uninstall aos && npm install rune-scroller`
+2. Change `import AOS from 'aos'` → `import AOS from 'rune-scroller/aos'`
+3. Change `import 'aos/dist/aos.css'` → `import 'rune-scroller/animations.css'` (or remove if using auto-import)
+4. Everything else stays the same
 
 ---
 
@@ -244,7 +272,7 @@ import type { AnimationType, RuneScrollerOptions } from "rune-scroller"
 
 - **npm**: [rune-scroller](https://www.npmjs.com/package/rune-scroller)
 - **GitHub**: [lelabdev/rune-scroller](https://github.com/lelabdev/rune-scroller)
-- **Changelog**: [CHANGELOG.md](https://github.com/lelabdev/rune-scroller/blob/main/lib/CHANGELOG.md)
+- **Changelog**: [CHANGELOG.md](./CHANGELOG.md)
 
 ---
 

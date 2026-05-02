@@ -1,7 +1,7 @@
 {
   "name": "rune-scroller",
-  "version": "2.2.2",
-  "description": "Lightweight, high-performance scroll animations for Svelte 5. 14KB gzipped, zero dependencies.",
+  "version": "3.0.0",
+  "description": "Lightweight scroll animations for Svelte 5. Drop-in AOS replacement. 30 animations, zero dependencies.",
   "type": "module",
   "sideEffects": false,
   "license": "MIT",
