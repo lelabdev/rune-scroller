@@ -14,49 +14,51 @@
  * @returns {HTMLElement}
  */
 export function createTestElement(options = {}) {
-	const {
-		width = '100px',
-		height = '100px',
-		id = null,
-		className = '',
-		document: doc = typeof document !== 'undefined' ? document : global.document
-	} = options;
+  const {
+    width = "100px",
+    height = "100px",
+    id = null,
+    className = "",
+    document: doc = typeof document !== "undefined"
+      ? document
+      : global.document,
+  } = options;
 
-	const element = doc.createElement('div');
-	element.style.cssText = `
+  const element = doc.createElement("div");
+  element.style.cssText = `
 		width: ${width};
 		height: ${height};
 		background: #ccc;
 		position: relative;
 	`;
 
-	if (id) element.id = id;
-	if (className) element.className = className;
+  if (id) element.id = id;
+  if (className) element.className = className;
 
-	element.textContent = `Test ${id || 'Element'}`;
+  element.textContent = `Test ${id || "Element"}`;
 
-	// Mock getBoundingClientRect
-	if (!element.getBoundingClientRect) {
-		element.getBoundingClientRect = () => ({
-			width: parseInt(width),
-			height: parseInt(height),
-			top: 0,
-			left: 0,
-			bottom: parseInt(height),
-			right: parseInt(width),
-			x: 0,
-			y: 0,
-			toJSON: () => ({})
-		});
-	}
+  // Mock getBoundingClientRect
+  if (!element.getBoundingClientRect) {
+    element.getBoundingClientRect = () => ({
+      width: parseInt(width),
+      height: parseInt(height),
+      top: 0,
+      left: 0,
+      bottom: parseInt(height),
+      right: parseInt(width),
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    });
+  }
 
-	// Mock offsetHeight
-	Object.defineProperty(element, 'offsetHeight', {
-		configurable: true,
-		value: parseInt(height)
-	});
+  // Mock offsetHeight
+  Object.defineProperty(element, "offsetHeight", {
+    configurable: true,
+    value: parseInt(height),
+  });
 
-	return element;
+  return element;
 }
 
 /**
@@ -66,16 +68,16 @@ export function createTestElement(options = {}) {
  * @returns {HTMLElement[]}
  */
 export function createTestElements(count, options = {}) {
-	const elements = [];
-	for (let i = 0; i < count; i++) {
-		elements.push(
-			createTestElement({
-				...options,
-				id: options.id ? `${options.id}-${i}` : `element-${i}`
-			})
-		);
-	}
-	return elements;
+  const elements = [];
+  for (let i = 0; i < count; i++) {
+    elements.push(
+      createTestElement({
+        ...options,
+        id: options.id ? `${options.id}-${i}` : `element-${i}`,
+      }),
+    );
+  }
+  return elements;
 }
 
 /**
@@ -84,21 +86,21 @@ export function createTestElements(count, options = {}) {
  * @returns {HTMLElement|null}
  */
 export function getSentinel(element) {
-	const wrapper = element.parentElement;
-	if (!wrapper) return null;
+  const wrapper = element.parentElement;
+  if (!wrapper) return null;
 
-	// Sentinel is typically the last child or has data-sentinel-id attribute
-	const sentinel = wrapper.querySelector('[data-sentinel-id]');
-	if (sentinel) return sentinel;
+  // Sentinel is typically the last child or has data-sentinel-id attribute
+  const sentinel = wrapper.querySelector("[data-sentinel-id]");
+  if (sentinel) return sentinel;
 
-	// Fallback: find child that is not the element
-	for (let i = 0; i < wrapper.children.length; i++) {
-		if (wrapper.children[i] !== element) {
-			return wrapper.children[i];
-		}
-	}
+  // Fallback: find child that is not the element
+  for (let i = 0; i < wrapper.children.length; i++) {
+    if (wrapper.children[i] !== element) {
+      return wrapper.children[i];
+    }
+  }
 
-	return null;
+  return null;
 }
 
 /**
@@ -107,10 +109,10 @@ export function getSentinel(element) {
  * @returns {boolean}
  */
 export function hasAnimation(element) {
-	return (
-		element.classList.contains('scroll-animate') &&
-		element.hasAttribute('data-animation')
-	);
+  return (
+    element.classList.contains("scroll-animate") &&
+    element.hasAttribute("data-animation")
+  );
 }
 
 /**
@@ -119,7 +121,7 @@ export function hasAnimation(element) {
  * @returns {boolean}
  */
 export function isAnimating(element) {
-	return element.classList.contains('is-visible');
+  return element.classList.contains("is-visible");
 }
 
 /**
@@ -128,7 +130,7 @@ export function isAnimating(element) {
  * @returns {string|null}
  */
 export function getAnimationType(element) {
-	return element.getAttribute('data-animation');
+  return element.getAttribute("data-animation");
 }
 
 /**
@@ -138,8 +140,10 @@ export function getAnimationType(element) {
  * @returns {string|null}
  */
 export function getCSSVariable(element, variableName) {
-	const name = variableName.startsWith('--') ? variableName : `--${variableName}`;
-	return element.style.getPropertyValue(name);
+  const name = variableName.startsWith("--")
+    ? variableName
+    : `--${variableName}`;
+  return element.style.getPropertyValue(name);
 }
 
 /**
@@ -148,39 +152,39 @@ export function getCSSVariable(element, variableName) {
  * @returns {Object}
  */
 export function createMockResizeObserver(callback) {
-	const observedElements = new Set();
+  const observedElements = new Set();
 
-	return {
-		observe(element) {
-			observedElements.add(element);
-		},
+  return {
+    observe(element) {
+      observedElements.add(element);
+    },
 
-		unobserve(element) {
-			observedElements.delete(element);
-		},
+    unobserve(element) {
+      observedElements.delete(element);
+    },
 
-		disconnect() {
-			observedElements.clear();
-		},
+    disconnect() {
+      observedElements.clear();
+    },
 
-		// Testing API: trigger resize
-		trigger(element) {
-			if (observedElements.has(element)) {
-				callback([
-					{
-						target: element,
-						contentRect: element.getBoundingClientRect()
-					}
-				]);
-			}
-		},
+    // Testing API: trigger resize
+    trigger(element) {
+      if (observedElements.has(element)) {
+        callback([
+          {
+            target: element,
+            contentRect: element.getBoundingClientRect(),
+          },
+        ]);
+      }
+    },
 
-		triggerAll() {
-			observedElements.forEach((element) => {
-				this.trigger(element);
-			});
-		}
-	};
+    triggerAll() {
+      observedElements.forEach((element) => {
+        this.trigger(element);
+      });
+    },
+  };
 }
 
 /**
@@ -189,27 +193,27 @@ export function createMockResizeObserver(callback) {
  * @returns {Object} - Setup context with window, document, cleanup
  */
 export function setupTestDOM(options = {}) {
-	const { width = 1024, height = 768 } = options;
+  const { width = 1024, height = 768 } = options;
 
-	// Already have a global document in test environment (happy-dom)
-	const doc = typeof document !== 'undefined' ? document : global.document;
-	const win = typeof window !== 'undefined' ? window : global.window;
+  // Already have a global document in test environment (happy-dom)
+  const doc = typeof document !== "undefined" ? document : global.document;
+  const win = typeof window !== "undefined" ? window : global.window;
 
-	if (doc && doc.body) {
-		doc.body.style.cssText = `width: ${width}px; height: ${height}px; margin: 0; padding: 0;`;
-	}
+  if (doc && doc.body) {
+    doc.body.style.cssText = `width: ${width}px; height: ${height}px; margin: 0; padding: 0;`;
+  }
 
-	return {
-		window: win,
-		document: doc,
-		body: doc?.body,
-		cleanup() {
-			// Clean up any test elements
-			if (doc && doc.body) {
-				doc.body.innerHTML = '';
-			}
-		}
-	};
+  return {
+    window: win,
+    document: doc,
+    body: doc?.body,
+    cleanup() {
+      // Clean up any test elements
+      if (doc && doc.body) {
+        doc.body.innerHTML = "";
+      }
+    },
+  };
 }
 
 /**
@@ -218,19 +222,19 @@ export function setupTestDOM(options = {}) {
  * @returns {Object} - Performance metrics
  */
 export function measurePerformance(fn) {
-	const start = Date.now();
-	const startMemory = process.memoryUsage().heapUsed;
+  const start = Date.now();
+  const startMemory = process.memoryUsage().heapUsed;
 
-	const result = fn();
+  const result = fn();
 
-	const end = Date.now();
-	const endMemory = process.memoryUsage().heapUsed;
+  const end = Date.now();
+  const endMemory = process.memoryUsage().heapUsed;
 
-	return {
-		duration: end - start,
-		memory: endMemory - startMemory,
-		result
-	};
+  return {
+    duration: end - start,
+    memory: endMemory - startMemory,
+    result,
+  };
 }
 
 /**
@@ -240,10 +244,10 @@ export function measurePerformance(fn) {
  * @returns {HTMLElement}
  */
 export function createSpacer(height = 500, doc = global.document) {
-	const spacer = doc.createElement('div');
-	spacer.style.cssText = `height: ${height}px; background: #f0f0f0;`;
-	spacer.textContent = `Spacer (${height}px)`;
-	return spacer;
+  const spacer = doc.createElement("div");
+  spacer.style.cssText = `height: ${height}px; background: #f0f0f0;`;
+  spacer.textContent = `Spacer (${height}px)`;
+  return spacer;
 }
 
 /**
@@ -252,9 +256,9 @@ export function createSpacer(height = 500, doc = global.document) {
  * @param {HTMLElement} parent - Parent element (default: body)
  */
 export function appendElement(element, parent = global.document?.body) {
-	if (parent) {
-		parent.appendChild(element);
-	}
+  if (parent) {
+    parent.appendChild(element);
+  }
 }
 
 /**
@@ -262,9 +266,9 @@ export function appendElement(element, parent = global.document?.body) {
  * @param {HTMLElement} element - Element to remove
  */
 export function removeElement(element) {
-	if (element?.parentElement) {
-		element.remove();
-	}
+  if (element?.parentElement) {
+    element.remove();
+  }
 }
 
 /**
@@ -273,33 +277,33 @@ export function removeElement(element) {
  * @returns {Object} - Element state snapshot
  */
 export function snapshotElement(element) {
-	return {
-		classList: Array.from(element.classList),
-		attributes: {
-			'data-animation': element.getAttribute('data-animation'),
-			'data-sentinel-id': element.getAttribute('data-sentinel-id')
-		},
-		styles: {
-			'--duration': element.style.getPropertyValue('--duration'),
-			'--delay': element.style.getPropertyValue('--delay')
-		},
-		isVisible: element.classList.contains('is-visible')
-	};
+  return {
+    classList: Array.from(element.classList),
+    attributes: {
+      "data-animation": element.getAttribute("data-animation"),
+      "data-sentinel-id": element.getAttribute("data-sentinel-id"),
+    },
+    styles: {
+      "--duration": element.style.getPropertyValue("--duration"),
+      "--delay": element.style.getPropertyValue("--delay"),
+    },
+    isVisible: element.classList.contains("is-visible"),
+  };
 }
 
 export default {
-	createTestElement,
-	createTestElements,
-	getSentinel,
-	hasAnimation,
-	isAnimating,
-	getAnimationType,
-	getCSSVariable,
-	createMockResizeObserver,
-	setupTestDOM,
-	measurePerformance,
-	createSpacer,
-	appendElement,
-	removeElement,
-	snapshotElement
+  createTestElement,
+  createTestElements,
+  getSentinel,
+  hasAnimation,
+  isAnimating,
+  getAnimationType,
+  getCSSVariable,
+  createMockResizeObserver,
+  setupTestDOM,
+  measurePerformance,
+  createSpacer,
+  appendElement,
+  removeElement,
+  snapshotElement,
 };

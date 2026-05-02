@@ -9,48 +9,48 @@
  * @type {readonly string[]}
  */
 export const ANIMATION_TYPES = [
-	// Fade (10)
-	'fade',
-	'fade-up',
-	'fade-down',
-	'fade-left',
-	'fade-right',
-	'fade-up-right',
-	'fade-up-left',
-	'fade-down-right',
-	'fade-down-left',
-	// Zoom (10)
-	'zoom-in',
-	'zoom-in-up',
-	'zoom-in-down',
-	'zoom-in-left',
-	'zoom-in-right',
-	'zoom-out',
-	'zoom-out-up',
-	'zoom-out-down',
-	'zoom-out-left',
-	'zoom-out-right',
-	// Slide (4)
-	'slide-up',
-	'slide-down',
-	'slide-left',
-	'slide-right',
-	// Flip (4)
-	'flip-left',
-	'flip-right',
-	'flip-up',
-	'flip-down',
-	// Special (2)
-	'slide-rotate',
-	'bounce-in',
-	// Legacy aliases (v2.x backward compat)
-	'fade-in',
-	'fade-in-up',
-	'fade-in-down',
-	'fade-in-left',
-	'fade-in-right',
-	'flip',
-	'flip-x'
+  // Fade (10)
+  "fade",
+  "fade-up",
+  "fade-down",
+  "fade-left",
+  "fade-right",
+  "fade-up-right",
+  "fade-up-left",
+  "fade-down-right",
+  "fade-down-left",
+  // Zoom (10)
+  "zoom-in",
+  "zoom-in-up",
+  "zoom-in-down",
+  "zoom-in-left",
+  "zoom-in-right",
+  "zoom-out",
+  "zoom-out-up",
+  "zoom-out-down",
+  "zoom-out-left",
+  "zoom-out-right",
+  // Slide (4)
+  "slide-up",
+  "slide-down",
+  "slide-left",
+  "slide-right",
+  // Flip (4)
+  "flip-left",
+  "flip-right",
+  "flip-up",
+  "flip-down",
+  // Special (2)
+  "slide-rotate",
+  "bounce-in",
+  // Legacy aliases (v2.x backward compat)
+  "fade-in",
+  "fade-in-up",
+  "fade-in-down",
+  "fade-in-left",
+  "fade-in-right",
+  "flip",
+  "flip-x",
 ];
 
 /**
@@ -61,6 +61,10 @@ export const ANIMATION_TYPES = [
  * @returns {string} rootMargin string for IntersectionObserver
  */
 export function calculateRootMargin(offset, rootMargin) {
-	return rootMargin ??
-		(offset !== undefined ? `-${100 - offset}% 0px -${offset}% 0px` : '-10% 0px -10% 0px');
+  return (
+    rootMargin ??
+    (offset !== undefined
+      ? `-${100 - offset}% 0px -${offset}% 0px`
+      : "-10% 0px -10% 0px")
+  );
 }

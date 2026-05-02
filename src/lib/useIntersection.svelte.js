@@ -9,61 +9,69 @@
  * @param {boolean} [once=false]
  * @returns {import('./types.js').UseIntersectionReturn}
  */
-function createIntersectionObserver(options = {}, onIntersect = undefined, once = false) {
-	const { threshold = 0.5, rootMargin = '-10% 0px -10% 0px', root = null } = options;
+function createIntersectionObserver(
+  options = {},
+  onIntersect = undefined,
+  once = false,
+) {
+  const {
+    threshold = 0.5,
+    rootMargin = "-10% 0px -10% 0px",
+    root = null,
+  } = options;
 
-	let element = $state(null);
-	let isVisible = $state(false);
-	let hasTriggeredOnce = false;
-	/** @type {IntersectionObserver | null} */
-	let observer = null;
+  let element = $state(null);
+  let isVisible = $state(false);
+  let hasTriggeredOnce = false;
+  /** @type {IntersectionObserver | null} */
+  let observer = null;
 
-	$effect(() => {
-		if (!element) return;
+  $effect(() => {
+    if (!element) return;
 
-		observer = new IntersectionObserver(
-			(entries) => {
-				entries.forEach((entry) => {
-					// For once-only behavior, check if already triggered
-					if (once && hasTriggeredOnce) return;
+    observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          // For once-only behavior, check if already triggered
+          if (once && hasTriggeredOnce) return;
 
-					isVisible = entry.isIntersecting;
-					if (onIntersect) {
-						onIntersect(entry, entry.isIntersecting);
-					}
+          isVisible = entry.isIntersecting;
+          if (onIntersect) {
+            onIntersect(entry, entry.isIntersecting);
+          }
 
-					// Unobserve after first trigger if once=true
-					if (once && entry.isIntersecting) {
-						hasTriggeredOnce = true;
-						observer?.unobserve(entry.target);
-					}
-				});
-			},
-			{
-				threshold,
-				rootMargin,
-				root
-			}
-		);
+          // Unobserve after first trigger if once=true
+          if (once && entry.isIntersecting) {
+            hasTriggeredOnce = true;
+            observer?.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        threshold,
+        rootMargin,
+        root,
+      },
+    );
 
-		observer.observe(element);
+    observer.observe(element);
 
-		return () => {
-			observer?.disconnect();
-		};
-	});
+    return () => {
+      observer?.disconnect();
+    };
+  });
 
-	return {
-		get element() {
-			return element;
-		},
-		set element(value) {
-			element = value;
-		},
-		get isVisible() {
-			return isVisible;
-		}
-	};
+  return {
+    get element() {
+      return element;
+    },
+    set element(value) {
+      element = value;
+    },
+    get isVisible() {
+      return isVisible;
+    },
+  };
 }
 
 /**
@@ -72,13 +80,13 @@ function createIntersectionObserver(options = {}, onIntersect = undefined, once 
  * @returns {import('./types.js').UseIntersectionReturn}
  */
 export function useIntersection(options = {}, onVisible) {
-	return createIntersectionObserver(
-		options,
-		(_entry, isVisible) => {
-			onVisible?.(isVisible);
-		},
-		false
-	);
+  return createIntersectionObserver(
+    options,
+    (_entry, isVisible) => {
+      onVisible?.(isVisible);
+    },
+    false,
+  );
 }
 
 /**
@@ -86,5 +94,5 @@ export function useIntersection(options = {}, onVisible) {
  * @returns {import('./types.js').UseIntersectionReturn}
  */
 export function useIntersectionOnce(options = {}) {
-	return createIntersectionObserver(options, () => {}, true);
+  return createIntersectionObserver(options, () => {}, true);
 }

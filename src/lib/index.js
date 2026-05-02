@@ -7,16 +7,19 @@
  */
 
 // Import CSS animations automatically
-import './animations.css';
+import "./animations.css";
 
 // Main action (default export - recommended)
-import { runeScroller } from './runeScroller.js';
+import { runeScroller } from "./runeScroller.js";
 export default runeScroller;
 export { runeScroller };
 export { runeScroller as rs };
 
 // Composables
-export { useIntersection, useIntersectionOnce } from './useIntersection.svelte.js';
+export {
+  useIntersection,
+  useIntersectionOnce,
+} from "./useIntersection.svelte.js";
 
 // Utilities
-export { calculateRootMargin, ANIMATION_TYPES } from './animations.js';
+export { calculateRootMargin, ANIMATION_TYPES } from "./animations.js";

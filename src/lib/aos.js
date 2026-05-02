@@ -13,8 +13,8 @@
  *   AOS.init()
  */
 
-import { runeScroller } from './runeScroller.js';
-import { ANIMATION_TYPES } from './animations.js';
+import { runeScroller } from "./runeScroller.js";
+import { ANIMATION_TYPES } from "./animations.js";
 
 /** @typedef {{ offset?: number, delay?: number, duration?: number, easing?: string, once?: boolean, mirror?: boolean, anchorPlacement?: string, disable?: boolean | string, useClassNames?: boolean, startEvent?: string, animatedClassName?: string, initClassName?: string }} AOSOptions */
 
@@ -23,13 +23,13 @@ import { ANIMATION_TYPES } from './animations.js';
  * @type {Record<string, string>}
  */
 const LEGACY_MAP = {
-	'fade-in': 'fade',
-	'fade-in-up': 'fade-up',
-	'fade-in-down': 'fade-down',
-	'fade-in-left': 'fade-left',
-	'fade-in-right': 'fade-right',
-	'flip': 'flip-left',
-	'flip-x': 'flip-up'
+  "fade-in": "fade",
+  "fade-in-up": "fade-up",
+  "fade-in-down": "fade-down",
+  "fade-in-left": "fade-left",
+  "fade-in-right": "fade-right",
+  flip: "flip-left",
+  "flip-x": "flip-up",
 };
 
 /**
@@ -38,26 +38,26 @@ const LEGACY_MAP = {
  * @returns {string}
  */
 function resolveAnimation(name) {
-	if (LEGACY_MAP[name]) return LEGACY_MAP[name];
-	if (ANIMATION_TYPES.includes(name)) return name;
-	// Unknown animation — try as-is, CSS will silently ignore
-	return name;
+  if (LEGACY_MAP[name]) return LEGACY_MAP[name];
+  if (ANIMATION_TYPES.includes(name)) return name;
+  // Unknown animation — try as-is, CSS will silently ignore
+  return name;
 }
 
 /** @type {AOSOptions} */
 let options = {
-	offset: 120,
-	delay: 0,
-	duration: 400,
-	easing: 'ease',
-	once: false,
-	mirror: false,
-	anchorPlacement: 'top-bottom',
-	disable: false,
-	useClassNames: false,
-	startEvent: 'DOMContentLoaded',
-	animatedClassName: 'aos-animate',
-	initClassName: 'aos-init'
+  offset: 120,
+  delay: 0,
+  duration: 400,
+  easing: "ease",
+  once: false,
+  mirror: false,
+  anchorPlacement: "top-bottom",
+  disable: false,
+  useClassNames: false,
+  startEvent: "DOMContentLoaded",
+  animatedClassName: "aos-animate",
+  initClassName: "aos-init",
 };
 
 /** @type {Array<{ destroy: () => void }>} */
@@ -77,10 +77,10 @@ let initialized = false;
  * @returns {*}
  */
 function getInlineOption(el, key, fallback) {
-	const attr = el.getAttribute('data-aos-' + key);
-	if (attr === 'true') return true;
-	if (attr === 'false') return false;
-	return attr || fallback;
+  const attr = el.getAttribute("data-aos-" + key);
+  if (attr === "true") return true;
+  if (attr === "false") return false;
+  return attr || fallback;
 }
 
 /**
@@ -88,87 +88,85 @@ function getInlineOption(el, key, fallback) {
  * @param {HTMLElement} el
  */
 function applyToElement(el) {
-	const animation = resolveAnimation(
-		el.getAttribute('data-aos') || 'fade-up'
-	);
+  const animation = resolveAnimation(el.getAttribute("data-aos") || "fade-up");
 
-	const duration = Number(getInlineOption(el, 'duration', options.duration));
-	const delay = Number(getInlineOption(el, 'delay', options.delay));
-	const offset = Number(getInlineOption(el, 'offset', options.offset));
-	const once = getInlineOption(el, 'once', options.once);
-	const mirror = getInlineOption(el, 'mirror', options.mirror);
+  const duration = Number(getInlineOption(el, "duration", options.duration));
+  const delay = Number(getInlineOption(el, "delay", options.delay));
+  const offset = Number(getInlineOption(el, "offset", options.offset));
+  const once = getInlineOption(el, "once", options.once);
+  const mirror = getInlineOption(el, "mirror", options.mirror);
 
-	// Set easing as CSS variable
-	if (options.easing || el.getAttribute('data-aos-easing')) {
-		const easing = getInlineOption(el, 'easing', options.easing);
-		el.style.setProperty('--easing', easing);
-	}
+  // Set easing as CSS variable
+  if (options.easing || el.getAttribute("data-aos-easing")) {
+    const easing = getInlineOption(el, "easing", options.easing);
+    el.style.setProperty("--easing", easing);
+  }
 
-	// Add init class
-	if (options.initClassName) {
-		el.classList.add(options.initClassName);
-	}
+  // Add init class
+  if (options.initClassName) {
+    el.classList.add(options.initClassName);
+  }
 
-	// Use useClassNames to add animation name as extra class
-	if (options.useClassNames && animation) {
-		el.classList.add(animation);
-	}
+  // Use useClassNames to add animation name as extra class
+  if (options.useClassNames && animation) {
+    el.classList.add(animation);
+  }
 
-	// Apply runeScroller action
-	const action = runeScroller(el, {
-		animation,
-		duration,
-		offset: offset - 120, // AOS offset is "px from viewport bottom", we adjust
-		repeat: !once || mirror
-	});
+  // Apply runeScroller action
+  const action = runeScroller(el, {
+    animation,
+    duration,
+    offset: offset - 120, // AOS offset is "px from viewport bottom", we adjust
+    repeat: !once || mirror,
+  });
 
-	// Set delay CSS variable AFTER runeScroller (which sets --delay: 0ms)
-	el.style.setProperty('--delay', `${delay}ms`);
+  // Set delay CSS variable AFTER runeScroller (which sets --delay: 0ms)
+  el.style.setProperty("--delay", `${delay}ms`);
 
-	activeActions.push(action);
+  activeActions.push(action);
 }
 
 /**
  * Process all [data-aos] elements in the DOM
  */
 function processElements() {
-	/** @type {NodeListOf<HTMLElement>} */
-	const elements = document.querySelectorAll('[data-aos]');
-	elements.forEach(applyToElement);
+  /** @type {NodeListOf<HTMLElement>} */
+  const elements = document.querySelectorAll("[data-aos]");
+  elements.forEach(applyToElement);
 }
 
 /**
  * Watch for new [data-aos] elements added to the DOM
  */
 function observeMutations() {
-	if (mutationObserver) mutationObserver.disconnect();
+  if (mutationObserver) mutationObserver.disconnect();
 
-	mutationObserver = new MutationObserver((mutations) => {
-		let hasNewAOS = false;
+  mutationObserver = new MutationObserver((mutations) => {
+    let hasNewAOS = false;
 
-		for (const mutation of mutations) {
-			for (const node of mutation.addedNodes) {
-				if (node instanceof HTMLElement) {
-					if (node.hasAttribute && node.hasAttribute('data-aos')) {
-						hasNewAOS = true;
-					}
-					if (node.querySelectorAll) {
-						const aosChildren = node.querySelectorAll('[data-aos]');
-						if (aosChildren.length > 0) hasNewAOS = true;
-					}
-				}
-			}
-		}
+    for (const mutation of mutations) {
+      for (const node of mutation.addedNodes) {
+        if (node instanceof HTMLElement) {
+          if (node.hasAttribute && node.hasAttribute("data-aos")) {
+            hasNewAOS = true;
+          }
+          if (node.querySelectorAll) {
+            const aosChildren = node.querySelectorAll("[data-aos]");
+            if (aosChildren.length > 0) hasNewAOS = true;
+          }
+        }
+      }
+    }
 
-		if (hasNewAOS) {
-			refreshHard();
-		}
-	});
+    if (hasNewAOS) {
+      refreshHard();
+    }
+  });
 
-	mutationObserver.observe(document.documentElement, {
-		childList: true,
-		subtree: true
-	});
+  mutationObserver.observe(document.documentElement, {
+    childList: true,
+    subtree: true,
+  });
 }
 
 /**
@@ -176,86 +174,98 @@ function observeMutations() {
  * @param {AOSOptions} [settings]
  */
 function init(settings = {}) {
-	if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
-	Object.assign(options, settings);
+  Object.assign(options, settings);
 
-	// Set global easing on body for CSS
-	const body = document.querySelector('body');
-	if (body) {
-		body.setAttribute('data-aos-easing', options.easing);
-		body.setAttribute('data-aos-duration', String(options.duration));
-		body.setAttribute('data-aos-delay', String(options.delay));
-	}
+  // Set global easing on body for CSS
+  const body = document.querySelector("body");
+  if (body) {
+    body.setAttribute("data-aos-easing", options.easing);
+    body.setAttribute("data-aos-duration", String(options.duration));
+    body.setAttribute("data-aos-delay", String(options.delay));
+  }
 
-	// Process elements on start event or immediately
-	const startEvent = options.startEvent || 'DOMContentLoaded';
+  // Process elements on start event or immediately
+  const startEvent = options.startEvent || "DOMContentLoaded";
 
-	if (startEvent === 'DOMContentLoaded' &&
-		['complete', 'interactive'].includes(document.readyState)) {
-		processElements();
-		observeMutations();
-		initialized = true;
-	} else if (startEvent === 'load') {
-		window.addEventListener('load', () => {
-			processElements();
-			observeMutations();
-			initialized = true;
-		});
-	} else {
-		document.addEventListener(startEvent, () => {
-			processElements();
-			observeMutations();
-			initialized = true;
-		});
-	}
+  if (
+    startEvent === "DOMContentLoaded" &&
+    ["complete", "interactive"].includes(document.readyState)
+  ) {
+    processElements();
+    observeMutations();
+    initialized = true;
+  } else if (startEvent === "load") {
+    window.addEventListener("load", () => {
+      processElements();
+      observeMutations();
+      initialized = true;
+    });
+  } else {
+    document.addEventListener(startEvent, () => {
+      processElements();
+      observeMutations();
+      initialized = true;
+    });
+  }
 }
 
 /**
  * Soft refresh — recalculate positions (no-op for IntersectionObserver)
  */
 function refresh() {
-	// IntersectionObserver handles position automatically
-	// This is here for API compatibility
+  // IntersectionObserver handles position automatically
+  // Only refresh if initialized
+  if (!initialized) return;
 }
 
 /**
  * Hard refresh — destroy and re-process all elements
  */
 function refreshHard() {
-	// Destroy all active actions
-	activeActions.forEach(action => {
-		try { action.destroy(); } catch (e) { /* ignore */ }
-	});
-	activeActions = [];
+  // Destroy all active actions
+  activeActions.forEach((action) => {
+    try {
+      action.destroy();
+    } catch {
+      /* ignore */
+    }
+  });
+  activeActions = [];
 
-	// Remove init classes
-	if (options.initClassName) {
-		document.querySelectorAll(`[data-aos].${options.initClassName}`)
-			.forEach(el => el.classList.remove(options.initClassName));
-	}
+  // Remove init classes
+  if (options.initClassName) {
+    document
+      .querySelectorAll(`[data-aos].${options.initClassName}`)
+      .forEach((el) => el.classList.remove(options.initClassName));
+  }
 
-	processElements();
+  processElements();
 }
 
 /**
  * Disable — remove all AOS attributes and classes
  */
 function disable() {
-	activeActions.forEach(action => {
-		try { action.destroy(); } catch (e) { /* ignore */ }
-	});
-	activeActions = [];
+  activeActions.forEach((action) => {
+    try {
+      action.destroy();
+    } catch {
+      /* ignore */
+    }
+  });
+  activeActions = [];
 
-	document.querySelectorAll('[data-aos]').forEach(el => {
-		el.removeAttribute('data-aos');
-		el.removeAttribute('data-aos-easing');
-		el.removeAttribute('data-aos-duration');
-		el.removeAttribute('data-aos-delay');
-		el.removeAttribute('data-aos-offset');
+  document.querySelectorAll("[data-aos]").forEach((el) => {
+    el.removeAttribute("data-aos");
+    el.removeAttribute("data-aos-easing");
+    el.removeAttribute("data-aos-duration");
+    el.removeAttribute("data-aos-delay");
+    el.removeAttribute("data-aos-offset");
 
-		if (options.initClassName) el.classList.remove(options.initClassName);
-	});
+    if (options.initClassName) el.classList.remove(options.initClassName);
+  });
 }
 
 // Public API — compatible with AOS

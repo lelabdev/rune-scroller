@@ -10,13 +10,13 @@
  * @returns {{ observer: IntersectionObserver, isConnected: boolean }}
  */
 export function createManagedObserver(target, callback, options) {
-	const observer = new IntersectionObserver(callback, options);
-	observer.observe(target);
+  const observer = new IntersectionObserver(callback, options);
+  observer.observe(target);
 
-	return {
-		observer,
-		isConnected: true
-	};
+  return {
+    observer,
+    isConnected: true,
+  };
 }
 
 /**
@@ -24,8 +24,8 @@ export function createManagedObserver(target, callback, options) {
  * @param {{ isConnected: boolean }} state
  */
 export function disconnectObserver(observer, state) {
-	if (state.isConnected && observer) {
-		observer.disconnect();
-		state.isConnected = false;
-	}
+  if (state.isConnected && observer) {
+    observer.disconnect();
+    state.isConnected = false;
+  }
 }

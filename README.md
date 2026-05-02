@@ -68,7 +68,7 @@ npm install rune-scroller
 ### AOS Drop-in (framework agnostic)
 
 ```js
-import AOS from 'rune-scroller/aos';
+import AOS from "rune-scroller/aos";
 AOS.init();
 ```
 
@@ -127,30 +127,30 @@ All animations use the `--rs-distance` CSS variable (default: `100px`):
 
 ```typescript
 interface RuneScrollerOptions {
-  animation?: AnimationType  // Animation name (default: 'fade-up')
-  duration?: number          // Duration in ms (default: 400)
-  delay?: number             // Delay in ms (default: 0)
-  easing?: string            // CSS timing function (default: 'ease')
-  repeat?: boolean           // Repeat on scroll (default: false)
-  debug?: boolean            // Show sentinel as visible line (default: false)
-  offset?: number            // Sentinel offset in px (default: 0, negative = earlier)
-  onVisible?: (element: HTMLElement) => void  // Callback when visible
-  sentinelColor?: string     // Debug sentinel color (e.g. '#ff6b6b')
-  sentinelId?: string        // Custom sentinel ID
+  animation?: AnimationType; // Animation name (default: 'fade-up')
+  duration?: number; // Duration in ms (default: 400)
+  delay?: number; // Delay in ms (default: 0)
+  easing?: string; // CSS timing function (default: 'ease')
+  repeat?: boolean; // Repeat on scroll (default: false)
+  debug?: boolean; // Show sentinel as visible line (default: false)
+  offset?: number; // Sentinel offset in px (default: 0, negative = earlier)
+  onVisible?: (element: HTMLElement) => void; // Callback when visible
+  sentinelColor?: string; // Debug sentinel color (e.g. '#ff6b6b')
+  sentinelId?: string; // Custom sentinel ID
 }
 ```
 
 ### AOS Mode (data attributes)
 
-| Attribute | Example | Description |
-|-----------|---------|-------------|
-| `data-aos` | `"fade-up"` | Animation name |
-| `data-aos-duration` | `"800"` | Duration in ms |
-| `data-aos-delay` | `"200"` | Delay in ms |
-| `data-aos-easing` | `"ease-in-out"` | CSS timing function |
-| `data-aos-offset` | `"120"` | Trigger offset in px |
-| `data-aos-once` | `"true"` | Animate only once |
-| `data-aos-mirror` | `"true"` | Animate on scroll away too |
+| Attribute           | Example         | Description                |
+| ------------------- | --------------- | -------------------------- |
+| `data-aos`          | `"fade-up"`     | Animation name             |
+| `data-aos-duration` | `"800"`         | Duration in ms             |
+| `data-aos-delay`    | `"200"`         | Delay in ms                |
+| `data-aos-easing`   | `"ease-in-out"` | CSS timing function        |
+| `data-aos-offset`   | `"120"`         | Trigger offset in px       |
+| `data-aos-once`     | `"true"`        | Animate only once          |
+| `data-aos-mirror`   | `"true"`        | Animate on scroll away too |
 
 ### AOS init options
 
@@ -159,10 +159,10 @@ AOS.init({
   offset: 120,
   duration: 400,
   delay: 0,
-  easing: 'ease',
+  easing: "ease",
   once: false,
   mirror: false,
-  startEvent: 'DOMContentLoaded'
+  startEvent: "DOMContentLoaded",
 });
 ```
 
@@ -197,25 +197,25 @@ Respects `prefers-reduced-motion` — animations are disabled automatically.
 
 ```typescript
 // Svelte action (default)
-import rs from 'rune-scroller'
+import rs from "rune-scroller";
 
 // Named exports
 import {
-  runeScroller,      // Same as default
-  useIntersection,   // Composable
+  runeScroller, // Same as default
+  useIntersection, // Composable
   useIntersectionOnce, // Composable (once)
   calculateRootMargin, // Utility
-  ANIMATION_TYPES,   // Array of all animation names
-} from 'rune-scroller'
+  ANIMATION_TYPES, // Array of all animation names
+} from "rune-scroller";
 
 // AOS compatibility
-import AOS from 'rune-scroller/aos'
-AOS.init()
-AOS.refresh()
-AOS.refreshHard()
+import AOS from "rune-scroller/aos";
+AOS.init();
+AOS.refresh();
+AOS.refreshHard();
 
 // Types
-import type { AnimationType, RuneScrollerOptions } from 'rune-scroller'
+import type { AnimationType, RuneScrollerOptions } from "rune-scroller";
 ```
 
 ---
@@ -249,7 +249,7 @@ import type { AnimationType, RuneScrollerOptions } from 'rune-scroller'
 
 ```html
 <script type="module">
-  import AOS from 'rune-scroller/aos';
+  import AOS from "rune-scroller/aos";
   AOS.init({ duration: 800, once: true });
 </script>
 
