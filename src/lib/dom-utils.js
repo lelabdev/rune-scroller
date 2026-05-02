@@ -86,7 +86,7 @@ export function checkAndWarnIfCSSNotLoaded() {
 	if (process.env.NODE_ENV === 'production') return true;
 
 	// Return cached result if already checked (avoids expensive reflows)
-	if (cssCheckResult !== null) return cssCheckResult;
+	if (cssCheckResult === true) return true;
 
 	// Try to detect if animations.css is loaded by checking for animation classes
 	const test = document.createElement('div');
@@ -107,6 +107,6 @@ export function checkAndWarnIfCSSNotLoaded() {
 	}
 
 	// Cache the result for future calls
-	cssCheckResult = hasAnimation;
+	if (hasAnimation) cssCheckResult = true;
 	return hasAnimation;
 }
