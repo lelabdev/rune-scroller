@@ -24,12 +24,10 @@ export function runeScroller(element, options) {
 	// Validate animation type
 	let animation = options?.animation ?? 'fade-in';
 	if (animation && !ANIMATION_TYPES.includes(animation)) {
-		if (process.env.NODE_ENV !== 'production') {
-			console.warn(
-				`[rune-scroller] Invalid animation "${animation}". Using "fade-in" instead. ` +
-				`Valid options: ${ANIMATION_TYPES.join(', ')}`
-			);
-		}
+		console.warn(
+			`[rune-scroller] Invalid animation "${animation}". Using "fade-in" instead. ` +
+			`Valid options: ${ANIMATION_TYPES.join(', ')}`
+		);
 		animation = 'fade-in';
 	}
 
@@ -50,14 +48,26 @@ export function runeScroller(element, options) {
 	// Force reflow to ensure transitions are ready
 	void element.offsetHeight;
 
-	// Create a wrapper div around the element to position the sentinel
-	const wrapper = document.createElement('div');
-	wrapper.style.cssText = 'position:relative;display:block;width:100%;margin:0;padding:0;box-sizing:border-box';
-	element.insertAdjacentElement('beforebegin', wrapper);
-	wrapper.appendChild(element);
+	// Store original position for cleanup
+	const originalPosition = element.style.position;
+	// Make element the positioning context for the sentinel
+	if (!originalPosition || originalPosition === 'static') {
+		element.style.position = 'relative';
+	}
+
+	// Warn about overflow:hidden in debug mode — sentinel won't be visible to observer
+	if (options?.debug) {
+		const computedStyle = getComputedStyle(element);
+		if (computedStyle.overflow === 'hidden' || computedStyle.overflowY === 'hidden') {
+			console.warn(
+				`[rune-scroller] Element has overflow:hidden. The sentinel may not be detected by IntersectionObserver. ` +
+				`Consider using overflow:visible or overflow:clip instead.`
+			);
+		}
+	}
 
 	// Create the invisible sentinel (or visible if debug=true)
-	// Positioned absolutely relative to the wrapper
+	// Positioned absolutely relative to the element
 	const sentinelResult = createSentinel(
 		element,
 		options?.debug,
@@ -72,7 +82,8 @@ export function runeScroller(element, options) {
 	// Add sentinel ID to element (either provided or auto-generated)
 	element.setAttribute('data-sentinel-id', sentinelId);
 
-	wrapper.appendChild(sentinel);
+	// Append sentinel as child of the element — no wrapper needed
+	element.appendChild(sentinel);
 
 	// Observe the sentinel with cleanup tracking
 	const state = { isConnected: true };
@@ -154,13 +165,10 @@ export function runeScroller(element, options) {
 			if (resizeObserver) {
 				resizeObserver.disconnect();
 			}
+			// Remove sentinel
 			currentSentinel.remove();
-			// Unwrap element (move it out of wrapper)
-			const parent = wrapper.parentElement;
-			if (parent) {
-				wrapper.insertAdjacentElement('beforebegin', element);
-			}
-			wrapper.remove();
+			// Restore original position
+			element.style.position = originalPosition;
 		}
 	};
 }
