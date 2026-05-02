@@ -6,7 +6,7 @@ describe('Observer Utilities', () => {
 	let window;
 	let document;
 	let testElement;
-	let observer;
+	let result;
 
 	beforeEach(() => {
 		window = new Window();
@@ -23,8 +23,8 @@ describe('Observer Utilities', () => {
 	});
 
 	afterEach(() => {
-		if (observer) {
-			observer.disconnect();
+		if (result?.observer) {
+			result.observer.disconnect();
 		}
 		if (testElement?.parentElement) {
 			testElement.remove();
@@ -38,113 +38,119 @@ describe('Observer Utilities', () => {
 
 	describe('createManagedObserver', () => {
 		it('creates IntersectionObserver instance', () => {
-			observer = createManagedObserver(
+			result = createManagedObserver(
 				testElement,
 				() => {},
 				{ threshold: 0.5 }
 			);
 
-			expect(observer).toBeDefined();
-			expect(observer.observer).toBeInstanceOf(IntersectionObserver);
+			expect(result).toBeDefined();
+			expect(result.observer).toBeDefined();
+			expect(result.observer).toBeInstanceOf(IntersectionObserver);
 		});
 
 		it('observes target element immediately', () => {
 			let observeCalled = false;
-			const mockObserver = new IntersectionObserver(() => {
-				observeCalled = true;
-			});
+			const RealObserver = global.IntersectionObserver;
+			global.IntersectionObserver = class extends RealObserver {
+				constructor(cb, opts) {
+					super(cb, opts);
+					observeCalled = true;
+				}
+			};
 
-			window.IntersectionObserver = mockObserver;
-
-			observer = createManagedObserver(
+			result = createManagedObserver(
 				testElement,
 				() => {},
 				{ threshold: 0.5 }
 			);
 
 			expect(observeCalled).toBe(true);
+			global.IntersectionObserver = RealObserver;
 		});
 
 		it('returns correct structure', () => {
-			observer = createManagedObserver(
+			result = createManagedObserver(
 				testElement,
 				() => {},
 				{ threshold: 0.5 }
 			);
 
-			expect(observer.observer).toBeDefined();
-			expect(observer.isConnected).toBe(true);
+			expect(result.observer).toBeDefined();
+			expect(result.isConnected).toBe(true);
 		});
 
 		it('handles threshold option', () => {
-			observer = createManagedObserver(
+			result = createManagedObserver(
 				testElement,
 				() => {},
 				{ threshold: 0.25 }
 			);
 
-			expect(observer.observer).toBeDefined();
+			expect(result.observer).toBeDefined();
 		});
 
 		it('handles rootMargin option', () => {
 			const rootMargin = '-10% 0px';
-			observer = createManagedObserver(
+			result = createManagedObserver(
 				testElement,
 				() => {},
 				{ rootMargin }
 			);
 
-			expect(observer.observer).toBeDefined();
+			expect(result.observer).toBeDefined();
 		});
 
 		it('handles root option', () => {
 			const root = document.createElement('div');
-			observer = createManagedObserver(
+			result = createManagedObserver(
 				testElement,
 				() => {},
 				{ root }
 			);
 
-			expect(observer.observer).toBeDefined();
+			expect(result.observer).toBeDefined();
 		});
 
 		it('handles both options', () => {
-			observer = createManagedObserver(
+			const root = document.createElement('div');
+			result = createManagedObserver(
 				testElement,
 				() => {},
 				{ threshold: 0.5, rootMargin: '-20% 0px', root }
 			);
 
-			expect(observer.observer).toBeDefined();
+			expect(result.observer).toBeDefined();
 		});
 	});
 
 	describe('disconnectObserver', () => {
 		it('disconnects observer', () => {
+			let disconnectCalled = 0;
 			const mockObserver = {
-				disconnect: vi.fn(),
+				disconnect: () => { disconnectCalled++; }
 			};
 
 			const state = { isConnected: true };
 
 			disconnectObserver(mockObserver, state);
 
-			expect(mockObserver.disconnect).toHaveBeenCalledTimes(1);
+			expect(disconnectCalled).toBe(1);
 			expect(state.isConnected).toBe(false);
 		});
 
 		it('does nothing if already disconnected', () => {
+			let disconnectCalled = 0;
 			const mockObserver = {
-				disconnect: vi.fn(),
+				disconnect: () => { disconnectCalled++; }
 			};
 
 			const state = { isConnected: false };
-
 			expect(() => {
 				disconnectObserver(mockObserver, state);
 			}).not.toThrow();
 
-			expect(mockObserver.disconnect).toHaveBeenCalledTimes(0);
+			expect(disconnectCalled).toBe(0);
 			expect(state.isConnected).toBe(false);
 		});
 
@@ -171,18 +177,19 @@ describe('Observer Utilities', () => {
 
 	describe('Integration Tests', () => {
 		it('complete lifecycle with real observer', () => {
-			observer = createManagedObserver(
+			result = createManagedObserver(
 				testElement,
 				() => {},
 				{ threshold: 0.5 }
 			);
 
-			expect(observer.isConnected).toBe(true);
-			expect(observer.observer).toBeDefined();
+			expect(result.isConnected).toBe(true);
+			expect(result.observer).toBeDefined();
 
-			disconnectObserver(observer, { isConnected: observer.isConnected });
+			const state = { isConnected: true };
+			disconnectObserver(result.observer, state);
 
-			expect(observer.isConnected).toBe(false);
+			expect(state.isConnected).toBe(false);
 		});
 	});
 });
