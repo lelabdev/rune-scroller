@@ -14,10 +14,8 @@ import { runeScroller } from './runeScroller.js';
 export default runeScroller;
 export { runeScroller };
 
-
-
 // Composables
 export { useIntersection, useIntersectionOnce } from './useIntersection.svelte.js';
 
 // Utilities
-export { calculateRootMargin } from './animations.js';
+export { calculateRootMargin, ANIMATION_TYPES } from './animations.js';
