@@ -6,8 +6,9 @@
  * @module rune-scroller
  */
 
-// Import CSS animations automatically
-import "./animations.css";
+// Note: CSS must be imported separately by the user:
+//   import 'rune-scroller/animations.css'
+// This avoids SSR issues with automatic CSS imports in Node/edge runtimes.
 
 // Main action (default export - recommended)
 import { runeScroller } from "./runeScroller.js";
