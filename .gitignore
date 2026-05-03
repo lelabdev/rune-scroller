@@ -29,3 +29,4 @@ vite.config.ts.timestamp-*
 
 # Claude Code
 .claude/
+rune-scroller-site/

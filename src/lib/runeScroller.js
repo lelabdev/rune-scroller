@@ -29,7 +29,7 @@ export function runeScroller(element, options) {
   // Validate animation type
   let animation = options?.animation ?? "fade-in";
   if (animation && !ANIMATION_TYPES.includes(animation)) {
-    if (process.env.NODE_ENV !== "production") {
+    if (typeof process !== "undefined" && process.env?.NODE_ENV !== "production") {
       console.warn(
         `[rune-scroller] Invalid animation "${animation}". Using "fade-in" instead. ` +
           `Valid options: ${ANIMATION_TYPES.join(", ")}`,
@@ -38,9 +38,8 @@ export function runeScroller(element, options) {
     animation = "fade-in";
   }
 
-  // Initialize opacity: 0 BEFORE adding .scroll-animate class
-  // This ensures the transition applies correctly when .is-visible is added later
-  element.style.opacity = "0";
+  // CSS handles initial opacity via [data-animation] { opacity: 0 }
+  // No inline opacity needed — it would override slide animations that use opacity: 1
 
   // Setup animation classes and CSS variables
   if (animation) {

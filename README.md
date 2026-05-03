@@ -6,7 +6,7 @@
 
 **Lightweight scroll animations. AOS replacement. Works everywhere.**
 
-Built with native IntersectionObserver — zero JS on scroll, GPU-accelerated, 5KB gzipped.
+Built with native IntersectionObserver — zero JS on scroll, GPU-accelerated, ~5.6KB gzipped.
 
 > 🚀 **Open Source** by [ludoloops](https://github.com/ludoloops) at [LeLab.dev](https://lelab.dev)
 > 📜 Licensed under **MIT**
@@ -125,8 +125,8 @@ export class AppComponent implements OnInit {
 - **Framework agnostic** — Svelte, React, Vue, Angular, Vanilla JS, CDN
 - **AOS drop-in** — Same `data-aos` attributes, same `init()` API
 - **Zero dependencies** — Pure JS + native IntersectionObserver
-- **~5KB gzipped** — Half the size of AOS
-- **30 animations** — Fade, Zoom, Flip, Slide, Bounce
+- **~5.6KB gzipped** — Smaller than AOS (6.9KB)
+- **37 animations** — Fade, Zoom, Flip, Slide, Bounce
 - **Zero JS on scroll** — Browser handles detection natively
 - **TypeScript support** — Full type definitions
 - **SSR-ready** — SvelteKit, Next.js, Nuxt compatible
@@ -140,7 +140,7 @@ export class AppComponent implements OnInit {
 
 |                           | rune-scroller                                  | AOS                                        |
 | ------------------------- | ---------------------------------------------- | ------------------------------------------ |
-| **Bundle size (gzipped)** | **~5.1KB** JS+CSS                              | ~11KB JS+CSS                               |
+| **Bundle size (gzipped)** | **~5.6KB** JS+CSS                              | ~6.9KB JS+CSS                              |
 | **Dependencies**          | **0**                                          | lodash.throttle, lodash.debounce           |
 | **Scroll detection**      | **IntersectionObserver** (native, C++)         | Scroll event + throttle (JS)               |
 | **Per-scroll cost**       | **0** — browser handles it                     | Iterates ALL elements every 99ms           |
