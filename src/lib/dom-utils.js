@@ -54,7 +54,7 @@ export function createSentinel(
   // getBoundingClientRect returns transformed dimensions (affected by scale, etc)
   // offsetHeight returns actual element height independent of CSS transforms
   const elementHeight = element.offsetHeight;
-  const sentinelTop = elementHeight + offset;
+  const sentinelTop = elementHeight - offset;
 
   // Generate auto-ID if not provided
   if (!sentinelId) {
