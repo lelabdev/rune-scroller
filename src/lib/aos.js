@@ -125,11 +125,33 @@ function applyToElement(el) {
     el.classList.add(animation);
   }
 
+  // Parse anchorPlacement for sentinel positioning
+  // Format: "vertical-horizontal" e.g. "top-bottom", "center-center"
+  const placement = getInlineOption(el, "anchor-placement", options.anchorPlacement) || "top-bottom";
+  const [anchor, target] = placement.split("-");
+
+  // Map anchor to offset: sentinel position on the element
+  // top = 0, center = 50%, bottom = 100% of element height
+  let anchorOffset = offset;
+  const elHeight = el.offsetHeight || 0;
+  if (anchor === "center") {
+    anchorOffset = offset + Math.round(elHeight / 2);
+  } else if (anchor === "bottom") {
+    anchorOffset = offset + elHeight;
+  }
+
+  // Map target to threshold
+  let threshold = 0;
+  if (target === "center") threshold = 0.5;
+  else if (target === "top") threshold = 0;
+  // bottom = default 0 (sentinel hits bottom of viewport)
+
   // Apply runeScroller action
   const action = runeScroller(el, {
     animation,
     duration,
-    offset: offset,
+    offset: anchorOffset,
+    threshold,
     delay,
     easing: getInlineOption(el, "easing", options.easing),
     // mirror: animate out on exit; once: animate only once
