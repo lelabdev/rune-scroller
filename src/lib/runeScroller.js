@@ -62,15 +62,14 @@ export function runeScroller(element, options) {
   // Force reflow to ensure transitions are ready
   void element.offsetHeight;
 
-  // Create a wrapper div around the element to position the sentinel
-  const wrapper = document.createElement("div");
-  wrapper.style.cssText =
-    "position:relative;display:block;width:100%;margin:0;padding:0;box-sizing:border-box";
-  element.insertAdjacentElement("beforebegin", wrapper);
-  wrapper.appendChild(element);
+  // Ensure element can serve as positioning context for sentinel
+  const originalPosition = element.style.position;
+  if (!originalPosition || originalPosition === "static") {
+    element.style.position = "relative";
+  }
 
   // Create the invisible sentinel (or visible if debug=true)
-  // Positioned absolutely relative to the wrapper
+  // Positioned absolutely relative to the element
   const sentinelResult = createSentinel(
     element,
     options?.debug,
@@ -85,7 +84,7 @@ export function runeScroller(element, options) {
   // Add sentinel ID to element (either provided or auto-generated)
   element.setAttribute("data-sentinel-id", sentinelId);
 
-  wrapper.appendChild(sentinel);
+  element.appendChild(sentinel);
 
   // Observe the sentinel with cleanup tracking
   const state = { isConnected: true };
@@ -175,12 +174,10 @@ export function runeScroller(element, options) {
         resizeObserver.disconnect();
       }
       currentSentinel.remove();
-      // Unwrap element (move it out of wrapper)
-      const parent = wrapper.parentElement;
-      if (parent) {
-        wrapper.insertAdjacentElement("beforebegin", element);
+      // Restore original position if we changed it
+      if (!originalPosition || originalPosition === "static") {
+        element.style.position = originalPosition || "";
       }
-      wrapper.remove();
     },
   };
 }
