@@ -56,8 +56,8 @@ export function runeScroller(element, options) {
   // Set CSS variables for duration and delay
   if (options?.duration !== undefined || options?.delay !== undefined) {
     setCSSVariables(element, options?.duration, options?.delay);
-  if (options?.easing !== undefined) { element.style.setProperty("--easing", options.easing); }
   }
+  if (options?.easing !== undefined) { element.style.setProperty("--easing", options.easing); }
 
   // Force reflow to ensure transitions are ready
   void element.offsetHeight;
@@ -148,8 +148,8 @@ export function runeScroller(element, options) {
       }
       if (newOptions?.duration || newOptions?.delay) {
         setCSSVariables(element, newOptions?.duration, newOptions?.delay);
-      if (newOptions?.easing !== undefined) { element.style.setProperty("--easing", newOptions.easing); }
       }
+      if (newOptions?.easing !== undefined) { element.style.setProperty("--easing", newOptions.easing); }
       // Update repeat option
       if (
         newOptions?.repeat !== undefined &&
