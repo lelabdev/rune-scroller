@@ -1,11 +1,11 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Integration tests using the real rune-scroller-site landing page.
- * Tests scroll-triggered animations in actual production layout.
+ * Integration tests against the live rune-scroller-site dev server.
+ * Run `bun dev --host 0.0.0.0` in ~/dev/rune-scroller-site before these tests.
  */
 
-const LANDING = 'http://localhost:3211';
+const LANDING = process.env.LANDING_URL || 'http://localhost:5173';
 
 test.describe('Landing page integration', () => {
 	test.beforeEach(async ({ page }) => {
@@ -13,7 +13,6 @@ test.describe('Landing page integration', () => {
 			if (msg.type() === 'error') console.log('CONSOLE ERROR:', msg.text());
 		});
 		await page.goto(LANDING);
-		// Wait for Svelte hydration + runeScroller init
 		await page.waitForTimeout(1500);
 	});
 
@@ -23,7 +22,6 @@ test.describe('Landing page integration', () => {
 	});
 
 	test('hero elements are visible without scrolling', async ({ page }) => {
-		// Hero is in the viewport on load — elements should already be is-visible
 		const visible = await page.$$eval(
 			'[data-animation].is-visible',
 			(els) => els.length
@@ -32,11 +30,9 @@ test.describe('Landing page integration', () => {
 	});
 
 	test('below-fold elements start hidden', async ({ page }) => {
-		// Scroll to top
 		await page.evaluate(() => window.scrollTo(0, 0));
 		await page.waitForTimeout(300);
 
-		// Find elements that are NOT visible (below viewport)
 		const hidden = await page.$$eval(
 			'[data-animation]:not(.is-visible)',
 			(els) => els.length
@@ -45,7 +41,6 @@ test.describe('Landing page integration', () => {
 	});
 
 	test('scrolling triggers hidden animations', async ({ page }) => {
-		// Scroll to top first
 		await page.evaluate(() => window.scrollTo(0, 0));
 		await page.waitForTimeout(300);
 
@@ -54,7 +49,6 @@ test.describe('Landing page integration', () => {
 			(els) => els.length
 		);
 
-		// Slow scroll to bottom
 		await page.evaluate(async () => {
 			const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 			for (let i = 0; i < 10; i++) {
@@ -74,7 +68,6 @@ test.describe('Landing page integration', () => {
 	});
 
 	test('all animations become visible after full scroll', async ({ page }) => {
-		// Scroll to bottom slowly
 		await page.evaluate(async () => {
 			const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 			for (let i = 0; i < 15; i++) {
@@ -91,18 +84,14 @@ test.describe('Landing page integration', () => {
 			(els) => els.length
 		);
 
-		// At least 80% should be visible after full scroll
 		expect(visible).toBeGreaterThanOrEqual(Math.floor(total * 0.8));
 	});
 
 	test('animation types used on landing are valid', async ({ page }) => {
-		// Import ANIMATION_TYPES from the dist build directly
 		const pageAnimations = await page.$$eval('[data-animation]', (els) =>
 			[...new Set(els.map((el) => el.getAttribute('data-animation')))]
 		);
 
-		// Fetch valid types from the library's dist
-		// The lib exports ANIMATION_TYPES in index.js
 		const mod = await page.evaluate(async () => {
 			const m = await import('http://localhost:3210/dist/index.js');
 			return m.ANIMATION_TYPES;
