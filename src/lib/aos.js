@@ -129,12 +129,14 @@ function applyToElement(el) {
   const action = runeScroller(el, {
     animation,
     duration,
-    offset: offset, // offset is now intuitive: positive = trigger earlier
+    offset: offset,
+    delay,
+    easing: getInlineOption(el, "easing", options.easing),
+    // mirror: animate out on exit; once: animate only once
+    // Both need repeat=true for reverse animation to play
     repeat: !once || mirror,
   });
 
-  // Set delay CSS variable AFTER runeScroller (which sets --delay: 0ms)
-  el.style.setProperty("--delay", `${delay}ms`);
 
   activeActions.push(action);
 }
