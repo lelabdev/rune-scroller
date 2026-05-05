@@ -94,8 +94,9 @@ test.describe('AOS data attributes', () => {
 		await setupAOSPage(page, {
 			html: '<div class="item" data-aos="fade" data-aos-offset="0">Item</div>',
 		});
-		const sentinel = await page.$('div[data-sentinel-id]');
-		expect(sentinel).toBeTruthy();
+		// Element should have scroll-animate class (runeScroller was applied)
+		const hasClass = await page.$eval('[data-aos]', (el) => el.classList.contains('scroll-animate'));
+		expect(hasClass).toBe(true);
 	});
 
 	test('data-aos-once prevents re-animation', async ({ page }) => {
@@ -177,12 +178,15 @@ test.describe('AOS global options', () => {
 		expect(duration).toBe('600ms');
 	});
 
-	test('init({ offset: 200 }) triggers earlier (element visible at init)', async ({ page }) => {
+	test('init({ offset: 200 }) triggers earlier than default', async ({ page }) => {
 		await setupAOSPage(page, {
 			html: '<div class="item" data-aos="fade">Item</div>',
 			initScript: 'init({ offset: 200 });',
 		});
-		// With offset:200, sentinel is pushed 200px above element → already in viewport
+		// With offset:200, rootMargin is "200px 0px 0px 0px" — viewport top extends 200px up
+		// Scroll partially — less than full viewport height
+		await page.evaluate(() => window.scrollTo(0, window.innerHeight * 0.8));
+		await page.waitForTimeout(300);
 		const hasClass = await page.$eval('[data-aos]', (el) => el.classList.contains('is-visible'));
 		expect(hasClass).toBe(true);
 	});

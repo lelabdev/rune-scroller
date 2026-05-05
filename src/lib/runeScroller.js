@@ -70,81 +70,80 @@ export function runeScroller(element, options) {
     element.style.transition = "";
   });
 
-  // Ensure element can serve as positioning context for sentinel
+  // Ensure element can serve as positioning context for debug sentinel
   const originalPosition = element.style.position;
   if (!originalPosition || originalPosition === "static") {
     element.style.position = "relative";
   }
 
-  // Create the invisible sentinel (or visible if debug=true)
-  // Positioned absolutely relative to the element
-  const sentinelResult = createSentinel(
-    element,
-    options?.debug,
-    options?.offset,
-    options?.sentinelColor,
-    options?.debugLabel,
-    options?.sentinelId,
-  );
-  const sentinel = sentinelResult.element;
-  const sentinelId = sentinelResult.id;
-
-  // Add sentinel ID to element (either provided or auto-generated)
-  element.setAttribute("data-sentinel-id", sentinelId);
-
-  element.appendChild(sentinel);
-
-  // Observe the sentinel with cleanup tracking
-  const state = { isConnected: true };
-  let currentSentinel = sentinel;
-  let resizeObserver;
-  let intersectionObserver;
-
-  const { observer } = createManagedObserver(
-    sentinel,
-    (entries) => {
-      const isIntersecting = entries[0].isIntersecting;
-      if (isIntersecting) {
-        // Add the is-visible class to trigger animation
-        element.classList.add("is-visible");
-        // Call onVisible callback if provided
-        options?.onVisible?.(element);
-        // Disconnect if not in repeat mode
-        if (!options?.repeat) {
-          disconnectObserver(intersectionObserver, state);
-        }
-      } else if (options?.repeat) {
-        // In repeat mode, remove the class when the sentinel exits
-        element.classList.remove("is-visible");
-      }
-    },
-    { threshold: options?.threshold ?? 0 },
-  );
-
-  intersectionObserver = observer;
-
-  // Function to recreate sentinel when element is resized
-  const recreateSentinel = () => {
-    const newSentinelResult = createSentinel(
+  // Create debug sentinel (visual indicator only, not used for observation)
+  let sentinel = null;
+  let sentinelId = null;
+  if (options?.debug) {
+    const sentinelResult = createSentinel(
       element,
       options?.debug,
       options?.offset,
       options?.sentinelColor,
       options?.debugLabel,
-      sentinelId,
+      options?.sentinelId,
     );
-    const newSentinel = newSentinelResult.element;
-    currentSentinel.replaceWith(newSentinel);
-    currentSentinel = newSentinel;
-    // Update observer to watch the new sentinel
-    intersectionObserver.disconnect();
-    intersectionObserver.observe(newSentinel);
+    sentinel = sentinelResult.element;
+    sentinelId = sentinelResult.id;
+    element.setAttribute("data-sentinel-id", sentinelId);
+    element.appendChild(sentinel);
+  }
+
+  // Calculate rootMargin from offset
+  // Positive offset = trigger earlier = expand the viewport top boundary
+  const offset = options?.offset ?? 0;
+  const rootMargin = `${offset}px 0px 0px 0px`;
+
+  // Observe the element directly (not the sentinel)
+  // This avoids overflow:hidden clipping issues when the element has transforms
+  const state = { isConnected: true };
+  let resizeObserver;
+  let intersectionObserver;
+
+  // IntersectionObserver callback
+  const handleIntersection = (entries) => {
+    const isIntersecting = entries[0].isIntersecting;
+    if (isIntersecting) {
+      element.classList.add("is-visible");
+      options?.onVisible?.(element);
+      if (!options?.repeat) {
+        disconnectObserver(intersectionObserver, state);
+      }
+    } else if (options?.repeat) {
+      element.classList.remove("is-visible");
+    }
   };
 
-  // Setup ResizeObserver to handle element resizing
-  if (typeof ResizeObserver !== "undefined") {
+  const { observer } = createManagedObserver(
+    element,
+    handleIntersection,
+    {
+      threshold: options?.threshold ?? 0,
+      rootMargin,
+    },
+  );
+
+  intersectionObserver = observer;
+
+  // Update debug sentinel if element resizes
+  if (options?.debug && typeof ResizeObserver !== "undefined") {
     resizeObserver = new ResizeObserver(() => {
-      recreateSentinel();
+      if (!sentinel) return;
+      const newResult = createSentinel(
+        element,
+        options?.debug,
+        options?.offset,
+        options?.sentinelColor,
+        options?.debugLabel,
+        sentinelId,
+      );
+      sentinel.replaceWith(newResult.element);
+      sentinel = newResult.element;
     });
     resizeObserver.observe(element);
   }
@@ -165,23 +164,36 @@ export function runeScroller(element, options) {
       ) {
         options = { ...options, repeat: newOptions.repeat };
       }
-      // Update offset and debug if changed
-      if (
-        (newOptions?.offset !== undefined &&
-          newOptions.offset !== options?.offset) ||
-        (newOptions?.debug !== undefined && newOptions.debug !== options?.debug)
-      ) {
+      // Recreate observer if offset or threshold changed
+      const offsetChanged = newOptions?.offset !== undefined && newOptions.offset !== options?.offset;
+      const thresholdChanged = newOptions?.threshold !== undefined && newOptions.threshold !== options?.threshold;
+      if (offsetChanged || thresholdChanged) {
         options = { ...options, ...newOptions };
-        recreateSentinel();
+        disconnectObserver(intersectionObserver, state);
+        const newOffset = options?.offset ?? 0;
+        const { observer: newObserver } = createManagedObserver(
+          element,
+          handleIntersection,
+          {
+            threshold: options?.threshold ?? 0,
+            rootMargin: `${newOffset}px 0px 0px 0px`,
+          },
+        );
+        intersectionObserver = newObserver;
+      }
+      // Update debug if changed
+      if (newOptions?.debug !== undefined && newOptions.debug !== options?.debug) {
+        options = { ...options, ...newOptions };
       }
     },
     destroy() {
       disconnectObserver(intersectionObserver, state);
-      // Cleanup ResizeObserver
       if (resizeObserver) {
         resizeObserver.disconnect();
       }
-      currentSentinel.remove();
+      if (sentinel) {
+        sentinel.remove();
+      }
       // Restore original position if we changed it
       if (!originalPosition || originalPosition === "static") {
         element.style.position = originalPosition || "";

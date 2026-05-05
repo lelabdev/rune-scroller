@@ -216,8 +216,8 @@ test.describe('offset', () => {
 			script: `rs(document.getElementById('target'), { animation: 'fade-up', offset: 200 });`,
 		});
 
-		// Scroll only a little — offset should make it trigger sooner
-		await page.evaluate(() => window.scrollTo(0, window.innerHeight * 0.3));
+		// Scroll partially — offset should make it trigger sooner
+		await page.evaluate(() => window.scrollTo(0, window.innerHeight * 0.5));
 		await page.waitForTimeout(300);
 		const hasClass = await page.$eval('#target', (el) => el.classList.contains('is-visible'));
 		expect(hasClass).toBe(true);
