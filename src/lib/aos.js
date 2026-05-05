@@ -116,7 +116,7 @@ function applyToElement(el) {
   const action = runeScroller(el, {
     animation,
     duration,
-    offset: offset - 120, // AOS offset is "px from viewport bottom", we adjust
+    offset: offset, // offset is now intuitive: positive = trigger earlier
     repeat: !once || mirror,
   });
 
