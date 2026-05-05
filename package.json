@@ -29,9 +29,10 @@
       "svelte": "./dist/index.js",
       "default": "./dist/index.js"
     },
-    "./aos": {
+"/aos": {
+      "types": "./dist/aos.d.ts",
       "default": "./dist/aos.js"
-    },
+    }
     "./animations.css": "./dist/animations.css"
   },
   "files": [
