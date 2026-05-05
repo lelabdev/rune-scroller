@@ -19,12 +19,13 @@
   transform: translate3d(var(--tx, 0), var(--ty, 0), 0) scale(var(--scale, 1))
     rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg))
     rotate(var(--rotate, 0deg));
+  will-change: transform, opacity;
 }
 
 /* ===== Visible state ===== */
 [data-animation].is-visible {
   opacity: 1 !important;
-  will-change: transform, opacity;
+  will-change: auto;
   transform: translate3d(0, 0, 0) scale(1) rotateX(0deg) rotateY(0deg)
     rotate(0deg);
 }
