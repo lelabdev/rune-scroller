@@ -20,6 +20,7 @@
  * @property {number} [offset=0] - Offset of sentinel in pixels (negative = above element)
  * @property {string} [easing='ease'] - CSS timing function
  * @property {number} [delay=0] - Animation delay in milliseconds
+ * @property {number | number[]} [threshold=0] - IntersectionObserver threshold
  * @property {(element: HTMLElement) => void} [onVisible] - Callback when animation triggers
  */
 

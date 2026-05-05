@@ -110,7 +110,7 @@ export function runeScroller(element, options) {
         element.classList.remove("is-visible");
       }
     },
-    { threshold: 0 },
+    { threshold: options?.threshold ?? 0 },
   );
 
   intersectionObserver = observer;
