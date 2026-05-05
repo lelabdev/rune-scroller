@@ -308,6 +308,39 @@ function disable() {
   });
 }
 
+/**
+ * Destroy — full cleanup for SPA route changes.
+ * Destroys all actions, disconnects observers, resets state.
+ */
+function destroy() {
+  // Destroy all active runeScroller actions
+  activeActions.forEach((action) => {
+    try {
+      action.destroy();
+    } catch {
+      /* ignore */
+    }
+  });
+  activeActions = [];
+
+  // Disconnect the MutationObserver
+  if (mutationObserver) {
+    mutationObserver.disconnect();
+    mutationObserver = null;
+  }
+
+  // Reset initialized flag
+  initialized = false;
+
+  // Remove body attributes set during init
+  const body = document.querySelector("body");
+  if (body) {
+    body.removeAttribute("data-aos-easing");
+    body.removeAttribute("data-aos-duration");
+    body.removeAttribute("data-aos-delay");
+  }
+}
+
 // Public API — compatible with AOS
-export default { init, refresh, refreshHard, disable };
-export { init, refresh, refreshHard, disable };
+export default { init, refresh, refreshHard, disable, destroy };
+export { init, refresh, refreshHard, disable, destroy };
