@@ -60,6 +60,19 @@ let options = {
   initClassName: "aos-init",
 };
 
+/**
+ * Check if AOS should be disabled based on option value
+ * @param {boolean | string | (() => boolean) | undefined} disable
+ * @returns {boolean}
+ */
+function shouldDisable(disable) {
+  if (!disable) return false;
+  if (typeof disable === "function") return disable();
+  if (disable === "mobile") return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if (disable === "phone") return /Android|iPhone|iPod/i.test(navigator.userAgent);
+  return true; // disable: true
+}
+
 /** @type {Array<{ destroy: () => void }>} */
 let activeActions = [];
 
@@ -177,6 +190,9 @@ function init(settings = {}) {
   if (typeof window === "undefined") return;
 
   Object.assign(options, settings);
+
+  // Check disable option
+  if (shouldDisable(options.disable)) return;
 
   // Set global easing on body for CSS
   const body = document.querySelector("body");
