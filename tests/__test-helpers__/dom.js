@@ -81,23 +81,15 @@ export function createTestElements(count, options = {}) {
 }
 
 /**
- * Get sentinel element from animated element's wrapper
+ * Get sentinel element that is a next sibling of the animated element
  * @param {HTMLElement} element - The animated element
  * @returns {HTMLElement|null}
  */
 export function getSentinel(element) {
-  const wrapper = element.parentElement;
-  if (!wrapper) return null;
-
-  // Sentinel is typically the last child or has data-sentinel-id attribute
-  const sentinel = wrapper.querySelector("[data-sentinel-id]");
-  if (sentinel) return sentinel;
-
-  // Fallback: find child that is not the element
-  for (let i = 0; i < wrapper.children.length; i++) {
-    if (wrapper.children[i] !== element) {
-      return wrapper.children[i];
-    }
+  // Sentinel is positioned as a next sibling of the element
+  const next = element.nextElementSibling;
+  if (next && next.hasAttribute("data-sentinel-id")) {
+    return next;
   }
 
   return null;

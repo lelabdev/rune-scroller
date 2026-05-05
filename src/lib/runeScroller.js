@@ -84,7 +84,7 @@ export function runeScroller(element, options) {
   // Add sentinel ID to element (either provided or auto-generated)
   element.setAttribute("data-sentinel-id", sentinelId);
 
-  element.appendChild(sentinel);
+  element.insertAdjacentElement('afterend', sentinel);
 
   // Observe the sentinel with cleanup tracking
   const state = { isConnected: true };

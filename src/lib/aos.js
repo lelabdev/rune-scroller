@@ -93,7 +93,7 @@ function getInlineOption(el, key, fallback) {
   const attr = el.getAttribute("data-aos-" + key);
   if (attr === "true") return true;
   if (attr === "false") return false;
-  return attr || fallback;
+  return (attr !== null && attr !== "") ? attr : fallback;
 }
 
 /**

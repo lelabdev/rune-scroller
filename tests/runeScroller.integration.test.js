@@ -76,7 +76,7 @@ describe("runeScroller Integration Tests", () => {
   });
 
   describe("Sentinel Wrapping & Structure", () => {
-    it("wraps element correctly for flex parent", () => {
+    it("places sentinel as sibling in flex parent", () => {
       const flexContainer = document.createElement("div");
       flexContainer.style.cssText =
         "display: flex; flex-direction: column; gap: 10px;";
@@ -87,11 +87,13 @@ describe("runeScroller Integration Tests", () => {
 
       action = runeScroller(item, { animation: "fade-in" });
 
-      // Wrapper should be in flex container
-      const wrapper = item.parentElement;
-      expect(wrapper.parentElement).toBe(flexContainer);
-      expect(wrapper.style.display).toBe("block");
-      expect(wrapper.style.width).toBe("100%");
+      // Element should still be directly in flex container
+      expect(item.parentElement).toBe(flexContainer);
+      // Sentinel should be a next sibling
+      const sentinel = item.nextElementSibling;
+      expect(sentinel).toBeDefined();
+      expect(sentinel.hasAttribute("data-sentinel-id")).toBe(true);
+      expect(sentinel.style.position).toBe("absolute");
 
       flexContainer.remove();
     });
@@ -349,8 +351,12 @@ describe("runeScroller Integration Tests", () => {
 
       action = runeScroller(el, { animation: "fade-in" });
 
-      // Should be wrapped correctly
-      expect(el.parentElement.style.position).toBe("relative");
+      // Element should have position:relative set directly
+      expect(el.style.position).toBe("relative");
+      // Sentinel should be a next sibling
+      const sentinel = el.nextElementSibling;
+      expect(sentinel).toBeDefined();
+      expect(sentinel.hasAttribute("data-sentinel-id")).toBe(true);
 
       action.destroy();
       parent.remove();

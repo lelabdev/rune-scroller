@@ -75,14 +75,14 @@ describe("runeScroller Action", () => {
   });
 
   describe("Wrapping & Structure", () => {
-    it("wraps element in a container", () => {
-      const originalParent = element.parentElement;
+    it("places sentinel as next sibling of element", () => {
       action = runeScroller(element, { animation: "fade-in" });
 
-      const wrapper = element.parentElement;
-      expect(wrapper).toBeDefined();
-      expect(wrapper).not.toBe(originalParent);
-      expect(wrapper.style.position).toBe("relative");
+      // Sentinel should be a next sibling, not a child
+      const sentinel = element.nextElementSibling;
+      expect(sentinel).toBeDefined();
+      expect(sentinel.hasAttribute("data-sentinel-id")).toBe(true);
+      expect(sentinel.style.position).toBe("absolute");
     });
 
     it("keeps element in document after wrapping", () => {
@@ -129,10 +129,12 @@ describe("runeScroller Action", () => {
       expect(getAnimationType(element)).toBe("fade-in-up");
     });
 
-    it("sets initial opacity to 0", () => {
+    it("does not set inline opacity (CSS handles it)", () => {
       action = runeScroller(element, { animation: "fade-in" });
 
-      expect(element.style.opacity).toBe("0");
+      // CSS handles initial opacity via [data-animation] { opacity: 0 }
+      // No inline opacity is set — it would override slide animations
+      expect(element.style.opacity).toBe("");
     });
 
     it("sets CSS variables for duration", () => {
@@ -253,29 +255,29 @@ describe("runeScroller Action", () => {
       expect(() => action.destroy()).not.toThrow();
     });
 
-    it("unwraps element on destroy", () => {
-      const originalParent = element.parentElement;
-
+    it("removes sentinel sibling on destroy", () => {
       action = runeScroller(element, { animation: "fade-in" });
-      const wrapper = element.parentElement;
-
-      expect(wrapper).not.toBe(originalParent);
+      const sentinel = element.nextElementSibling;
+      expect(sentinel).toBeDefined();
+      expect(sentinel.hasAttribute("data-sentinel-id")).toBe(true);
 
       action.destroy();
 
-      // Element should be restored to original parent
-      expect(element.parentElement).toBe(originalParent);
+      // Sentinel should be removed from DOM
+      expect(sentinel.parentElement).toBeNull();
+      // Element's parent should be unchanged
+      expect(element.parentElement).toBe(document.body);
     });
 
-    it("removes wrapper from document", () => {
+    it("removes sentinel from document on destroy", () => {
       action = runeScroller(element, { animation: "fade-in" });
-      const wrapper = element.parentElement;
+      const sentinel = element.nextElementSibling;
 
-      expect(document.contains(wrapper)).toBe(true);
+      expect(document.contains(sentinel)).toBe(true);
 
       action.destroy();
 
-      expect(wrapper.parentElement).toBeNull();
+      expect(sentinel.parentElement).toBeNull();
     });
 
     it("can be destroyed multiple times safely", () => {
@@ -447,12 +449,10 @@ describe("runeScroller Action", () => {
 
       action.update({ offset: 100 });
 
-      // Sentinel should still exist in wrapper with same ID
-      const wrapper = element.parentElement;
-      const sentinel = wrapper.querySelector(
-        `[data-sentinel-id="${sentinelId}"]`,
-      );
+      // Sentinel should still exist as next sibling with same ID
+      const sentinel = element.nextElementSibling;
       expect(sentinel).not.toBeNull();
+      expect(sentinel.hasAttribute(`data-sentinel-id`)).toBe(true);
     });
   });
 
@@ -513,10 +513,10 @@ describe("runeScroller Action", () => {
       expect(id2).toBeDefined();
       expect(id2).not.toBe(id1);
 
-      // The element's immediate parent (wrapper2) should contain the second sentinel
-      const wrapper = element.parentElement;
-      const sentinel = wrapper.querySelector(`[data-sentinel-id="${id2}"]`);
+      // The element's next sibling should be the second sentinel
+      const sentinel = element.nextElementSibling;
       expect(sentinel).not.toBeNull();
+      expect(sentinel.hasAttribute("data-sentinel-id")).toBe(true);
 
       // Cleanup: destroy second action manually, first cleaned by afterEach
       act2.destroy();

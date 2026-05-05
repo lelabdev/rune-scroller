@@ -107,17 +107,12 @@ function createAOSElement(attrs = {}) {
 }
 
 /**
- * Get the sentinel element from an animated element's wrapper.
- * The element itself also gets data-sentinel-id, so we must find the child
- * of the wrapper that is NOT the animated element and HAS data-sentinel-id.
+ * Get the sentinel element that is a next sibling of the animated element.
  */
 function getSentinel(el) {
-  const wrapper = el.parentElement;
-  if (!wrapper) return null;
-  for (const child of wrapper.children) {
-    if (child !== el && child.hasAttribute("data-sentinel-id")) {
-      return child;
-    }
+  const next = el.nextElementSibling;
+  if (next && next.hasAttribute("data-sentinel-id")) {
+    return next;
   }
   return null;
 }
@@ -158,13 +153,10 @@ describe("AOS Integration Tests — Real-world HTML patterns", () => {
     expect(el.classList.contains("scroll-animate")).toBe(true);
     expect(el.getAttribute("data-animation")).toBe("fade-up");
 
-    // Element should be wrapped in a sentinel wrapper (position:relative)
-    const wrapper = el.parentElement;
-    expect(wrapper).toBeDefined();
-    expect(wrapper.tagName).toBe("DIV");
-    expect(wrapper.style.position).toBe("relative");
+    // Element gets position:relative directly for sentinel positioning
+    expect(el.style.position).toBe("relative");
 
-    // Sentinel child should exist inside the wrapper
+    // Sentinel should be a next sibling
     const sentinel = getSentinel(el);
     expect(sentinel).not.toBeNull();
 

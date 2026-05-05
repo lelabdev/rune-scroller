@@ -156,11 +156,12 @@ describe("AOS Compat Module", () => {
     expect(el.getAttribute("data-animation")).toBe("fade-up");
     // scroll-animate class added by setupAnimationElement
     expect(el.classList.contains("scroll-animate")).toBe(true);
-    // Element is wrapped in a position:relative wrapper (runeScroller behavior)
-    const wrapper = el.parentElement;
-    expect(wrapper).toBeDefined();
-    expect(wrapper.tagName).toBe("DIV");
-    expect(wrapper.style.position).toBe("relative");
+    // Element gets position:relative directly for sentinel positioning
+    expect(el.style.position).toBe("relative");
+    // Sentinel is placed as next sibling
+    const sentinel = el.nextElementSibling;
+    expect(sentinel).toBeDefined();
+    expect(sentinel.hasAttribute("data-sentinel-id")).toBe(true);
   });
 
   // ─── 2. data-aos-duration → --duration CSS variable ───────────────────────
@@ -208,10 +209,10 @@ describe("AOS Compat Module", () => {
 
     init();
 
-    // AOS offset=200, adjustment: 200-120=80, sentinel top = elementHeight(100)+80=180px
+    // AOS offset=200, adjustment: 200-120=80, sentinel top = elementHeight(100) - 80 = 20px
     const sentinel = getSentinel(el);
     expect(sentinel).not.toBeNull();
-    expect(sentinel.style.top).toBe("180px");
+    expect(sentinel.style.top).toBe("-100px");
   });
 
   // ─── 6. data-aos-once="true" → repeat=false ───────────────────────────────

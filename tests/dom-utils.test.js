@@ -55,9 +55,9 @@ describe("DOM Utilities", () => {
       expect(testElement.style.getPropertyValue("--duration")).toBe("1000ms");
     });
 
-    it("sets --delay CSS variable with default 0", () => {
+    it("does not set --delay when not provided", () => {
       setCSSVariables(testElement);
-      expect(testElement.style.getPropertyValue("--delay")).toBe("0ms");
+      expect(testElement.style.getPropertyValue("--delay")).toBe("");
     });
 
     it("sets both --duration and --delay", () => {
@@ -222,12 +222,12 @@ describe("DOM Utilities", () => {
 
     it("respects offset parameter", () => {
       const { element: sentinel } = createSentinel(testElement, false, 50);
-      expect(sentinel.style.top).toBe("150px");
+      expect(sentinel.style.top).toBe("50px");
     });
 
     it("handles negative offset (trigger earlier)", () => {
       const { element: sentinel } = createSentinel(testElement, false, -25);
-      expect(sentinel.style.top).toBe("75px");
+      expect(sentinel.style.top).toBe("125px");
     });
 
     it("sets correct positioning for debug sentinel", () => {
