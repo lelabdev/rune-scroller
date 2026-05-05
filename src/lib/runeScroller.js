@@ -46,6 +46,12 @@ export function runeScroller(element, options) {
     setupAnimationElement(element, animation);
   }
 
+  // Force initial state without transition to prevent FOUC
+  // When data-animation is added dynamically, the browser would animate
+  // from the current state (opacity:1) to the initial state (opacity:0)
+  element.style.transition = "none";
+  void element.offsetHeight; // Force reflow to apply no-transition
+
   // Warn about overflow:hidden in debug mode
   if (options?.debug && element.style.overflow === "hidden") {
     console.warn(
@@ -59,8 +65,10 @@ export function runeScroller(element, options) {
   }
   if (options?.easing !== undefined) { element.style.setProperty("--easing", options.easing); }
 
-  // Force reflow to ensure transitions are ready
-  void element.offsetHeight;
+  // Re-enable transitions after a frame (CSS takes over from here)
+  requestAnimationFrame(() => {
+    element.style.transition = "";
+  });
 
   // Ensure element can serve as positioning context for sentinel
   const originalPosition = element.style.position;
@@ -84,7 +92,7 @@ export function runeScroller(element, options) {
   // Add sentinel ID to element (either provided or auto-generated)
   element.setAttribute("data-sentinel-id", sentinelId);
 
-  element.insertAdjacentElement('afterend', sentinel);
+  element.appendChild(sentinel);
 
   // Observe the sentinel with cleanup tracking
   const state = { isConnected: true };
