@@ -14,13 +14,15 @@ let cssCheckResult = null;
 /**
  * @param {HTMLElement} element
  * @param {number} [duration]
- * @param {number} [delay=0]
+ * @param {number} [delay]
  */
-export function setCSSVariables(element, duration, delay = 0) {
+export function setCSSVariables(element, duration, delay) {
   if (duration !== undefined) {
     element.style.setProperty("--duration", `${duration}ms`);
   }
-  element.style.setProperty("--delay", `${delay}ms`);
+  if (delay !== undefined) {
+    element.style.setProperty("--delay", `${delay}ms`);
+  }
 }
 
 /**
