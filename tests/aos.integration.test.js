@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { Window } from "happy-dom";
-import { destroy, init, refreshHard } from "../src/lib/aos.js";
+import { destroy, disable, init, refreshHard } from "../src/lib/aos.js";
 import { mockIntersectionObserver } from "./__mocks__/IntersectionObserver.js";
 
 let window;
@@ -50,6 +50,43 @@ describe("AOS integration", () => {
     expect(slide.classList.contains("is-visible")).toBe(false);
   });
 
+  it("keeps one observer per element after repeated initialization", () => {
+    const element = addElement("fade");
+
+    init();
+    init();
+
+    expect(mockIntersectionObserver.getAll()).toHaveLength(1);
+    expect(mockIntersectionObserver.getObserverFor(element)).toBeDefined();
+  });
+
+  it("disconnects the mutation observer when disabled", () => {
+    const originalMutationObserver = globalThis.MutationObserver;
+    class TrackingMutationObserver {
+      static instances = [];
+
+      constructor() {
+        this.disconnected = false;
+        TrackingMutationObserver.instances.push(this);
+      }
+
+      observe() {}
+
+      disconnect() {
+        this.disconnected = true;
+      }
+    }
+    globalThis.MutationObserver = TrackingMutationObserver;
+
+    addElement("fade");
+    init();
+    disable();
+
+    expect(TrackingMutationObserver.instances).toHaveLength(1);
+    expect(TrackingMutationObserver.instances[0].disconnected).toBe(true);
+    globalThis.MutationObserver = originalMutationObserver;
+  });
+
   it("processes new elements after an explicit hard refresh", () => {
     const first = addElement("fade");
     init();
@@ -59,6 +96,26 @@ describe("AOS integration", () => {
 
     expect(first.getAttribute("data-animation")).toBe("fade");
     expect(second.getAttribute("data-animation")).toBe("bounce-in");
+  });
+
+  it("restores default options before reinitialization", () => {
+    addElement("fade");
+    init({ duration: 800 });
+    destroy();
+
+    const reinitialized = addElement("zoom-in");
+    init();
+
+    expect(reinitialized.style.getPropertyValue("--duration")).toBe("400ms");
+  });
+
+  it("does not retain disabled settings across initialization", () => {
+    const element = addElement("fade");
+
+    init({ disable: true });
+    init();
+
+    expect(element.getAttribute("data-animation")).toBe("fade");
   });
 
   it("does nothing during SSR", () => {

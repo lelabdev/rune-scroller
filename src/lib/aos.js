@@ -45,7 +45,7 @@ function resolveAnimation(name) {
 }
 
 /** @type {AOSOptions} */
-let options = {
+const DEFAULT_OPTIONS = {
   offset: 120,
   delay: 0,
   duration: 400,
@@ -60,6 +60,9 @@ let options = {
   initClassName: "aos-init",
 };
 
+/** @type {AOSOptions} */
+let options = { ...DEFAULT_OPTIONS };
+
 /**
  * Check if AOS should be disabled based on option value
  * @param {boolean | string | (() => boolean) | undefined} disable
@@ -68,8 +71,10 @@ let options = {
 function shouldDisable(disable) {
   if (!disable) return false;
   if (typeof disable === "function") return disable();
-  if (disable === "mobile") return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  if (disable === "phone") return /Android|iPhone|iPod/i.test(navigator.userAgent);
+  if (disable === "mobile")
+    return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if (disable === "phone")
+    return /Android|iPhone|iPod/i.test(navigator.userAgent);
   return true; // disable: true
 }
 
@@ -93,7 +98,7 @@ function getInlineOption(el, key, fallback) {
   const attr = el.getAttribute("data-aos-" + key);
   if (attr === "true") return true;
   if (attr === "false") return false;
-  return (attr !== null && attr !== "") ? attr : fallback;
+  return attr !== null && attr !== "" ? attr : fallback;
 }
 
 /**
@@ -127,7 +132,9 @@ function applyToElement(el) {
 
   // Parse anchorPlacement for sentinel positioning
   // Format: "vertical-horizontal" e.g. "top-bottom", "center-center"
-  const placement = getInlineOption(el, "anchor-placement", options.anchorPlacement) || "top-bottom";
+  const placement =
+    getInlineOption(el, "anchor-placement", options.anchorPlacement) ||
+    "top-bottom";
   const [anchor, target] = placement.split("-");
 
   // Map anchor to offset: sentinel position on the element
@@ -158,7 +165,6 @@ function applyToElement(el) {
     // Both need repeat=true for reverse animation to play
     repeat: !once || mirror,
   });
-
 
   activeActions.push(action);
 }
@@ -213,7 +219,8 @@ function observeMutations() {
 function init(settings = {}) {
   if (typeof window === "undefined") return;
 
-  Object.assign(options, settings);
+  if (initialized) destroy();
+  options = { ...DEFAULT_OPTIONS, ...settings };
 
   // Check disable option
   if (shouldDisable(options.disable)) return;
@@ -289,14 +296,7 @@ function refreshHard() {
  * Disable — remove all AOS attributes and classes
  */
 function disable() {
-  activeActions.forEach((action) => {
-    try {
-      action.destroy();
-    } catch {
-      /* ignore */
-    }
-  });
-  activeActions = [];
+  destroy();
 
   document.querySelectorAll("[data-aos]").forEach((el) => {
     el.removeAttribute("data-aos");
@@ -330,8 +330,9 @@ function destroy() {
     mutationObserver = null;
   }
 
-  // Reset initialized flag
+  // Reset initialized flag and options
   initialized = false;
+  options = { ...DEFAULT_OPTIONS };
 
   // Remove body attributes set during init
   const body = document.querySelector("body");
