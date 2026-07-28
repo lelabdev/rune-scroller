@@ -56,6 +56,19 @@ describe("AOS compatibility API", () => {
     expect(element.style.getPropertyValue("--easing")).toBe("linear");
   });
 
+  it("uses a positive AOS offset to extend the viewport bottom", () => {
+    const element = createAOSElement({
+      "data-aos": "fade-up",
+      "data-aos-offset": "120",
+    });
+
+    init();
+
+    expect(
+      mockIntersectionObserver.getObserverFor(element)?.options.rootMargin,
+    ).toBe("0px 0px 120px 0px");
+  });
+
   it("maps legacy AOS animation names", () => {
     const element = createAOSElement({ "data-aos": "fade-in-up" });
 

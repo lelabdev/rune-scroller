@@ -102,9 +102,9 @@ export function runeScroller(element, options) {
   }
 
   // Calculate rootMargin from offset
-  // Positive offset = trigger earlier = expand the viewport top boundary
+  // Positive offset = trigger earlier = expand the viewport bottom boundary
   const offset = options?.offset ?? 0;
-  const rootMargin = `${offset}px 0px 0px 0px`;
+  const rootMargin = `0px 0px ${offset}px 0px`;
 
   // Observe the element directly (not the sentinel)
   // This avoids overflow:hidden clipping issues when the element has transforms
@@ -191,7 +191,7 @@ export function runeScroller(element, options) {
           handleIntersection,
           {
             threshold: options?.threshold ?? 0,
-            rootMargin: `${newOffset}px 0px 0px 0px`,
+            rootMargin: `0px 0px ${newOffset}px 0px`,
           },
         );
         intersectionObserver = newObserver;

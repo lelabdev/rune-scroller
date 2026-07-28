@@ -67,6 +67,7 @@ describe("runeScroller integration", () => {
     action.update({ offset: 100 });
     const replacementObserver =
       mockIntersectionObserver.getObserverFor(element);
+    expect(replacementObserver?.options.rootMargin).toBe("0px 0px 100px 0px");
     action.destroy();
 
     expect(replacementObserver?.isConnected).toBe(false);

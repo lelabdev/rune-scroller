@@ -225,7 +225,7 @@ describe("DOM Utilities", () => {
       expect(sentinel.style.top).toBe("50px");
     });
 
-    it("handles negative offset (trigger earlier)", () => {
+    it("positions a negative-offset debug indicator below the element", () => {
       const { element: sentinel } = createSentinel(testElement, false, -25);
       expect(sentinel.style.top).toBe("125px");
     });

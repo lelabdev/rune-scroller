@@ -230,7 +230,7 @@ interface RuneScrollerOptions {
   easing?: string; // default: 'ease'
   repeat?: boolean; // default: false
   debug?: boolean;
-  offset?: number; // negative = earlier trigger
+  offset?: number; // positive = earlier trigger
   onVisible?: (el: HTMLElement) => void;
   sentinelColor?: string;
   sentinelId?: string;
