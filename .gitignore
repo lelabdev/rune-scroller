@@ -17,7 +17,8 @@ node_modules
 .DS_Store
 Thumbs.db
 
-# Env
+# Env and local package-manager credentials
+.npmrc
 .env
 .env.*
 !.env.example

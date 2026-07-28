@@ -148,7 +148,7 @@ function applyToElement(el) {
 
   // Apply runeScroller action
   const action = runeScroller(el, {
-    animation,
+    animation: /** @type {import('./types.js').AnimationType} */ (animation),
     duration,
     offset: anchorOffset,
     threshold,
@@ -221,7 +221,7 @@ function init(settings = {}) {
   // Set global easing on body for CSS
   const body = document.querySelector("body");
   if (body) {
-    body.setAttribute("data-aos-easing", options.easing);
+    body.setAttribute("data-aos-easing", options.easing ?? "ease");
     body.setAttribute("data-aos-duration", String(options.duration));
     body.setAttribute("data-aos-delay", String(options.delay));
   }
@@ -275,10 +275,11 @@ function refreshHard() {
   activeActions = [];
 
   // Remove init classes
-  if (options.initClassName) {
+  const initClassName = options.initClassName;
+  if (initClassName) {
     document
-      .querySelectorAll(`[data-aos].${options.initClassName}`)
-      .forEach((el) => el.classList.remove(options.initClassName));
+      .querySelectorAll(`[data-aos].${initClassName}`)
+      .forEach((el) => el.classList.remove(initClassName));
   }
 
   processElements();

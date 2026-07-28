@@ -20,7 +20,7 @@ export function createManagedObserver(target, callback, options) {
 }
 
 /**
- * @param {IntersectionObserver} observer
+ * @param {IntersectionObserver | null | undefined} observer
  * @param {{ isConnected: boolean }} state
  */
 export function disconnectObserver(observer, state) {
