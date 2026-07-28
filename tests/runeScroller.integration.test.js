@@ -59,6 +59,19 @@ describe("runeScroller integration", () => {
     expect(observer?.isConnected).toBe(false);
   });
 
+  it("disconnects a replacement observer when the action is destroyed", () => {
+    const element = document.createElement("div");
+    document.body.appendChild(element);
+    const action = runeScroller(element, { animation: "fade", offset: 0 });
+
+    action.update({ offset: 100 });
+    const replacementObserver =
+      mockIntersectionObserver.getObserverFor(element);
+    action.destroy();
+
+    expect(replacementObserver?.isConnected).toBe(false);
+  });
+
   it("keeps a caller-defined position when destroyed", () => {
     const element = document.createElement("div");
     element.style.position = "absolute";

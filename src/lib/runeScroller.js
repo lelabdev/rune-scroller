@@ -29,7 +29,10 @@ export function runeScroller(element, options) {
   // Validate animation type
   let animation = options?.animation ?? "fade-in";
   if (animation && !ANIMATION_TYPES.includes(animation)) {
-    if (typeof process !== "undefined" && process.env?.NODE_ENV !== "production") {
+    if (
+      typeof process !== "undefined" &&
+      process.env?.NODE_ENV !== "production"
+    ) {
       console.warn(
         `[rune-scroller] Invalid animation "${animation}". Using "fade-in" instead. ` +
           `Valid options: ${ANIMATION_TYPES.join(", ")}`,
@@ -63,7 +66,9 @@ export function runeScroller(element, options) {
   if (options?.duration !== undefined || options?.delay !== undefined) {
     setCSSVariables(element, options?.duration, options?.delay);
   }
-  if (options?.easing !== undefined) { element.style.setProperty("--easing", options.easing); }
+  if (options?.easing !== undefined) {
+    element.style.setProperty("--easing", options.easing);
+  }
 
   // Re-enable transitions after a frame (CSS takes over from here)
   window.requestAnimationFrame(() => {
@@ -124,14 +129,10 @@ export function runeScroller(element, options) {
     }
   };
 
-  const { observer } = createManagedObserver(
-    element,
-    handleIntersection,
-    {
-      threshold: options?.threshold ?? 0,
-      rootMargin,
-    },
-  );
+  const { observer } = createManagedObserver(element, handleIntersection, {
+    threshold: options?.threshold ?? 0,
+    rootMargin,
+  });
 
   intersectionObserver = observer;
 
@@ -158,10 +159,15 @@ export function runeScroller(element, options) {
       if (newOptions?.animation) {
         element.setAttribute("data-animation", newOptions.animation);
       }
-      if (newOptions?.duration || newOptions?.delay) {
+      if (
+        newOptions?.duration !== undefined ||
+        newOptions?.delay !== undefined
+      ) {
         setCSSVariables(element, newOptions?.duration, newOptions?.delay);
       }
-      if (newOptions?.easing !== undefined) { element.style.setProperty("--easing", newOptions.easing); }
+      if (newOptions?.easing !== undefined) {
+        element.style.setProperty("--easing", newOptions.easing);
+      }
       // Update repeat option
       if (
         newOptions?.repeat !== undefined &&
@@ -170,8 +176,12 @@ export function runeScroller(element, options) {
         options = { ...options, repeat: newOptions.repeat };
       }
       // Recreate observer if offset or threshold changed
-      const offsetChanged = newOptions?.offset !== undefined && newOptions.offset !== options?.offset;
-      const thresholdChanged = newOptions?.threshold !== undefined && newOptions.threshold !== options?.threshold;
+      const offsetChanged =
+        newOptions?.offset !== undefined &&
+        newOptions.offset !== options?.offset;
+      const thresholdChanged =
+        newOptions?.threshold !== undefined &&
+        newOptions.threshold !== options?.threshold;
       if (offsetChanged || thresholdChanged) {
         options = { ...options, ...newOptions };
         disconnectObserver(intersectionObserver, state);
@@ -185,9 +195,13 @@ export function runeScroller(element, options) {
           },
         );
         intersectionObserver = newObserver;
+        state.isConnected = true;
       }
       // Update debug if changed
-      if (newOptions?.debug !== undefined && newOptions.debug !== options?.debug) {
+      if (
+        newOptions?.debug !== undefined &&
+        newOptions.debug !== options?.debug
+      ) {
         options = { ...options, ...newOptions };
       }
     },
