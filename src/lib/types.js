@@ -17,7 +17,7 @@
  * @property {string} [sentinelColor='#00e0ff'] - Sentinel color for debug mode
  * @property {string} [sentinelId] - Unique identifier for sentinel
  * @property {string} [debugLabel] - Debug label to show on sentinel
- * @property {number} [offset=0] - Offset of sentinel in pixels (negative = above element)
+ * @property {number} [offset=0] - Viewport offset in pixels (positive = trigger earlier)
  * @property {string} [easing='ease'] - CSS timing function
  * @property {number} [delay=0] - Animation delay in milliseconds
  * @property {number | number[]} [threshold=0] - IntersectionObserver threshold

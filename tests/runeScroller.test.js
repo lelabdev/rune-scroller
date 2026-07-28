@@ -38,6 +38,14 @@ describe("runeScroller action", () => {
     expect(element.style.position).toBe("relative");
   });
 
+  it("uses a positive offset to extend the viewport bottom", () => {
+    action = runeScroller(element, { animation: "fade", offset: 120 });
+
+    expect(
+      mockIntersectionObserver.getObserverFor(element)?.options.rootMargin,
+    ).toBe("0px 0px 120px 0px");
+  });
+
   it("adds the visible class and invokes onVisible on intersection", () => {
     let visibleElement;
     action = runeScroller(element, {
