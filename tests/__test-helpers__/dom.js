@@ -81,18 +81,12 @@ export function createTestElements(count, options = {}) {
 }
 
 /**
- * Get sentinel element that is a next sibling of the animated element
+ * Get the optional debug sentinel inside an animated element.
  * @param {HTMLElement} element - The animated element
  * @returns {HTMLElement|null}
  */
 export function getSentinel(element) {
-  // Sentinel is positioned as a next sibling of the element
-  const next = element.nextElementSibling;
-  if (next && next.hasAttribute("data-sentinel-id")) {
-    return next;
-  }
-
-  return null;
+  return element.querySelector("[data-sentinel-id]");
 }
 
 /**

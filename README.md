@@ -224,7 +224,7 @@ AOS.init({
 
 ```typescript
 interface RuneScrollerOptions {
-  animation?: AnimationType; // default: 'fade-up'
+  animation?: AnimationType; // default: 'fade-in'
   duration?: number; // default: 400
   delay?: number; // default: 0
   easing?: string; // default: 'ease'
@@ -232,8 +232,8 @@ interface RuneScrollerOptions {
   debug?: boolean;
   offset?: number; // positive = earlier trigger
   onVisible?: (el: HTMLElement) => void;
-  sentinelColor?: string;
-  sentinelId?: string;
+  sentinelColor?: string; // debug indicator color
+  sentinelId?: string; // debug indicator identifier
 }
 ```
 
@@ -241,12 +241,12 @@ interface RuneScrollerOptions {
 
 ## 🎯 How It Works
 
-1. Invisible 1px sentinel appended as child of the animated element
-2. When sentinel enters viewport, animation triggers via IntersectionObserver
-3. Pure CSS transitions (GPU-accelerated via `translate3d`)
-4. ResizeObserver auto-repositions sentinel
+1. The animated element is observed directly with `IntersectionObserver`.
+2. When it enters the viewport, the `is-visible` class triggers its CSS transition.
+3. Positive `offset` values extend the viewport bottom, triggering animations earlier while scrolling down.
+4. `debug: true` adds a visual sentinel indicator only; it does not affect observation.
 
-**No wrapper divs** — the element itself becomes the positioning context. Your flex/grid layouts stay intact.
+**No wrapper divs** — the original element is observed directly, so flex and grid layouts stay intact.
 
 ---
 
@@ -282,6 +282,22 @@ import type { AnimationType, RuneScrollerOptions } from "rune-scroller";
 ```
 
 ---
+
+## 🧪 Development
+
+```bash
+bun run test
+bun run check
+bun run lint
+bun run build
+```
+
+Browser tests require Playwright's Chromium runtime once per machine:
+
+```bash
+bunx playwright install chromium
+bunx playwright test
+```
 
 ## 📖 Examples
 

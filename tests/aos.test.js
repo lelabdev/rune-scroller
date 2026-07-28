@@ -23,7 +23,9 @@ beforeEach(() => {
   globalThis.document = document;
   globalThis.HTMLElement = window.HTMLElement;
   globalThis.MutationObserver = window.MutationObserver;
-  globalThis.getComputedStyle = () => ({ animation: "fade" });
+  globalThis.getComputedStyle = () => ({
+    transitionProperty: "opacity, transform",
+  });
   mockIntersectionObserver.install();
 });
 
