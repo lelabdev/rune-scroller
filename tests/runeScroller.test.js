@@ -76,6 +76,19 @@ describe("runeScroller action", () => {
     expect(element.style.getPropertyValue("--easing")).toBe("linear");
   });
 
+  it("applies zero duration and delay through update", () => {
+    action = runeScroller(element, {
+      animation: "fade",
+      duration: 300,
+      delay: 300,
+    });
+
+    action.update({ duration: 0, delay: 0 });
+
+    expect(element.style.getPropertyValue("--duration")).toBe("0ms");
+    expect(element.style.getPropertyValue("--delay")).toBe("0ms");
+  });
+
   it("creates and cleans up a debug sentinel", () => {
     action = runeScroller(element, {
       animation: "fade",
