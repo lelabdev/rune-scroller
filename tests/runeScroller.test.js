@@ -13,7 +13,9 @@ beforeEach(() => {
   document = window.document;
   globalThis.window = window;
   globalThis.document = document;
-  globalThis.getComputedStyle = () => ({ animation: "fade" });
+  globalThis.getComputedStyle = () => ({
+    transitionProperty: "opacity, transform",
+  });
   mockIntersectionObserver.install();
 
   element = document.createElement("div");
@@ -30,6 +32,12 @@ afterEach(() => {
 });
 
 describe("runeScroller action", () => {
+  it("uses fade-in as the default animation", () => {
+    action = runeScroller(element);
+
+    expect(element.getAttribute("data-animation")).toBe("fade-in");
+  });
+
   it("observes the animated element directly without a sentinel", () => {
     action = runeScroller(element, { animation: "fade-up" });
 

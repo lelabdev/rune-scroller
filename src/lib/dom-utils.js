@@ -90,23 +90,27 @@ export function createSentinel(
  */
 export function checkAndWarnIfCSSNotLoaded() {
   if (typeof document === "undefined") return false;
-  if (typeof process !== "undefined" && process.env?.NODE_ENV === "production") return true;
+  if (typeof process !== "undefined" && process.env?.NODE_ENV === "production")
+    return true;
 
   // Return cached result if already checked (avoids expensive reflows)
   if (cssCheckResult !== null) return cssCheckResult;
 
-  // Try to detect if animations.css is loaded by checking for animation classes
+  // The default animation path uses transitions, not CSS keyframes.
   const test = document.createElement("div");
-  test.className = "scroll-animate is-visible";
+  test.setAttribute("data-animation", "fade");
   test.style.position = "absolute";
-  test.style.opacity = "0";
   document.body.appendChild(test);
   const computed = getComputedStyle(test);
-  const hasAnimation =
-    computed.animation !== "none" && computed.animation !== "";
+  const transitionProperties = computed.transitionProperty
+    .split(",")
+    .map((property) => property.trim());
+  const hasStylesheet =
+    transitionProperties.includes("opacity") &&
+    transitionProperties.includes("transform");
   test.remove();
 
-  if (!hasAnimation) {
+  if (!hasStylesheet) {
     console.warn(
       "[rune-scroller] CSS animations not found. Make sure to import the animations:\n" +
         '  import "rune-scroller/animations.css";\n' +
@@ -115,6 +119,6 @@ export function checkAndWarnIfCSSNotLoaded() {
   }
 
   // Cache the result for future calls
-  cssCheckResult = hasAnimation;
-  return hasAnimation;
+  cssCheckResult = hasStylesheet;
+  return hasStylesheet;
 }

@@ -49,6 +49,43 @@ describe("DOM Utilities", () => {
     }
   });
 
+  describe("checkAndWarnIfCSSNotLoaded", () => {
+    it("recognizes the stylesheet from its transition property", async () => {
+      const originalGetComputedStyle = global.getComputedStyle;
+      global.getComputedStyle = () => ({
+        animation: "none",
+        transitionProperty: "opacity, transform",
+      });
+
+      const { checkAndWarnIfCSSNotLoaded } = await import(
+        "../src/lib/dom-utils.js?css-loaded"
+      );
+
+      expect(checkAndWarnIfCSSNotLoaded()).toBe(true);
+      global.getComputedStyle = originalGetComputedStyle;
+    });
+
+    it("warns when the stylesheet transition is unavailable", async () => {
+      const originalGetComputedStyle = global.getComputedStyle;
+      const originalWarn = console.warn;
+      const warnings = [];
+      global.getComputedStyle = () => ({
+        animation: "none",
+        transitionProperty: "",
+      });
+      console.warn = (message) => warnings.push(message);
+
+      const { checkAndWarnIfCSSNotLoaded } = await import(
+        "../src/lib/dom-utils.js?css-missing"
+      );
+
+      expect(checkAndWarnIfCSSNotLoaded()).toBe(false);
+      expect(warnings).toHaveLength(1);
+      console.warn = originalWarn;
+      global.getComputedStyle = originalGetComputedStyle;
+    });
+  });
+
   describe("setCSSVariables", () => {
     it("sets --duration CSS variable", () => {
       setCSSVariables(testElement, 1000);

@@ -10,13 +10,13 @@
 /**
  * Options for the runeScroller action
  * @typedef {Object} RuneScrollerOptions
- * @property {AnimationType} [animation='fade-up'] - Animation type to apply
+ * @property {AnimationType} [animation='fade-in'] - Animation type to apply
  * @property {number} [duration=400] - Animation duration in milliseconds
  * @property {boolean} [repeat=false] - Repeat animation on every scroll
- * @property {boolean} [debug=false] - Show sentinel as visible line for debugging
- * @property {string} [sentinelColor='#00e0ff'] - Sentinel color for debug mode
- * @property {string} [sentinelId] - Unique identifier for sentinel
- * @property {string} [debugLabel] - Debug label to show on sentinel
+ * @property {boolean} [debug=false] - Show a visual trigger indicator for debugging
+ * @property {string} [sentinelColor='#00e0ff'] - Debug indicator color
+ * @property {string} [sentinelId] - Unique debug indicator identifier
+ * @property {string} [debugLabel] - Label to show on the debug indicator
  * @property {number} [offset=0] - Viewport offset in pixels (positive = trigger earlier)
  * @property {string} [easing='ease'] - CSS timing function
  * @property {number} [delay=0] - Animation delay in milliseconds
