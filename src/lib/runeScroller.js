@@ -66,7 +66,7 @@ export function runeScroller(element, options) {
   if (options?.easing !== undefined) { element.style.setProperty("--easing", options.easing); }
 
   // Re-enable transitions after a frame (CSS takes over from here)
-  requestAnimationFrame(() => {
+  window.requestAnimationFrame(() => {
     element.style.transition = "";
   });
 
@@ -77,8 +77,10 @@ export function runeScroller(element, options) {
   }
 
   // Create debug sentinel (visual indicator only, not used for observation)
+  /** @type {HTMLElement | null} */
   let sentinel = null;
-  let sentinelId = null;
+  /** @type {string | undefined} */
+  let sentinelId;
   if (options?.debug) {
     const sentinelResult = createSentinel(
       element,
@@ -102,10 +104,13 @@ export function runeScroller(element, options) {
   // Observe the element directly (not the sentinel)
   // This avoids overflow:hidden clipping issues when the element has transforms
   const state = { isConnected: true };
+  /** @type {ResizeObserver | undefined} */
   let resizeObserver;
+  /** @type {IntersectionObserver | undefined} */
   let intersectionObserver;
 
   // IntersectionObserver callback
+  /** @param {IntersectionObserverEntry[]} entries */
   const handleIntersection = (entries) => {
     const isIntersecting = entries[0].isIntersecting;
     if (isIntersecting) {
