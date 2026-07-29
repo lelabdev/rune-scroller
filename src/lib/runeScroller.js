@@ -93,8 +93,9 @@ export function runeScroller(element, options = {}) {
   let animation = normalizeAnimation(currentOptions.animation);
   setupAnimationElement(element, animation);
 
+  // Keep transitions disabled through the first paint, without forcing a
+  // synchronous layout read. The second frame restores caller transitions.
   element.style.transition = "none";
-  void element.offsetHeight;
 
   if (
     currentOptions.duration !== undefined ||
@@ -107,8 +108,12 @@ export function runeScroller(element, options = {}) {
   }
 
   let destroyed = false;
+  /** @type {number | undefined} */
+  let restoreTransitionFrame;
   const animationFrame = window.requestAnimationFrame(() => {
-    if (!destroyed) element.style.transition = original.transition;
+    restoreTransitionFrame = window.requestAnimationFrame(() => {
+      if (!destroyed) element.style.transition = original.transition;
+    });
   });
 
   /** @type {HTMLElement | null} */
@@ -319,6 +324,9 @@ export function runeScroller(element, options = {}) {
       if (destroyed) return;
       destroyed = true;
       window.cancelAnimationFrame?.(animationFrame);
+      if (restoreTransitionFrame !== undefined) {
+        window.cancelAnimationFrame?.(restoreTransitionFrame);
+      }
       releaseWillChange();
       disconnectObserver(managedObserver, state);
       disableDebug();
