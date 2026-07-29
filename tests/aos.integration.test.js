@@ -151,7 +151,7 @@ describe("AOS integration", () => {
     expect(document.body.getAttribute("data-aos-delay")).toBe("456");
   });
 
-  it("processes added AOS elements without replacing active observers", async () => {
+  it("processes added AOS elements with a shared observer", async () => {
     const first = addElement("fade");
     const second = addElement("zoom-in");
     init();
@@ -161,10 +161,11 @@ describe("AOS integration", () => {
     const third = addElement("bounce-in");
     await new Promise((resolve) => window.setTimeout(resolve, 0));
 
+    const thirdObserver = getAOSObserver(third);
     expect(firstObserver?.isConnected).toBe(true);
-    expect(secondObserver?.isConnected).toBe(true);
-    expect(getAOSObserver(third)).toBeDefined();
-    expect(mockIntersectionObserver.getAll()).toHaveLength(3);
+    expect(secondObserver).toBe(firstObserver);
+    expect(thirdObserver).toBe(firstObserver);
+    expect(mockIntersectionObserver.getAll()).toHaveLength(1);
   });
 
   it("destroys actions when animated elements are removed", async () => {

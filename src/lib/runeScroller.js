@@ -117,8 +117,8 @@ export function runeScroller(element, options = {}) {
   let positionChanged = false;
   /** @type {ResizeObserver | undefined} */
   let resizeObserver;
-  /** @type {IntersectionObserver | undefined} */
-  let intersectionObserver;
+  /** @type {ReturnType<typeof createManagedObserver> | undefined} */
+  let managedObserver;
   const state = { isConnected: false };
 
   function ensurePositioningContext() {
@@ -205,7 +205,7 @@ export function runeScroller(element, options = {}) {
       element.classList.add("is-visible");
       currentOptions.onVisible?.(element);
       if (!currentOptions.repeat) {
-        disconnectObserver(intersectionObserver, state);
+        disconnectObserver(managedObserver, state);
       }
     } else if (currentOptions.repeat) {
       element.classList.remove("is-visible");
@@ -214,7 +214,7 @@ export function runeScroller(element, options = {}) {
   };
 
   function connectObserver() {
-    disconnectObserver(intersectionObserver, state);
+    disconnectObserver(managedObserver, state);
     const offset = currentOptions.offset ?? 0;
     const rootMargin = currentOptions.rootMargin ?? `0px 0px ${offset}px 0px`;
     const target = currentOptions.observerTarget ?? element;
@@ -224,11 +224,10 @@ export function runeScroller(element, options = {}) {
       element.style.position = original.position;
       positionChanged = false;
     }
-    const { observer } = createManagedObserver(target, handleIntersection, {
+    managedObserver = createManagedObserver(target, handleIntersection, {
       threshold: currentOptions.threshold ?? 0,
       rootMargin,
     });
-    intersectionObserver = observer;
     state.isConnected = true;
   }
 
@@ -286,7 +285,7 @@ export function runeScroller(element, options = {}) {
       if (destroyed) return;
       destroyed = true;
       window.cancelAnimationFrame?.(animationFrame);
-      disconnectObserver(intersectionObserver, state);
+      disconnectObserver(managedObserver, state);
       disableDebug();
       if (positionChanged) {
         element.style.position = original.position;

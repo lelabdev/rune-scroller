@@ -11,7 +11,9 @@ beforeEach(() => {
   document = window.document;
   globalThis.window = window;
   globalThis.document = document;
-  globalThis.getComputedStyle = () => ({ animation: "fade" });
+  globalThis.getComputedStyle = () => ({
+    transitionProperty: "opacity, transform",
+  });
   mockIntersectionObserver.install();
 });
 
@@ -108,6 +110,50 @@ describe("runeScroller integration", () => {
     expect(replacementObserver?.options.threshold).toBe(0.75);
     expect(mockIntersectionObserver.getObserverFor(element)).toBeUndefined();
     action.destroy();
+  });
+
+  it("shares observers with matching options and releases each target independently", () => {
+    const first = document.createElement("div");
+    const second = document.createElement("div");
+    document.body.append(first, second);
+
+    const firstAction = runeScroller(first, { animation: "fade", offset: 120 });
+    const secondAction = runeScroller(second, {
+      animation: "zoom-in",
+      offset: 120,
+    });
+    const sharedObserver = mockIntersectionObserver.getObserverFor(first);
+
+    expect(mockIntersectionObserver.getAll()).toHaveLength(1);
+    expect(mockIntersectionObserver.getObserverFor(second)).toBe(
+      sharedObserver,
+    );
+
+    firstAction.destroy();
+    expect(mockIntersectionObserver.getObserverFor(first)).toBeUndefined();
+    expect(mockIntersectionObserver.getObserverFor(second)).toBe(
+      sharedObserver,
+    );
+
+    secondAction.destroy();
+    expect(mockIntersectionObserver.getAll()).toHaveLength(0);
+  });
+
+  it("does not share observers with different options", () => {
+    const first = document.createElement("div");
+    const second = document.createElement("div");
+    document.body.append(first, second);
+
+    const firstAction = runeScroller(first, { animation: "fade", offset: 120 });
+    const secondAction = runeScroller(second, {
+      animation: "fade",
+      offset: 240,
+    });
+
+    expect(mockIntersectionObserver.getAll()).toHaveLength(2);
+
+    firstAction.destroy();
+    secondAction.destroy();
   });
 
   it("keeps a caller-defined position when destroyed", () => {
