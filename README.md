@@ -152,6 +152,14 @@ export class AppComponent implements OnInit {
 
 The key difference: **AOS runs JavaScript on every scroll event** for every element. rune-scroller delegates detection to the browser's native IntersectionObserver — zero JS execution until an element actually enters the viewport.
 
+## Measured Performance
+
+The reproducible benchmark compares Rune Scroller and `aos@2.3.4` with 50, 200, and 1,000 elements across desktop and mobile Chromium profiles. At 1,000 elements on the measured machine, Rune Scroller completed the scroll scenario in **662–664 ms** versus **869–886 ms** for AOS, and its median worst frame remained **below 17 ms** versus **40–49 ms** for AOS.
+
+Rune Scroller uses one shared `IntersectionObserver` and no scroll or resize listener in this scenario. AOS uses two scroll/resize listeners. Rune Scroller currently retains more JavaScript heap at 1,000 elements, so the results do not claim a memory advantage.
+
+See the complete raw samples, medians, variance inputs, environment, and methodology in [`benchmarks/results/latest.md`](./benchmarks/results/latest.md). Run `bun run benchmark` on the target machine before using these numbers in public material.
+
 ## AOS Compatibility
 
 Rune Scroller implements the common declarative AOS workflow, not every legacy AOS behavior.

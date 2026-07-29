@@ -15,6 +15,12 @@ describe("README public claims", () => {
     expect(readme).toContain("29 primary animations + 7 legacy aliases");
   });
 
+  it("links to the reproducible benchmark results", () => {
+    expect(readme).toContain("## Measured Performance");
+    expect(readme).toContain("benchmarks/results/latest.md");
+    expect(readme).toContain("more JavaScript heap");
+  });
+
   it("defines the supported AOS compatibility surface", () => {
     expect(readme).toContain("## AOS Compatibility");
     expect(readme).toContain("`data-aos-anchor`");
