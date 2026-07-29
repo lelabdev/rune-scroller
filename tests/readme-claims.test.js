@@ -15,6 +15,12 @@ describe("README public claims", () => {
     expect(readme).toContain("29 primary animations + 7 legacy aliases");
   });
 
+  it("defines the supported AOS compatibility surface", () => {
+    expect(readme).toContain("## AOS Compatibility");
+    expect(readme).toContain("`data-aos-anchor`");
+    expect(readme).toContain("Call `AOS.refreshHard()`");
+  });
+
   it("documents the IntersectionObserver browser requirement", () => {
     expect(readme).toContain("Requires a browser with");
     expect(readme).toContain("IntersectionObserver support");

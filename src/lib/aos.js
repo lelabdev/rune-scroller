@@ -108,6 +108,15 @@ function getInlineOption(el, key, fallback) {
 }
 
 /**
+ * @param {*} value
+ * @param {number} fallback
+ */
+function getFiniteNumber(value, fallback) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+/**
  * Apply rune-scroller action to a single element
  * @param {HTMLElement} el
  */
@@ -125,9 +134,18 @@ function applyToElement(el) {
     animation: animation ? el.classList.contains(animation) : false,
   };
 
-  const duration = Number(getInlineOption(el, "duration", options.duration));
-  const delay = Number(getInlineOption(el, "delay", options.delay));
-  const offset = Number(getInlineOption(el, "offset", options.offset));
+  const duration = getFiniteNumber(
+    getInlineOption(el, "duration", options.duration),
+    options.duration ?? 400,
+  );
+  const delay = getFiniteNumber(
+    getInlineOption(el, "delay", options.delay),
+    options.delay ?? 0,
+  );
+  const offset = getFiniteNumber(
+    getInlineOption(el, "offset", options.offset),
+    options.offset ?? 120,
+  );
   const once = getInlineOption(el, "once", options.once);
   const mirror = getInlineOption(el, "mirror", options.mirror);
 
@@ -318,6 +336,8 @@ function refresh() {
  * Hard refresh — destroy and re-process all elements
  */
 function refreshHard() {
+  if (typeof document === "undefined") return;
+
   // Destroy all active actions
   activeActions.forEach((action) => {
     try {
@@ -343,6 +363,8 @@ function refreshHard() {
  * Disable — remove all AOS attributes and classes
  */
 function disable() {
+  if (typeof document === "undefined") return;
+
   const cleanupOptions = options;
   const elements = document.querySelectorAll("[data-aos]");
   destroy();
@@ -370,6 +392,8 @@ function disable() {
  * Destroys all actions, disconnects observers, resets state.
  */
 function destroy() {
+  if (typeof document === "undefined") return;
+
   if (removeStartEventListener) {
     removeStartEventListener();
     removeStartEventListener = null;
