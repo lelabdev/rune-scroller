@@ -142,28 +142,31 @@ function applyToElement(el) {
     "top-bottom";
   const [anchor, target] = placement.split("-");
 
-  // Map anchor to offset: sentinel position on the element
-  // top = 0, center = 50%, bottom = 100% of element height
-  let anchorOffset = offset;
-  const elHeight = el.offsetHeight || 0;
-  if (anchor === "center") {
-    anchorOffset = offset + Math.round(elHeight / 2);
-  } else if (anchor === "bottom") {
-    anchorOffset = offset + elHeight;
-  }
-
-  // Map target to threshold
-  let threshold = 0;
-  if (target === "center") threshold = 0.5;
-  else if (target === "top") threshold = 0;
-  // bottom = default 0 (sentinel hits bottom of viewport)
+  const anchorPosition =
+    { top: "0%", center: "50%", bottom: "100%" }[
+      /** @type {"top" | "center" | "bottom"} */ (anchor)
+    ] ?? "0%";
+  const viewportOffset =
+    {
+      bottom: "0%",
+      center: "-50%",
+      top: "-100%",
+    }[/** @type {"top" | "center" | "bottom"} */ (target)] ?? "0%";
+  const anchorElement = document.createElement("span");
+  anchorElement.setAttribute("data-aos-anchor", "");
+  anchorElement.style.cssText = `position:absolute;top:${anchorPosition};left:0;width:1px;height:1px;pointer-events:none`;
+  el.appendChild(anchorElement);
 
   // Apply runeScroller action
   const action = runeScroller(el, {
     animation: /** @type {import('./types.js').AnimationType} */ (animation),
     duration,
-    offset: anchorOffset,
-    threshold,
+    offset,
+    rootMargin:
+      target === "bottom"
+        ? `0px 0px ${offset}px 0px`
+        : `0px 0px calc(${viewportOffset} + ${offset}px) 0px`,
+    observerTarget: anchorElement,
     delay,
     easing: getInlineOption(el, "easing", options.easing),
     onVisible: () => {
@@ -180,7 +183,12 @@ function applyToElement(el) {
     repeat: !once || mirror,
   });
 
-  activeActions.set(el, action);
+  activeActions.set(el, {
+    destroy() {
+      action.destroy();
+      anchorElement.remove();
+    },
+  });
 }
 
 /**

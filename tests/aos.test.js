@@ -58,6 +58,21 @@ describe("AOS compatibility API", () => {
     expect(element.style.getPropertyValue("--easing")).toBe("linear");
   });
 
+  it("uses an element anchor and viewport placement for anchor-placement", () => {
+    const element = createAOSElement({
+      "data-aos": "fade-up",
+      "data-aos-anchor-placement": "top-center",
+    });
+
+    init();
+
+    const anchor = element.querySelector("[data-aos-anchor]");
+    expect(anchor?.style.top).toBe("0%");
+    expect(
+      mockIntersectionObserver.getObserverFor(anchor)?.options.rootMargin,
+    ).toBe("0px 0px calc(-50% + 120px) 0px");
+  });
+
   it("uses a positive AOS offset to extend the viewport bottom", () => {
     const element = createAOSElement({
       "data-aos": "fade-up",
@@ -67,7 +82,9 @@ describe("AOS compatibility API", () => {
     init();
 
     expect(
-      mockIntersectionObserver.getObserverFor(element)?.options.rootMargin,
+      mockIntersectionObserver.getObserverFor(
+        element.querySelector("[data-aos-anchor]"),
+      )?.options.rootMargin,
     ).toBe("0px 0px 120px 0px");
   });
 
@@ -83,7 +100,10 @@ describe("AOS compatibility API", () => {
     const element = createAOSElement({ "data-aos": "fade" });
     init({ once: true });
 
-    mockIntersectionObserver.trigger(element, true);
+    mockIntersectionObserver.trigger(
+      element.querySelector("[data-aos-anchor]"),
+      true,
+    );
 
     expect(element.classList.contains("is-visible")).toBe(true);
   });
@@ -115,10 +135,11 @@ describe("AOS compatibility API", () => {
     const element = createAOSElement({ "data-aos": "fade" });
     init({ animatedClassName: "custom-animated" });
 
-    mockIntersectionObserver.trigger(element, true);
+    const anchor = element.querySelector("[data-aos-anchor]");
+    mockIntersectionObserver.trigger(anchor, true);
     expect(element.classList.contains("custom-animated")).toBe(true);
 
-    mockIntersectionObserver.trigger(element, false);
+    mockIntersectionObserver.trigger(anchor, false);
     expect(element.classList.contains("custom-animated")).toBe(false);
   });
 
