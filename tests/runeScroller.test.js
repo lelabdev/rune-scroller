@@ -185,6 +185,41 @@ describe("runeScroller action", () => {
     expect(element.hasAttribute("data-sentinel-id")).toBe(false);
   });
 
+  it("uses will-change only while an animation is active", () => {
+    action = runeScroller(element, { animation: "fade", repeat: true });
+
+    expect(element.style.getPropertyValue("will-change")).toBe("");
+
+    mockIntersectionObserver.trigger(element, true);
+    expect(element.style.getPropertyValue("will-change")).toBe(
+      "transform, opacity",
+    );
+
+    element.dispatchEvent(new window.Event("transitionend"));
+    expect(element.style.getPropertyValue("will-change")).toBe("");
+  });
+
+  it("does not retain a compositor hint for zero-duration animations", () => {
+    action = runeScroller(element, {
+      animation: "fade",
+      duration: 0,
+      delay: 0,
+    });
+
+    mockIntersectionObserver.trigger(element, true);
+
+    expect(element.style.getPropertyValue("will-change")).toBe("");
+  });
+
+  it("skips compositor hints when reduced motion is enabled", () => {
+    window.matchMedia = () => ({ matches: true });
+    action = runeScroller(element, { animation: "fade" });
+
+    mockIntersectionObserver.trigger(element, true);
+
+    expect(element.style.getPropertyValue("will-change")).toBe("");
+  });
+
   it("restores action-owned DOM state on destroy", () => {
     action = runeScroller(element, {
       animation: "fade",

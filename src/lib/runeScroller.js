@@ -86,6 +86,7 @@ export function runeScroller(element, options = {}) {
     duration: captureStyleProperty(element, "--duration"),
     delay: captureStyleProperty(element, "--delay"),
     easing: captureStyleProperty(element, "--easing"),
+    willChange: captureStyleProperty(element, "will-change"),
   };
 
   let currentOptions = { ...options };
@@ -196,18 +197,51 @@ export function runeScroller(element, options = {}) {
 
   if (currentOptions.debug) enableDebug();
 
+  /** @type {number | undefined} */
+  let willChangeTimer;
+  let willChangeActive = false;
+
+  function releaseWillChange() {
+    if (!willChangeActive) return;
+    willChangeActive = false;
+    window.clearTimeout(willChangeTimer);
+    element.removeEventListener("transitionend", releaseWillChange);
+    element.removeEventListener("animationend", releaseWillChange);
+    restoreStyleProperty(element, "will-change", original.willChange);
+  }
+
+  function activateWillChange() {
+    if (original.willChange.value || willChangeActive) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+
+    const duration = Number(currentOptions.duration ?? 400);
+    if (Number.isFinite(duration) && duration <= 0) return;
+
+    willChangeActive = true;
+    element.style.setProperty("will-change", "transform, opacity");
+    element.addEventListener("transitionend", releaseWillChange);
+    element.addEventListener("animationend", releaseWillChange);
+    const delay = Number(currentOptions.delay ?? 0);
+    const timeout = Number.isFinite(delay)
+      ? Math.max(0, duration + delay) + 100
+      : 500;
+    willChangeTimer = window.setTimeout(releaseWillChange, timeout);
+  }
+
   /** @param {IntersectionObserverEntry[]} entries */
   const handleIntersection = (entries) => {
     const entry = entries[0];
     if (!entry) return;
 
     if (entry.isIntersecting) {
+      activateWillChange();
       element.classList.add("is-visible");
       currentOptions.onVisible?.(element);
       if (!currentOptions.repeat) {
         disconnectObserver(managedObserver, state);
       }
     } else if (currentOptions.repeat) {
+      activateWillChange();
       element.classList.remove("is-visible");
       currentOptions.onHidden?.(element);
     }
@@ -285,6 +319,7 @@ export function runeScroller(element, options = {}) {
       if (destroyed) return;
       destroyed = true;
       window.cancelAnimationFrame?.(animationFrame);
+      releaseWillChange();
       disconnectObserver(managedObserver, state);
       disableDebug();
       if (positionChanged) {
@@ -309,6 +344,7 @@ export function runeScroller(element, options = {}) {
       restoreStyleProperty(element, "--duration", original.duration);
       restoreStyleProperty(element, "--delay", original.delay);
       restoreStyleProperty(element, "--easing", original.easing);
+      restoreStyleProperty(element, "will-change", original.willChange);
       element.style.transition = original.transition;
     },
   };
