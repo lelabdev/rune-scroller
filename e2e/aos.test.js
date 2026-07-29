@@ -227,6 +227,26 @@ test.describe("multiple elements", () => {
 // ============================================================
 
 test.describe("AOS global options", () => {
+  test("non-default anchor placement creates a valid observer", async ({
+    page,
+  }) => {
+    const pageErrors = [];
+    page.on("pageerror", (error) => pageErrors.push(error.message));
+
+    await setupAOSPage(page, {
+      html: '<div class="item" data-aos="fade" data-aos-anchor-placement="center-center">Item</div>',
+    });
+
+    expect(pageErrors).toEqual([]);
+    await page.evaluate(() => window.scrollTo(0, window.innerHeight));
+    await page.waitForTimeout(300);
+    expect(
+      await page.$eval("[data-aos]", (el) =>
+        el.classList.contains("is-visible"),
+      ),
+    ).toBe(true);
+  });
+
   test("init({ duration: 600 }) applies to all elements", async ({ page }) => {
     await setupAOSPage(page, {
       html: '<div class="item" data-aos="fade">Item</div>',

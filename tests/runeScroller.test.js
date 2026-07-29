@@ -38,12 +38,12 @@ describe("runeScroller action", () => {
     expect(element.getAttribute("data-animation")).toBe("fade-in");
   });
 
-  it("observes the animated element directly without a sentinel", () => {
+  it("observes the animated element without changing its positioning", () => {
     action = runeScroller(element, { animation: "fade-up" });
 
     expect(mockIntersectionObserver.getObserverFor(element)).toBeDefined();
     expect(element.querySelector("[data-sentinel-id]")).toBeNull();
-    expect(element.style.position).toBe("relative");
+    expect(element.style.position).toBe("");
   });
 
   it("uses a positive offset to extend the viewport bottom", () => {
@@ -132,6 +132,43 @@ describe("runeScroller action", () => {
     expect(element.hasAttribute("data-sentinel-id")).toBe(false);
   });
 
+  it("starts and stops resize tracking with debug updates", () => {
+    const originalResizeObserver = globalThis.ResizeObserver;
+    const instances = [];
+    globalThis.ResizeObserver = class {
+      constructor() {
+        this.disconnected = false;
+        instances.push(this);
+      }
+      observe() {}
+      disconnect() {
+        this.disconnected = true;
+      }
+    };
+
+    action = runeScroller(element, { animation: "fade" });
+    action.update({ debug: true });
+    expect(instances).toHaveLength(1);
+    expect(instances[0].disconnected).toBe(false);
+
+    action.update({ debug: false });
+    expect(instances[0].disconnected).toBe(true);
+    globalThis.ResizeObserver = originalResizeObserver;
+  });
+
+  it("validates animation names supplied through update", () => {
+    const originalWarn = console.warn;
+    const warnings = [];
+    console.warn = (message) => warnings.push(message);
+    action = runeScroller(element, { animation: "fade" });
+
+    action.update({ animation: /** @type {*} */ ("not-an-animation") });
+
+    expect(element.getAttribute("data-animation")).toBe("fade-in");
+    expect(warnings).toHaveLength(1);
+    console.warn = originalWarn;
+  });
+
   it("creates and cleans up a debug sentinel", () => {
     action = runeScroller(element, {
       animation: "fade",
@@ -141,14 +178,66 @@ describe("runeScroller action", () => {
 
     const sentinel = element.querySelector("[data-sentinel-debug]");
     expect(sentinel?.textContent).toBe("trigger");
+    expect(element.style.position).toBe("relative");
 
     action.destroy();
     expect(element.querySelector("[data-sentinel-debug]")).toBeNull();
     expect(element.hasAttribute("data-sentinel-id")).toBe(false);
   });
 
-  it("restores a position added by the action on destroy", () => {
-    action = runeScroller(element, { animation: "fade" });
+  it("restores action-owned DOM state on destroy", () => {
+    action = runeScroller(element, {
+      animation: "fade",
+      duration: 800,
+      delay: 100,
+      easing: "linear",
+      repeat: true,
+    });
+    mockIntersectionObserver.trigger(element, true);
+
+    action.destroy();
+
+    expect(element.hasAttribute("data-animation")).toBe(false);
+    expect(element.classList.contains("scroll-animate")).toBe(false);
+    expect(element.classList.contains("is-visible")).toBe(false);
+    expect(element.style.getPropertyValue("--duration")).toBe("");
+    expect(element.style.getPropertyValue("--delay")).toBe("");
+    expect(element.style.getPropertyValue("--easing")).toBe("");
+  });
+
+  it("preserves caller-owned DOM state on destroy", () => {
+    element.classList.add("scroll-animate", "is-visible");
+    element.setAttribute("data-animation", "caller-animation");
+    element.setAttribute("data-sentinel-id", "caller-sentinel");
+    element.style.setProperty("--duration", "2s");
+    element.style.setProperty("--delay", "1s");
+    element.style.setProperty("--easing", "steps(2)");
+
+    action = runeScroller(element, {
+      animation: "fade",
+      duration: 800,
+      debug: true,
+    });
+    action.destroy();
+
+    expect(element.getAttribute("data-animation")).toBe("caller-animation");
+    expect(element.classList.contains("scroll-animate")).toBe(true);
+    expect(element.classList.contains("is-visible")).toBe(true);
+    expect(element.getAttribute("data-sentinel-id")).toBe("caller-sentinel");
+    expect(element.style.getPropertyValue("--duration")).toBe("2s");
+    expect(element.style.getPropertyValue("--delay")).toBe("1s");
+    expect(element.style.getPropertyValue("--easing")).toBe("steps(2)");
+  });
+
+  it("restores positioning added for an internal observer target", () => {
+    const target = document.createElement("span");
+    element.appendChild(target);
+    action = runeScroller(element, {
+      animation: "fade",
+      observerTarget: target,
+    });
+    expect(element.style.position).toBe("relative");
+
     action.destroy();
 
     expect(element.style.position).toBe("");
