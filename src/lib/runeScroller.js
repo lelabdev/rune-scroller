@@ -7,13 +7,62 @@ import {
 import { createManagedObserver, disconnectObserver } from "./observer-utils.js";
 import { ANIMATION_TYPES } from "./animations.js";
 
+const DEFAULT_ANIMATION = "fade-in";
+
+/**
+ * @param {unknown} animation
+ * @returns {import('./types.js').AnimationType}
+ */
+function normalizeAnimation(animation) {
+  if (typeof animation === "string" && ANIMATION_TYPES.includes(animation)) {
+    return /** @type {import('./types.js').AnimationType} */ (animation);
+  }
+
+  if (
+    animation !== undefined &&
+    typeof process !== "undefined" &&
+    process.env?.NODE_ENV !== "production"
+  ) {
+    console.warn(
+      `[rune-scroller] Invalid animation "${String(animation)}". Using "${DEFAULT_ANIMATION}" instead. ` +
+        `Valid options: ${ANIMATION_TYPES.join(", ")}`,
+    );
+  }
+
+  return DEFAULT_ANIMATION;
+}
+
+/**
+ * @param {HTMLElement} element
+ * @param {string} property
+ * @returns {{ value: string, priority: string }}
+ */
+function captureStyleProperty(element, property) {
+  return {
+    value: element.style.getPropertyValue(property),
+    priority: element.style.getPropertyPriority(property),
+  };
+}
+
+/**
+ * @param {HTMLElement} element
+ * @param {string} property
+ * @param {{ value: string, priority: string }} original
+ */
+function restoreStyleProperty(element, property, original) {
+  if (original.value) {
+    element.style.setProperty(property, original.value, original.priority);
+  } else {
+    element.style.removeProperty(property);
+  }
+}
+
 /**
  * @param {HTMLElement} element
  * @param {import('./types.js').RuneScrollerOptions} [options]
  * @returns {{ update: (newOptions?: import('./types.js').RuneScrollerOptions) => void, destroy: () => void }}
  */
-export function runeScroller(element, options) {
-  // SSR Guard: Return no-op action when running on server
+export function runeScroller(element, options = {}) {
   if (typeof window === "undefined") {
     return {
       update: () => {},
@@ -21,233 +70,247 @@ export function runeScroller(element, options) {
     };
   }
 
-  // Warn if CSS is not loaded (first time only)
   if (typeof document !== "undefined") {
     checkAndWarnIfCSSNotLoaded();
   }
 
-  // Validate animation type
-  let animation = options?.animation ?? "fade-in";
-  if (animation && !ANIMATION_TYPES.includes(animation)) {
-    if (
-      typeof process !== "undefined" &&
-      process.env?.NODE_ENV !== "production"
-    ) {
-      console.warn(
-        `[rune-scroller] Invalid animation "${animation}". Using "fade-in" instead. ` +
-          `Valid options: ${ANIMATION_TYPES.join(", ")}`,
-      );
-    }
-    animation = "fade-in";
-  }
+  const original = {
+    position: element.style.position,
+    transition: element.style.transition,
+    hasAnimationAttribute: element.hasAttribute("data-animation"),
+    animationAttribute: element.getAttribute("data-animation"),
+    hasSentinelAttribute: element.hasAttribute("data-sentinel-id"),
+    sentinelAttribute: element.getAttribute("data-sentinel-id"),
+    hasScrollAnimateClass: element.classList.contains("scroll-animate"),
+    hasVisibleClass: element.classList.contains("is-visible"),
+    duration: captureStyleProperty(element, "--duration"),
+    delay: captureStyleProperty(element, "--delay"),
+    easing: captureStyleProperty(element, "--easing"),
+  };
 
-  // CSS handles initial opacity via [data-animation] { opacity: 0 }
-  // No inline opacity needed — it would override slide animations that use opacity: 1
+  let currentOptions = { ...options };
+  let animation = normalizeAnimation(currentOptions.animation);
+  setupAnimationElement(element, animation);
 
-  // Setup animation classes and CSS variables
-  if (animation) {
-    setupAnimationElement(element, animation);
-  }
-
-  // Force initial state without transition to prevent FOUC
-  // When data-animation is added dynamically, the browser would animate
-  // from the current state (opacity:1) to the initial state (opacity:0)
   element.style.transition = "none";
-  void element.offsetHeight; // Force reflow to apply no-transition
+  void element.offsetHeight;
 
-  // Warn about overflow:hidden in debug mode
-  if (options?.debug && element.style.overflow === "hidden") {
-    console.warn(
-      "[rune-scroller] Element has overflow:hidden — the sentinel indicator may be clipped in debug mode.",
-    );
+  if (
+    currentOptions.duration !== undefined ||
+    currentOptions.delay !== undefined
+  ) {
+    setCSSVariables(element, currentOptions.duration, currentOptions.delay);
+  }
+  if (currentOptions.easing !== undefined) {
+    element.style.setProperty("--easing", currentOptions.easing);
   }
 
-  // Set CSS variables for duration and delay
-  if (options?.duration !== undefined || options?.delay !== undefined) {
-    setCSSVariables(element, options?.duration, options?.delay);
-  }
-  if (options?.easing !== undefined) {
-    element.style.setProperty("--easing", options.easing);
-  }
-
-  // Re-enable transitions after a frame (CSS takes over from here)
-  window.requestAnimationFrame(() => {
-    element.style.transition = "";
+  let destroyed = false;
+  const animationFrame = window.requestAnimationFrame(() => {
+    if (!destroyed) element.style.transition = original.transition;
   });
 
-  // Ensure element can serve as positioning context for debug sentinel
-  const originalPosition = element.style.position;
-  if (!originalPosition || originalPosition === "static") {
-    element.style.position = "relative";
-  }
-
-  // Create debug sentinel (visual indicator only, not used for observation)
   /** @type {HTMLElement | null} */
   let sentinel = null;
   /** @type {string | undefined} */
   let sentinelId;
-  if (options?.debug) {
-    const sentinelResult = createSentinel(
-      element,
-      options?.debug,
-      options?.offset,
-      options?.sentinelColor,
-      options?.debugLabel,
-      options?.sentinelId,
-    );
-    sentinel = sentinelResult.element;
-    sentinelId = sentinelResult.id;
-    element.setAttribute("data-sentinel-id", sentinelId);
-    element.appendChild(sentinel);
-  }
-
-  // Calculate rootMargin from offset
-  // Positive offset = trigger earlier = expand the viewport bottom boundary
-  const offset = options?.offset ?? 0;
-  const rootMargin = options?.rootMargin ?? `0px 0px ${offset}px 0px`;
-  const observerTarget = options?.observerTarget ?? element;
-
-  // Observe the element directly unless an internal compatibility target is provided
-  // This avoids overflow:hidden clipping issues when the element has transforms
-  const state = { isConnected: true };
+  let positionChanged = false;
   /** @type {ResizeObserver | undefined} */
   let resizeObserver;
   /** @type {IntersectionObserver | undefined} */
   let intersectionObserver;
+  const state = { isConnected: false };
 
-  // IntersectionObserver callback
-  /** @param {IntersectionObserverEntry[]} entries */
-  const handleIntersection = (entries) => {
-    const isIntersecting = entries[0].isIntersecting;
-    if (isIntersecting) {
-      element.classList.add("is-visible");
-      options?.onVisible?.(element);
-      if (!options?.repeat) {
-        disconnectObserver(intersectionObserver, state);
-      }
-    } else if (options?.repeat) {
-      element.classList.remove("is-visible");
-      options?.onHidden?.(element);
+  function ensurePositioningContext() {
+    if (!element.style.position || element.style.position === "static") {
+      element.style.position = "relative";
+      positionChanged = true;
     }
-  };
+  }
 
-  const { observer } = createManagedObserver(
-    observerTarget,
-    handleIntersection,
-    {
-      threshold: options?.threshold ?? 0,
-      rootMargin,
-    },
-  );
+  function renderSentinel() {
+    ensurePositioningContext();
+    const result = createSentinel(
+      element,
+      true,
+      currentOptions.offset,
+      currentOptions.sentinelColor,
+      currentOptions.debugLabel,
+      sentinelId ?? currentOptions.sentinelId,
+    );
+    sentinelId = result.id;
+    element.setAttribute("data-sentinel-id", sentinelId);
 
-  intersectionObserver = observer;
+    if (sentinel) {
+      sentinel.replaceWith(result.element);
+    } else {
+      element.appendChild(result.element);
+    }
+    sentinel = result.element;
+  }
 
-  // Update debug sentinel if element resizes
-  if (options?.debug && typeof ResizeObserver !== "undefined") {
+  function startResizeObserver() {
+    if (resizeObserver || typeof ResizeObserver === "undefined") return;
     resizeObserver = new ResizeObserver(() => {
-      if (!sentinel) return;
-      const newResult = createSentinel(
-        element,
-        options?.debug,
-        options?.offset,
-        options?.sentinelColor,
-        options?.debugLabel,
-        sentinelId,
-      );
-      sentinel.replaceWith(newResult.element);
-      sentinel = newResult.element;
+      if (sentinel) renderSentinel();
     });
     resizeObserver.observe(element);
   }
 
+  function stopResizeObserver() {
+    resizeObserver?.disconnect();
+    resizeObserver = undefined;
+  }
+
+  function enableDebug() {
+    if (element.style.overflow === "hidden") {
+      console.warn(
+        "[rune-scroller] Element has overflow:hidden — the sentinel indicator may be clipped in debug mode.",
+      );
+    }
+    renderSentinel();
+    startResizeObserver();
+  }
+
+  function disableDebug() {
+    stopResizeObserver();
+    sentinel?.remove();
+    sentinel = null;
+    sentinelId = undefined;
+    if (original.hasSentinelAttribute) {
+      element.setAttribute(
+        "data-sentinel-id",
+        original.sentinelAttribute ?? "",
+      );
+    } else {
+      element.removeAttribute("data-sentinel-id");
+    }
+    const target = currentOptions.observerTarget;
+    const observerNeedsPositioning =
+      target !== undefined && target !== element && element.contains(target);
+    if (positionChanged && !observerNeedsPositioning) {
+      element.style.position = original.position;
+      positionChanged = false;
+    }
+  }
+
+  if (currentOptions.debug) enableDebug();
+
+  /** @param {IntersectionObserverEntry[]} entries */
+  const handleIntersection = (entries) => {
+    const entry = entries[0];
+    if (!entry) return;
+
+    if (entry.isIntersecting) {
+      element.classList.add("is-visible");
+      currentOptions.onVisible?.(element);
+      if (!currentOptions.repeat) {
+        disconnectObserver(intersectionObserver, state);
+      }
+    } else if (currentOptions.repeat) {
+      element.classList.remove("is-visible");
+      currentOptions.onHidden?.(element);
+    }
+  };
+
+  function connectObserver() {
+    disconnectObserver(intersectionObserver, state);
+    const offset = currentOptions.offset ?? 0;
+    const rootMargin = currentOptions.rootMargin ?? `0px 0px ${offset}px 0px`;
+    const target = currentOptions.observerTarget ?? element;
+    if (target !== element && element.contains(target)) {
+      ensurePositioningContext();
+    } else if (positionChanged && !currentOptions.debug) {
+      element.style.position = original.position;
+      positionChanged = false;
+    }
+    const { observer } = createManagedObserver(target, handleIntersection, {
+      threshold: currentOptions.threshold ?? 0,
+      rootMargin,
+    });
+    intersectionObserver = observer;
+    state.isConnected = true;
+  }
+
+  connectObserver();
+
   return {
-    update(newOptions) {
-      if (
-        newOptions?.onVisible !== undefined ||
-        newOptions?.onHidden !== undefined
-      ) {
-        options = { ...options, ...newOptions };
+    update(newOptions = {}) {
+      if (destroyed) return;
+
+      const previousOptions = currentOptions;
+      currentOptions = { ...currentOptions, ...newOptions };
+
+      if (newOptions.animation !== undefined) {
+        animation = normalizeAnimation(newOptions.animation);
+        element.setAttribute("data-animation", animation);
       }
-      if (newOptions?.animation) {
-        element.setAttribute("data-animation", newOptions.animation);
+      if (newOptions.duration !== undefined || newOptions.delay !== undefined) {
+        setCSSVariables(element, newOptions.duration, newOptions.delay);
       }
-      if (
-        newOptions?.duration !== undefined ||
-        newOptions?.delay !== undefined
-      ) {
-        setCSSVariables(element, newOptions?.duration, newOptions?.delay);
-      }
-      if (newOptions?.easing !== undefined) {
+      if (newOptions.easing !== undefined) {
         element.style.setProperty("--easing", newOptions.easing);
       }
-      // Update repeat option
-      if (
-        newOptions?.repeat !== undefined &&
-        newOptions.repeat !== options?.repeat
-      ) {
-        options = { ...options, repeat: newOptions.repeat };
+
+      const observerOptionsChanged =
+        newOptions.offset !== undefined ||
+        newOptions.threshold !== undefined ||
+        newOptions.rootMargin !== undefined ||
+        newOptions.observerTarget !== undefined;
+      const repeatNeedsReconnect =
+        newOptions.repeat === true &&
+        previousOptions.repeat !== true &&
+        !state.isConnected;
+
+      if (observerOptionsChanged || repeatNeedsReconnect) {
+        connectObserver();
       }
-      // Recreate observer if offset or threshold changed
-      const offsetChanged =
-        newOptions?.offset !== undefined &&
-        newOptions.offset !== options?.offset;
-      const thresholdChanged =
-        newOptions?.threshold !== undefined &&
-        newOptions.threshold !== options?.threshold;
-      if (offsetChanged || thresholdChanged) {
-        options = { ...options, ...newOptions };
-        disconnectObserver(intersectionObserver, state);
-        const newOffset = options?.offset ?? 0;
-        const { observer: newObserver } = createManagedObserver(
-          element,
-          handleIntersection,
-          {
-            threshold: options?.threshold ?? 0,
-            rootMargin: `0px 0px ${newOffset}px 0px`,
-          },
-        );
-        intersectionObserver = newObserver;
-        state.isConnected = true;
-      }
-      // Update debug indicator
-      if (
-        newOptions?.debug !== undefined &&
-        newOptions.debug !== options?.debug
-      ) {
-        options = { ...options, ...newOptions };
-        if (options.debug) {
-          const sentinelResult = createSentinel(
-            element,
-            true,
-            options.offset,
-            options.sentinelColor,
-            options.debugLabel,
-            options.sentinelId,
-          );
-          sentinel = sentinelResult.element;
-          sentinelId = sentinelResult.id;
-          element.setAttribute("data-sentinel-id", sentinelId);
-          element.appendChild(sentinel);
-        } else if (sentinel) {
-          sentinel.remove();
-          sentinel = null;
-          element.removeAttribute("data-sentinel-id");
-        }
+
+      const debugChanged =
+        newOptions.debug !== undefined &&
+        newOptions.debug !== previousOptions.debug;
+      const debugAppearanceChanged =
+        newOptions.offset !== undefined ||
+        newOptions.sentinelColor !== undefined ||
+        newOptions.debugLabel !== undefined ||
+        newOptions.sentinelId !== undefined;
+
+      if (debugChanged) {
+        if (currentOptions.debug) enableDebug();
+        else disableDebug();
+      } else if (currentOptions.debug && debugAppearanceChanged) {
+        renderSentinel();
       }
     },
     destroy() {
+      if (destroyed) return;
+      destroyed = true;
+      window.cancelAnimationFrame?.(animationFrame);
       disconnectObserver(intersectionObserver, state);
-      if (resizeObserver) {
-        resizeObserver.disconnect();
+      disableDebug();
+      if (positionChanged) {
+        element.style.position = original.position;
+        positionChanged = false;
       }
-      if (sentinel) {
-        sentinel.remove();
+
+      if (original.hasAnimationAttribute) {
+        element.setAttribute(
+          "data-animation",
+          original.animationAttribute ?? "",
+        );
+      } else {
+        element.removeAttribute("data-animation");
       }
-      element.removeAttribute("data-sentinel-id");
-      // Restore original position if we changed it
-      if (!originalPosition || originalPosition === "static") {
-        element.style.position = originalPosition || "";
+      if (!original.hasScrollAnimateClass) {
+        element.classList.remove("scroll-animate");
       }
+      if (!original.hasVisibleClass) {
+        element.classList.remove("is-visible");
+      }
+      restoreStyleProperty(element, "--duration", original.duration);
+      restoreStyleProperty(element, "--delay", original.delay);
+      restoreStyleProperty(element, "--easing", original.easing);
+      element.style.transition = original.transition;
     },
   };
 }

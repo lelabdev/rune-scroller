@@ -109,6 +109,48 @@ describe("AOS integration", () => {
     globalThis.MutationObserver = originalMutationObserver;
   });
 
+  it("leaves content visible and removes action-owned state when disabled", () => {
+    const element = addElement("fade");
+    init();
+
+    disable();
+
+    expect(element.hasAttribute("data-aos")).toBe(false);
+    expect(element.hasAttribute("data-animation")).toBe(false);
+    expect(element.classList.contains("scroll-animate")).toBe(false);
+    expect(element.classList.contains("is-visible")).toBe(false);
+  });
+
+  it("preserves caller-owned AOS classes during cleanup", () => {
+    const element = addElement("fade");
+    element.classList.add("custom-init", "custom-animated", "fade");
+
+    init({
+      initClassName: "custom-init",
+      animatedClassName: "custom-animated",
+      useClassNames: true,
+    });
+    destroy();
+
+    expect(element.classList.contains("custom-init")).toBe(true);
+    expect(element.classList.contains("custom-animated")).toBe(true);
+    expect(element.classList.contains("fade")).toBe(true);
+  });
+
+  it("restores caller-owned body attributes after destroy", () => {
+    document.body.setAttribute("data-aos-easing", "caller-easing");
+    document.body.setAttribute("data-aos-duration", "123");
+    document.body.setAttribute("data-aos-delay", "456");
+    addElement("fade");
+
+    init({ easing: "linear", duration: 800, delay: 100 });
+    destroy();
+
+    expect(document.body.getAttribute("data-aos-easing")).toBe("caller-easing");
+    expect(document.body.getAttribute("data-aos-duration")).toBe("123");
+    expect(document.body.getAttribute("data-aos-delay")).toBe("456");
+  });
+
   it("processes added AOS elements without replacing active observers", async () => {
     const first = addElement("fade");
     const second = addElement("zoom-in");
@@ -123,6 +165,18 @@ describe("AOS integration", () => {
     expect(secondObserver?.isConnected).toBe(true);
     expect(getAOSObserver(third)).toBeDefined();
     expect(mockIntersectionObserver.getAll()).toHaveLength(3);
+  });
+
+  it("destroys actions when animated elements are removed", async () => {
+    const element = addElement("fade");
+    init();
+    const observer = getAOSObserver(element);
+
+    element.remove();
+    await new Promise((resolve) => window.setTimeout(resolve, 0));
+
+    expect(observer?.isConnected).toBe(false);
+    expect(mockIntersectionObserver.getAll()).toHaveLength(0);
   });
 
   it("processes new elements after an explicit hard refresh", () => {

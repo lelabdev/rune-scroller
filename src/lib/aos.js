@@ -90,6 +90,9 @@ let initialized = false;
 /** @type {(() => void) | null} */
 let removeStartEventListener = null;
 
+/** @type {Record<string, { exists: boolean, value: string | null }> | null} */
+let bodyAttributeSnapshot = null;
+
 /**
  * Read a data-aos-* attribute from an element
  * @param {HTMLElement} el
@@ -112,6 +115,15 @@ function applyToElement(el) {
   if (activeActions.has(el)) return;
 
   const animation = resolveAnimation(el.getAttribute("data-aos") || "fade-up");
+  const originalClasses = {
+    init: options.initClassName
+      ? el.classList.contains(options.initClassName)
+      : false,
+    animated: options.animatedClassName
+      ? el.classList.contains(options.animatedClassName)
+      : false,
+    animation: animation ? el.classList.contains(animation) : false,
+  };
 
   const duration = Number(getInlineOption(el, "duration", options.duration));
   const delay = Number(getInlineOption(el, "delay", options.delay));
@@ -154,7 +166,7 @@ function applyToElement(el) {
     }[/** @type {"top" | "center" | "bottom"} */ (target)] ?? "0%";
   const anchorElement = document.createElement("span");
   anchorElement.setAttribute("data-aos-anchor", "");
-  anchorElement.style.cssText = `position:absolute;top:${anchorPosition};left:0;width:1px;height:1px;pointer-events:none`;
+  anchorElement.style.cssText = `position:absolute;top:${anchorPosition};left:0;width:1px;height:1px;pointer-events:none;transform:translateY(${-offset}px)`;
   el.appendChild(anchorElement);
 
   // Apply runeScroller action
@@ -162,10 +174,7 @@ function applyToElement(el) {
     animation: /** @type {import('./types.js').AnimationType} */ (animation),
     duration,
     offset,
-    rootMargin:
-      target === "bottom"
-        ? `0px 0px ${offset}px 0px`
-        : `0px 0px calc(${viewportOffset} + ${offset}px) 0px`,
+    rootMargin: `0px 0px ${viewportOffset} 0px`,
     observerTarget: anchorElement,
     delay,
     easing: getInlineOption(el, "easing", options.easing),
@@ -183,10 +192,20 @@ function applyToElement(el) {
     repeat: !once || mirror,
   });
 
+  let destroyed = false;
   activeActions.set(el, {
     destroy() {
+      if (destroyed) return;
+      destroyed = true;
       action.destroy();
       anchorElement.remove();
+      if (options.initClassName && !originalClasses.init)
+        el.classList.remove(options.initClassName);
+      if (options.animatedClassName && !originalClasses.animated)
+        el.classList.remove(options.animatedClassName);
+      if (options.useClassNames && !originalClasses.animation)
+        el.classList.remove(animation);
+      activeActions.delete(el);
     },
   });
 }
@@ -208,6 +227,12 @@ function observeMutations() {
 
   mutationObserver = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
+      for (const node of mutation.removedNodes) {
+        if (!(node instanceof HTMLElement)) continue;
+        for (const [element, action] of activeActions) {
+          if (element === node || node.contains(element)) action.destroy();
+        }
+      }
       for (const node of mutation.addedNodes) {
         if (!(node instanceof HTMLElement)) continue;
         if (node.hasAttribute("data-aos")) applyToElement(node);
@@ -240,6 +265,17 @@ function init(settings = {}) {
   // Set global easing on body for CSS
   const body = document.querySelector("body");
   if (body) {
+    bodyAttributeSnapshot = Object.fromEntries(
+      ["data-aos-easing", "data-aos-duration", "data-aos-delay"].map(
+        (attribute) => [
+          attribute,
+          {
+            exists: body.hasAttribute(attribute),
+            value: body.getAttribute(attribute),
+          },
+        ],
+      ),
+    );
     body.setAttribute("data-aos-easing", options.easing ?? "ease");
     body.setAttribute("data-aos-duration", String(options.duration));
     body.setAttribute("data-aos-delay", String(options.delay));
@@ -359,13 +395,15 @@ function destroy() {
   initialized = false;
   options = { ...DEFAULT_OPTIONS };
 
-  // Remove body attributes set during init
+  // Restore body attributes changed during init
   const body = document.querySelector("body");
-  if (body) {
-    body.removeAttribute("data-aos-easing");
-    body.removeAttribute("data-aos-duration");
-    body.removeAttribute("data-aos-delay");
+  if (body && bodyAttributeSnapshot) {
+    for (const [attribute, original] of Object.entries(bodyAttributeSnapshot)) {
+      if (original.exists) body.setAttribute(attribute, original.value ?? "");
+      else body.removeAttribute(attribute);
+    }
   }
+  bodyAttributeSnapshot = null;
 }
 
 // Public API — compatible with AOS

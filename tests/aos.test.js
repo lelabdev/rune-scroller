@@ -58,7 +58,7 @@ describe("AOS compatibility API", () => {
     expect(element.style.getPropertyValue("--easing")).toBe("linear");
   });
 
-  it("uses an element anchor and viewport placement for anchor-placement", () => {
+  it("uses valid observer margins for non-default anchor placement", () => {
     const element = createAOSElement({
       "data-aos": "fade-up",
       "data-aos-anchor-placement": "top-center",
@@ -68,12 +68,13 @@ describe("AOS compatibility API", () => {
 
     const anchor = element.querySelector("[data-aos-anchor]");
     expect(anchor?.style.top).toBe("0%");
+    expect(anchor?.style.transform).toBe("translateY(-120px)");
     expect(
       mockIntersectionObserver.getObserverFor(anchor)?.options.rootMargin,
-    ).toBe("0px 0px calc(-50% + 120px) 0px");
+    ).toBe("0px 0px -50% 0px");
   });
 
-  it("uses a positive AOS offset to extend the viewport bottom", () => {
+  it("uses a positive AOS offset to shift the observed anchor", () => {
     const element = createAOSElement({
       "data-aos": "fade-up",
       "data-aos-offset": "120",
@@ -81,11 +82,53 @@ describe("AOS compatibility API", () => {
 
     init();
 
+    const anchor = element.querySelector("[data-aos-anchor]");
+    expect(anchor?.style.transform).toBe("translateY(-120px)");
     expect(
-      mockIntersectionObserver.getObserverFor(
-        element.querySelector("[data-aos-anchor]"),
-      )?.options.rootMargin,
-    ).toBe("0px 0px 120px 0px");
+      mockIntersectionObserver.getObserverFor(anchor)?.options.rootMargin,
+    ).toBe("0px 0px 0% 0px");
+  });
+
+  for (const placement of [
+    "top-top",
+    "top-center",
+    "top-bottom",
+    "center-top",
+    "center-center",
+    "center-bottom",
+    "bottom-top",
+    "bottom-center",
+    "bottom-bottom",
+  ]) {
+    it(`uses a valid root margin for ${placement}`, () => {
+      const element = createAOSElement({
+        "data-aos": "fade-up",
+        "data-aos-anchor-placement": placement,
+      });
+
+      init();
+
+      const anchor = element.querySelector("[data-aos-anchor]");
+      const rootMargin =
+        mockIntersectionObserver.getObserverFor(anchor)?.options.rootMargin;
+      expect(rootMargin).not.toContain("calc(");
+      expect(rootMargin).toMatch(/^0px 0px (-100%|-50%|0%) 0px$/);
+    });
+  }
+
+  it("falls back safely for an invalid anchor placement", () => {
+    const element = createAOSElement({
+      "data-aos": "fade-up",
+      "data-aos-anchor-placement": "invalid-placement",
+    });
+
+    init();
+
+    const anchor = element.querySelector("[data-aos-anchor]");
+    expect(anchor?.style.top).toBe("0%");
+    expect(
+      mockIntersectionObserver.getObserverFor(anchor)?.options.rootMargin,
+    ).toBe("0px 0px 0% 0px");
   });
 
   it("maps legacy AOS animation names", () => {

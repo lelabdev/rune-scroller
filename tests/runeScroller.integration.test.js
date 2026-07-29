@@ -73,6 +73,43 @@ describe("runeScroller integration", () => {
     expect(replacementObserver?.isConnected).toBe(false);
   });
 
+  it("reconnects when a completed action becomes repeating", () => {
+    const element = document.createElement("div");
+    document.body.appendChild(element);
+    const action = runeScroller(element, { animation: "fade" });
+
+    mockIntersectionObserver.trigger(element, true);
+    expect(mockIntersectionObserver.getObserverFor(element)).toBeUndefined();
+
+    action.update({ repeat: true });
+    expect(mockIntersectionObserver.getObserverFor(element)).toBeDefined();
+
+    mockIntersectionObserver.trigger(element, false);
+    expect(element.classList.contains("is-visible")).toBe(false);
+    action.destroy();
+  });
+
+  it("preserves a custom target and root margin when options change", () => {
+    const element = document.createElement("div");
+    const target = document.createElement("span");
+    element.appendChild(target);
+    document.body.appendChild(element);
+    const action = runeScroller(element, {
+      animation: "fade",
+      observerTarget: target,
+      rootMargin: "10px 20px 30px 40px",
+    });
+
+    action.update({ threshold: 0.75 });
+    const replacementObserver = mockIntersectionObserver.getObserverFor(target);
+
+    expect(replacementObserver).toBeDefined();
+    expect(replacementObserver?.options.rootMargin).toBe("10px 20px 30px 40px");
+    expect(replacementObserver?.options.threshold).toBe(0.75);
+    expect(mockIntersectionObserver.getObserverFor(element)).toBeUndefined();
+    action.destroy();
+  });
+
   it("keeps a caller-defined position when destroyed", () => {
     const element = document.createElement("div");
     element.style.position = "absolute";
