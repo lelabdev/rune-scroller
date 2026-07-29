@@ -148,7 +148,10 @@ test.describe("AOS data attributes", () => {
     expect(hasClass).toBe(true);
 
     await page.evaluate(() => window.scrollTo(0, 0));
-    await page.waitForTimeout(200);
+    await page.waitForFunction(() => {
+      const element = document.querySelector("[data-aos]");
+      return element && getComputedStyle(element).opacity === "0";
+    });
     hasClass = await page.$eval("[data-aos]", (el) =>
       el.classList.contains("is-visible"),
     );
@@ -169,7 +172,10 @@ test.describe("AOS data attributes", () => {
 
     await scrollToTarget(page);
     await page.evaluate(() => window.scrollTo(0, 0));
-    await page.waitForTimeout(200);
+    await page.waitForFunction(() => {
+      const element = document.querySelector("[data-aos]");
+      return element && getComputedStyle(element).opacity === "0";
+    });
 
     const state = await page.$eval("[data-aos]", (el) => ({
       visible: el.classList.contains("is-visible"),
