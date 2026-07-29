@@ -16,7 +16,7 @@
 import { runeScroller } from "./runeScroller.js";
 import { ANIMATION_TYPES } from "./animations.js";
 
-/** @typedef {{ offset?: number, delay?: number, duration?: number, easing?: string, once?: boolean, mirror?: boolean, anchorPlacement?: string, disable?: boolean | string, useClassNames?: boolean, startEvent?: string, animatedClassName?: string, initClassName?: string }} AOSOptions */
+/** @typedef {{ offset?: number, delay?: number, duration?: number, easing?: string, once?: boolean, mirror?: boolean, anchorPlacement?: string, disable?: boolean | 'mobile' | 'phone' | (() => boolean), useClassNames?: boolean, startEvent?: string, animatedClassName?: string, initClassName?: string }} AOSOptions */
 
 /**
  * Map old animation names (v2.x) to new names

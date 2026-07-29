@@ -4,9 +4,9 @@
 	<img src="./logo.png" alt="Rune Scroller Logo" width="200" />
 </div>
 
-**Lightweight scroll animations. AOS replacement. Works everywhere.**
+**Lightweight scroll animations. AOS replacement.**
 
-Built with native IntersectionObserver — zero JS on scroll, GPU-accelerated, ~5.6KB gzipped.
+Built with native IntersectionObserver — zero JS on scroll and GPU-accelerated. Requires a browser with [IntersectionObserver support](https://caniuse.com/intersectionobserver).
 
 > 🚀 **Open Source** by [ludoloops](https://github.com/ludoloops) at [LeLab.dev](https://lelab.dev)
 > 📜 Licensed under **MIT**
@@ -40,7 +40,7 @@ AOS.init();
 <div data-aos="zoom-in" data-aos-delay="200">Delayed zoom</div>
 ```
 
-That's it. Same API as AOS. Works everywhere.
+That's it. Same API as AOS in browsers that support IntersectionObserver.
 
 ### Svelte (native action)
 
@@ -125,8 +125,8 @@ export class AppComponent implements OnInit {
 - **Framework agnostic** — Svelte, React, Vue, Angular, Vanilla JS, CDN
 - **AOS drop-in** — Same `data-aos` attributes, same `init()` API
 - **Zero dependencies** — Pure JS + native IntersectionObserver
-- **~5.6KB gzipped** — Smaller than AOS (6.9KB)
-- **37 animations** — Fade, Zoom, Flip, Slide, Bounce
+- **Bundle size** — Current minified and gzip figures are published by Bundlephobia above
+- **29 primary animations + 7 legacy aliases** — Fade, Zoom, Flip, Slide, Bounce
 - **Zero JS on scroll** — Browser handles detection natively
 - **TypeScript support** — Full type definitions
 - **SSR-ready** — SvelteKit, Next.js, Nuxt compatible
@@ -138,17 +138,17 @@ export class AppComponent implements OnInit {
 
 ### AOS vs rune-scroller
 
-|                           | rune-scroller                                  | AOS                                        |
-| ------------------------- | ---------------------------------------------- | ------------------------------------------ |
-| **Bundle size (gzipped)** | **~5.6KB** JS+CSS                              | ~6.9KB JS+CSS                              |
-| **Dependencies**          | **0**                                          | lodash.throttle, lodash.debounce           |
-| **Scroll detection**      | **IntersectionObserver** (native, C++)         | Scroll event + throttle (JS)               |
-| **Per-scroll cost**       | **0** — browser handles it                     | Iterates ALL elements every 99ms           |
-| **Layout reads**          | **1 per element** (init only)                  | `offsetParent` loop per element per scroll |
-| **Resize handling**       | **ResizeObserver** (native)                    | debounced scroll recalc                    |
-| **100 animated elements** | **~0ms per scroll**                            | ~2-5ms per scroll (layout thrashing)       |
-| **Animations**            | 30                                             | 28                                         |
-| **Framework**             | **Any** (Svelte, React, Vue, Angular, Vanilla) | Vanilla JS only                            |
+|                           | rune-scroller                                      | AOS                                        |
+| ------------------------- | -------------------------------------------------- | ------------------------------------------ |
+| **Bundle size**           | See the Bundlephobia badge above                   | See Bundlephobia                           |
+| **Dependencies**          | **0**                                              | lodash.throttle, lodash.debounce           |
+| **Scroll detection**      | **IntersectionObserver** (native, C++)             | Scroll event + throttle (JS)               |
+| **Per-scroll cost**       | **0** — browser handles it                         | Iterates ALL elements every 99ms           |
+| **Layout reads**          | **1 per element** (init only)                      | `offsetParent` loop per element per scroll |
+| **Resize handling**       | IntersectionObserver; ResizeObserver in debug mode | debounced scroll recalc                    |
+| **100 animated elements** | **~0ms per scroll**                                | ~2-5ms per scroll (layout thrashing)       |
+| **Animations**            | 30                                                 | 28                                         |
+| **Framework**             | **Any** (Svelte, React, Vue, Angular, Vanilla)     | Vanilla JS only                            |
 
 The key difference: **AOS runs JavaScript on every scroll event** for every element. rune-scroller delegates detection to the browser's native IntersectionObserver — zero JS execution until an element actually enters the viewport.
 

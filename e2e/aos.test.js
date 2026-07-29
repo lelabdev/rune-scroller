@@ -134,7 +134,9 @@ test.describe("AOS data attributes", () => {
     expect(hasClass).toBe(true);
   });
 
-  test("data-aos-mirror reverses animation on exit", async ({ page }) => {
+  test("data-aos-mirror reverses fade and transform animations on exit", async ({
+    page,
+  }) => {
     await setupAOSPage(page, {
       html: '<div class="item" data-aos="fade-up" data-aos-mirror="true">Item</div>',
     });
@@ -151,6 +153,32 @@ test.describe("AOS data attributes", () => {
       el.classList.contains("is-visible"),
     );
     expect(hasClass).toBe(false);
+    const opacity = await page.$eval(
+      "[data-aos]",
+      (el) => getComputedStyle(el).opacity,
+    );
+    expect(opacity).toBe("0");
+  });
+
+  test("mirror overrides once and restores the initial state on exit", async ({
+    page,
+  }) => {
+    await setupAOSPage(page, {
+      html: '<div class="item" data-aos="fade-up" data-aos-once="true" data-aos-mirror="true">Item</div>',
+    });
+
+    await scrollToTarget(page);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(200);
+
+    const state = await page.$eval("[data-aos]", (el) => ({
+      visible: el.classList.contains("is-visible"),
+      opacity: getComputedStyle(el).opacity,
+      transform: getComputedStyle(el).transform,
+    }));
+    expect(state.visible).toBe(false);
+    expect(state.opacity).toBe("0");
+    expect(state.transform).not.toBe("none");
   });
 });
 
