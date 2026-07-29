@@ -75,21 +75,26 @@ export function runeScroller(element, options = {}) {
   }
 
   const original = {
-    position: element.style.position,
     transition: element.style.transition,
     hasAnimationAttribute: element.hasAttribute("data-animation"),
     animationAttribute: element.getAttribute("data-animation"),
-    hasSentinelAttribute: element.hasAttribute("data-sentinel-id"),
-    sentinelAttribute: element.getAttribute("data-sentinel-id"),
     hasScrollAnimateClass: element.classList.contains("scroll-animate"),
     hasVisibleClass: element.classList.contains("is-visible"),
-    duration: captureStyleProperty(element, "--duration"),
-    delay: captureStyleProperty(element, "--delay"),
-    easing: captureStyleProperty(element, "--easing"),
-    willChange: captureStyleProperty(element, "will-change"),
   };
+  /** @type {string | undefined} */
+  let originalPosition;
+  /** @type {{ hasAttribute: boolean, value: string | null } | undefined} */
+  let originalSentinelAttribute;
+  /** @type {{ value: string, priority: string } | undefined} */
+  let originalDuration;
+  /** @type {{ value: string, priority: string } | undefined} */
+  let originalDelay;
+  /** @type {{ value: string, priority: string } | undefined} */
+  let originalEasing;
+  /** @type {{ value: string, priority: string } | undefined} */
+  let originalWillChange;
 
-  let currentOptions = { ...options };
+  let currentOptions = options;
   let animation = normalizeAnimation(currentOptions.animation);
   setupAnimationElement(element, animation);
 
@@ -101,9 +106,12 @@ export function runeScroller(element, options = {}) {
     currentOptions.duration !== undefined ||
     currentOptions.delay !== undefined
   ) {
+    originalDuration = captureStyleProperty(element, "--duration");
+    originalDelay = captureStyleProperty(element, "--delay");
     setCSSVariables(element, currentOptions.duration, currentOptions.delay);
   }
   if (currentOptions.easing !== undefined) {
+    originalEasing = captureStyleProperty(element, "--easing");
     element.style.setProperty("--easing", currentOptions.easing);
   }
 
@@ -129,6 +137,7 @@ export function runeScroller(element, options = {}) {
 
   function ensurePositioningContext() {
     if (!element.style.position || element.style.position === "static") {
+      originalPosition ??= element.style.position;
       element.style.position = "relative";
       positionChanged = true;
     }
@@ -145,6 +154,10 @@ export function runeScroller(element, options = {}) {
       sentinelId ?? currentOptions.sentinelId,
     );
     sentinelId = result.id;
+    originalSentinelAttribute ??= {
+      hasAttribute: element.hasAttribute("data-sentinel-id"),
+      value: element.getAttribute("data-sentinel-id"),
+    };
     element.setAttribute("data-sentinel-id", sentinelId);
 
     if (sentinel) {
@@ -183,10 +196,10 @@ export function runeScroller(element, options = {}) {
     sentinel?.remove();
     sentinel = null;
     sentinelId = undefined;
-    if (original.hasSentinelAttribute) {
+    if (originalSentinelAttribute?.hasAttribute) {
       element.setAttribute(
         "data-sentinel-id",
-        original.sentinelAttribute ?? "",
+        originalSentinelAttribute.value ?? "",
       );
     } else {
       element.removeAttribute("data-sentinel-id");
@@ -195,7 +208,7 @@ export function runeScroller(element, options = {}) {
     const observerNeedsPositioning =
       target !== undefined && target !== element && element.contains(target);
     if (positionChanged && !observerNeedsPositioning) {
-      element.style.position = original.position;
+      element.style.position = originalPosition ?? "";
       positionChanged = false;
     }
   }
@@ -212,16 +225,21 @@ export function runeScroller(element, options = {}) {
     window.clearTimeout(willChangeTimer);
     element.removeEventListener("transitionend", releaseWillChange);
     element.removeEventListener("animationend", releaseWillChange);
-    restoreStyleProperty(element, "will-change", original.willChange);
+    if (originalWillChange) {
+      restoreStyleProperty(element, "will-change", originalWillChange);
+      originalWillChange = undefined;
+    }
   }
 
   function activateWillChange() {
-    if (original.willChange.value || willChangeActive) return;
+    if (element.style.getPropertyValue("will-change") || willChangeActive)
+      return;
     if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
 
     const duration = Number(currentOptions.duration ?? 400);
     if (Number.isFinite(duration) && duration <= 0) return;
 
+    originalWillChange ??= captureStyleProperty(element, "will-change");
     willChangeActive = true;
     element.style.setProperty("will-change", "transform, opacity");
     element.addEventListener("transitionend", releaseWillChange);
@@ -260,7 +278,7 @@ export function runeScroller(element, options = {}) {
     if (target !== element && element.contains(target)) {
       ensurePositioningContext();
     } else if (positionChanged && !currentOptions.debug) {
-      element.style.position = original.position;
+      element.style.position = originalPosition ?? "";
       positionChanged = false;
     }
     managedObserver = createManagedObserver(target, handleIntersection, {
@@ -284,9 +302,12 @@ export function runeScroller(element, options = {}) {
         element.setAttribute("data-animation", animation);
       }
       if (newOptions.duration !== undefined || newOptions.delay !== undefined) {
+        originalDuration ??= captureStyleProperty(element, "--duration");
+        originalDelay ??= captureStyleProperty(element, "--delay");
         setCSSVariables(element, newOptions.duration, newOptions.delay);
       }
       if (newOptions.easing !== undefined) {
+        originalEasing ??= captureStyleProperty(element, "--easing");
         element.style.setProperty("--easing", newOptions.easing);
       }
 
@@ -331,7 +352,7 @@ export function runeScroller(element, options = {}) {
       disconnectObserver(managedObserver, state);
       disableDebug();
       if (positionChanged) {
-        element.style.position = original.position;
+        element.style.position = originalPosition ?? "";
         positionChanged = false;
       }
 
@@ -349,10 +370,17 @@ export function runeScroller(element, options = {}) {
       if (!original.hasVisibleClass) {
         element.classList.remove("is-visible");
       }
-      restoreStyleProperty(element, "--duration", original.duration);
-      restoreStyleProperty(element, "--delay", original.delay);
-      restoreStyleProperty(element, "--easing", original.easing);
-      restoreStyleProperty(element, "will-change", original.willChange);
+      if (originalDuration) {
+        restoreStyleProperty(element, "--duration", originalDuration);
+      }
+      if (originalDelay)
+        restoreStyleProperty(element, "--delay", originalDelay);
+      if (originalEasing) {
+        restoreStyleProperty(element, "--easing", originalEasing);
+      }
+      if (originalWillChange) {
+        restoreStyleProperty(element, "will-change", originalWillChange);
+      }
       element.style.transition = original.transition;
     },
   };
