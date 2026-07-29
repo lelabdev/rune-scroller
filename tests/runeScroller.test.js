@@ -46,6 +46,18 @@ describe("runeScroller action", () => {
     expect(element.style.position).toBe("");
   });
 
+  it("does not force layout during animation setup", () => {
+    Object.defineProperty(element, "offsetHeight", {
+      get() {
+        throw new Error("forced layout");
+      },
+    });
+
+    expect(() => {
+      action = runeScroller(element, { animation: "fade" });
+    }).not.toThrow();
+  });
+
   it("uses a positive offset to extend the viewport bottom", () => {
     action = runeScroller(element, { animation: "fade", offset: 120 });
 

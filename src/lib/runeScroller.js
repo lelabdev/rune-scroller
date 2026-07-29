@@ -92,8 +92,9 @@ export function runeScroller(element, options = {}) {
   let animation = normalizeAnimation(currentOptions.animation);
   setupAnimationElement(element, animation);
 
+  // The inline transition override is applied before the next paint, so it
+  // prevents setup transitions without forcing a synchronous layout read.
   element.style.transition = "none";
-  void element.offsetHeight;
 
   if (
     currentOptions.duration !== undefined ||
