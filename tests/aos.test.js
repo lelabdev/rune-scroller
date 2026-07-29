@@ -1,6 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { Window } from "happy-dom";
-import AOS, { destroy, disable, init, refreshHard } from "../src/lib/aos.js";
+import AOS, {
+  destroy,
+  disable,
+  init,
+  refresh,
+  refreshHard,
+} from "../src/lib/aos.js";
 import { mockIntersectionObserver } from "./__mocks__/IntersectionObserver.js";
 
 let window;
@@ -56,6 +62,38 @@ describe("AOS compatibility API", () => {
     expect(element.style.getPropertyValue("--duration")).toBe("800ms");
     expect(element.style.getPropertyValue("--delay")).toBe("200ms");
     expect(element.style.getPropertyValue("--easing")).toBe("linear");
+  });
+
+  it("makes every public method a no-op during SSR", () => {
+    const browserWindow = globalThis.window;
+    const browserDocument = globalThis.document;
+    delete globalThis.window;
+    delete globalThis.document;
+
+    expect(() => init()).not.toThrow();
+    expect(() => refresh()).not.toThrow();
+    expect(() => refreshHard()).not.toThrow();
+    expect(() => disable()).not.toThrow();
+    expect(() => destroy()).not.toThrow();
+
+    globalThis.window = browserWindow;
+    globalThis.document = browserDocument;
+  });
+
+  it("falls back to defaults for malformed numeric inline options", () => {
+    const element = createAOSElement({
+      "data-aos": "fade-up",
+      "data-aos-duration": "invalid",
+      "data-aos-delay": "NaN",
+      "data-aos-offset": "not-a-number",
+    });
+
+    init();
+
+    const anchor = element.querySelector("[data-aos-anchor]");
+    expect(element.style.getPropertyValue("--duration")).toBe("400ms");
+    expect(element.style.getPropertyValue("--delay")).toBe("0ms");
+    expect(anchor?.style.transform).toBe("translateY(-120px)");
   });
 
   it("uses valid observer margins for non-default anchor placement", () => {

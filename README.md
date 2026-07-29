@@ -40,7 +40,7 @@ AOS.init();
 <div data-aos="zoom-in" data-aos-delay="200">Delayed zoom</div>
 ```
 
-That's it. Same API as AOS in browsers that support IntersectionObserver.
+That's it. It supports the AOS-compatible surface documented below in browsers that support IntersectionObserver.
 
 ### Svelte (native action)
 
@@ -123,7 +123,7 @@ export class AppComponent implements OnInit {
 ## ✨ Features
 
 - **Framework agnostic** — Svelte, React, Vue, Angular, Vanilla JS, CDN
-- **AOS drop-in** — Same `data-aos` attributes, same `init()` API
+- **AOS-compatible** — Familiar `data-aos` attributes and `init()` API
 - **Zero dependencies** — Pure JS + native IntersectionObserver
 - **Bundle size** — Current minified and gzip figures are published by Bundlephobia above
 - **29 primary animations + 7 legacy aliases** — Fade, Zoom, Flip, Slide, Bounce
@@ -151,6 +151,23 @@ export class AppComponent implements OnInit {
 | **Framework**             | **Any** (Svelte, React, Vue, Angular, Vanilla)     | Vanilla JS only                            |
 
 The key difference: **AOS runs JavaScript on every scroll event** for every element. rune-scroller delegates detection to the browser's native IntersectionObserver — zero JS execution until an element actually enters the viewport.
+
+## AOS Compatibility
+
+Rune Scroller implements the common declarative AOS workflow, not every legacy AOS behavior.
+
+| Surface                                             | Behavior                                                                                                                     |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `data-aos`, duration, delay, easing, offset         | Supported. Invalid numeric values use the configured defaults.                                                               |
+| `data-aos-once`                                     | Supported: the element remains visible after its first entry.                                                                |
+| `data-aos-mirror`                                   | Supported: the element animates out on an intersection exit and can animate in again. `mirror` takes precedence over `once`. |
+| Anchor placement                                    | Supported through `data-aos-anchor-placement`.                                                                               |
+| `data-aos-anchor`                                   | Not supported. Use the native action's `observerTarget` for custom targets.                                                  |
+| Runtime insertion/removal                           | Supported automatically through `MutationObserver`.                                                                          |
+| Runtime changes to existing `data-aos-*` attributes | Call `AOS.refreshHard()` after changing attributes.                                                                          |
+| `AOS.refresh()`                                     | Intentional no-op: `IntersectionObserver` recalculates geometry automatically.                                               |
+| `AOS.refreshHard()`                                 | Rebuilds AOS actions for the current `[data-aos]` elements.                                                                  |
+| AOS events and `data-aos-id`                        | Not supported.                                                                                                               |
 
 ---
 
