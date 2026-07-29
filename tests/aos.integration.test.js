@@ -52,6 +52,17 @@ describe("AOS integration", () => {
     expect(slide.classList.contains("is-visible")).toBe(false);
   });
 
+  it("cancels a pending start event when destroyed", () => {
+    const element = addElement("fade");
+
+    init({ startEvent: "rune-start" });
+    destroy();
+    document.dispatchEvent(new window.Event("rune-start"));
+
+    expect(element.hasAttribute("data-animation")).toBe(false);
+    expect(mockIntersectionObserver.getAll()).toHaveLength(0);
+  });
+
   it("keeps one observer per element after repeated initialization", () => {
     const element = addElement("fade");
 
@@ -87,6 +98,22 @@ describe("AOS integration", () => {
     expect(TrackingMutationObserver.instances).toHaveLength(1);
     expect(TrackingMutationObserver.instances[0].disconnected).toBe(true);
     globalThis.MutationObserver = originalMutationObserver;
+  });
+
+  it("processes added AOS elements without replacing active observers", async () => {
+    const first = addElement("fade");
+    const second = addElement("zoom-in");
+    init();
+    const firstObserver = mockIntersectionObserver.getObserverFor(first);
+    const secondObserver = mockIntersectionObserver.getObserverFor(second);
+
+    const third = addElement("bounce-in");
+    await new Promise((resolve) => window.setTimeout(resolve, 0));
+
+    expect(firstObserver?.isConnected).toBe(true);
+    expect(secondObserver?.isConnected).toBe(true);
+    expect(mockIntersectionObserver.getObserverFor(third)).toBeDefined();
+    expect(mockIntersectionObserver.getAll()).toHaveLength(3);
   });
 
   it("processes new elements after an explicit hard refresh", () => {

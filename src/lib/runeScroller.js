@@ -126,6 +126,7 @@ export function runeScroller(element, options) {
       }
     } else if (options?.repeat) {
       element.classList.remove("is-visible");
+      options?.onHidden?.(element);
     }
   };
 
@@ -156,6 +157,12 @@ export function runeScroller(element, options) {
 
   return {
     update(newOptions) {
+      if (
+        newOptions?.onVisible !== undefined ||
+        newOptions?.onHidden !== undefined
+      ) {
+        options = { ...options, ...newOptions };
+      }
       if (newOptions?.animation) {
         element.setAttribute("data-animation", newOptions.animation);
       }
@@ -197,12 +204,30 @@ export function runeScroller(element, options) {
         intersectionObserver = newObserver;
         state.isConnected = true;
       }
-      // Update debug if changed
+      // Update debug indicator
       if (
         newOptions?.debug !== undefined &&
         newOptions.debug !== options?.debug
       ) {
         options = { ...options, ...newOptions };
+        if (options.debug) {
+          const sentinelResult = createSentinel(
+            element,
+            true,
+            options.offset,
+            options.sentinelColor,
+            options.debugLabel,
+            options.sentinelId,
+          );
+          sentinel = sentinelResult.element;
+          sentinelId = sentinelResult.id;
+          element.setAttribute("data-sentinel-id", sentinelId);
+          element.appendChild(sentinel);
+        } else if (sentinel) {
+          sentinel.remove();
+          sentinel = null;
+          element.removeAttribute("data-sentinel-id");
+        }
       }
     },
     destroy() {
@@ -213,6 +238,7 @@ export function runeScroller(element, options) {
       if (sentinel) {
         sentinel.remove();
       }
+      element.removeAttribute("data-sentinel-id");
       // Restore original position if we changed it
       if (!originalPosition || originalPosition === "static") {
         element.style.position = originalPosition || "";

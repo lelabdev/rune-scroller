@@ -3,7 +3,9 @@
   "version": "4.0.0",
   "description": "Lightweight scroll animations for Svelte 5. Drop-in AOS replacement. 30 animations, zero dependencies.",
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": [
+    "*.css"
+  ],
   "license": "MIT",
   "author": {
     "name": "ludoloops",

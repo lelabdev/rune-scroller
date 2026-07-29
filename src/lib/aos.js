@@ -78,14 +78,17 @@ function shouldDisable(disable) {
   return true; // disable: true
 }
 
-/** @type {Array<{ destroy: () => void }>} */
-let activeActions = [];
+/** @type {Map<HTMLElement, { destroy: () => void }>} */
+let activeActions = new Map();
 
 /** @type {MutationObserver | null} */
 let mutationObserver = null;
 
 /** @type {boolean} */
 let initialized = false;
+
+/** @type {(() => void) | null} */
+let removeStartEventListener = null;
 
 /**
  * Read a data-aos-* attribute from an element
@@ -106,6 +109,8 @@ function getInlineOption(el, key, fallback) {
  * @param {HTMLElement} el
  */
 function applyToElement(el) {
+  if (activeActions.has(el)) return;
+
   const animation = resolveAnimation(el.getAttribute("data-aos") || "fade-up");
 
   const duration = Number(getInlineOption(el, "duration", options.duration));
@@ -161,12 +166,21 @@ function applyToElement(el) {
     threshold,
     delay,
     easing: getInlineOption(el, "easing", options.easing),
+    onVisible: () => {
+      if (options.animatedClassName)
+        el.classList.add(options.animatedClassName);
+    },
+    onHidden: () => {
+      if (options.animatedClassName) {
+        el.classList.remove(options.animatedClassName);
+      }
+    },
     // mirror: animate out on exit; once: animate only once
     // Both need repeat=true for reverse animation to play
     repeat: !once || mirror,
   });
 
-  activeActions.push(action);
+  activeActions.set(el, action);
 }
 
 /**
@@ -185,24 +199,14 @@ function observeMutations() {
   if (mutationObserver) mutationObserver.disconnect();
 
   mutationObserver = new MutationObserver((mutations) => {
-    let hasNewAOS = false;
-
     for (const mutation of mutations) {
       for (const node of mutation.addedNodes) {
-        if (node instanceof HTMLElement) {
-          if (node.hasAttribute && node.hasAttribute("data-aos")) {
-            hasNewAOS = true;
-          }
-          if (node.querySelectorAll) {
-            const aosChildren = node.querySelectorAll("[data-aos]");
-            if (aosChildren.length > 0) hasNewAOS = true;
-          }
-        }
+        if (!(node instanceof HTMLElement)) continue;
+        if (node.hasAttribute("data-aos")) applyToElement(node);
+        node.querySelectorAll("[data-aos]").forEach((element) => {
+          if (element instanceof HTMLElement) applyToElement(element);
+        });
       }
-    }
-
-    if (hasNewAOS) {
-      refreshHard();
     }
   });
 
@@ -219,7 +223,7 @@ function observeMutations() {
 function init(settings = {}) {
   if (typeof window === "undefined") return;
 
-  if (initialized) destroy();
+  destroy();
   options = { ...DEFAULT_OPTIONS, ...settings };
 
   // Check disable option
@@ -236,25 +240,24 @@ function init(settings = {}) {
   // Process elements on start event or immediately
   const startEvent = options.startEvent || "DOMContentLoaded";
 
-  if (
-    startEvent === "DOMContentLoaded" &&
-    ["complete", "interactive"].includes(document.readyState)
-  ) {
+  const start = () => {
+    removeStartEventListener = null;
+    if (initialized) return;
     processElements();
     observeMutations();
     initialized = true;
-  } else if (startEvent === "load") {
-    window.addEventListener("load", () => {
-      processElements();
-      observeMutations();
-      initialized = true;
-    });
+  };
+
+  if (
+    ["complete", "interactive"].includes(document.readyState) &&
+    (startEvent === "DOMContentLoaded" || startEvent === "load")
+  ) {
+    start();
   } else {
-    document.addEventListener(startEvent, () => {
-      processElements();
-      observeMutations();
-      initialized = true;
-    });
+    const target = startEvent === "load" ? window : document;
+    target.addEventListener(startEvent, start, { once: true });
+    removeStartEventListener = () =>
+      target.removeEventListener(startEvent, start);
   }
 }
 
@@ -279,7 +282,7 @@ function refreshHard() {
       /* ignore */
     }
   });
-  activeActions = [];
+  activeActions.clear();
 
   // Remove init classes
   const initClassName = options.initClassName;
@@ -296,16 +299,25 @@ function refreshHard() {
  * Disable — remove all AOS attributes and classes
  */
 function disable() {
+  const cleanupOptions = options;
+  const elements = document.querySelectorAll("[data-aos]");
   destroy();
 
-  document.querySelectorAll("[data-aos]").forEach((el) => {
-    el.removeAttribute("data-aos");
-    el.removeAttribute("data-aos-easing");
-    el.removeAttribute("data-aos-duration");
-    el.removeAttribute("data-aos-delay");
-    el.removeAttribute("data-aos-offset");
+  elements.forEach((el) => {
+    const animation = resolveAnimation(el.getAttribute("data-aos") || "");
+    [...el.attributes]
+      .filter((attribute) => attribute.name.startsWith("data-aos"))
+      .forEach((attribute) => el.removeAttribute(attribute.name));
 
-    if (options.initClassName) el.classList.remove(options.initClassName);
+    if (cleanupOptions.initClassName) {
+      el.classList.remove(cleanupOptions.initClassName);
+    }
+    if (cleanupOptions.animatedClassName) {
+      el.classList.remove(cleanupOptions.animatedClassName);
+    }
+    if (cleanupOptions.useClassNames) {
+      el.classList.remove(animation);
+    }
   });
 }
 
@@ -314,6 +326,11 @@ function disable() {
  * Destroys all actions, disconnects observers, resets state.
  */
 function destroy() {
+  if (removeStartEventListener) {
+    removeStartEventListener();
+    removeStartEventListener = null;
+  }
+
   // Destroy all active runeScroller actions
   activeActions.forEach((action) => {
     try {
@@ -322,7 +339,7 @@ function destroy() {
       /* ignore */
     }
   });
-  activeActions = [];
+  activeActions.clear();
 
   // Disconnect the MutationObserver
   if (mutationObserver) {

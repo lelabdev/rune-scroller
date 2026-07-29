@@ -105,6 +105,33 @@ describe("runeScroller action", () => {
     expect(element.style.getPropertyValue("--delay")).toBe("0ms");
   });
 
+  it("replaces the visibility callback through update", () => {
+    let firstCalls = 0;
+    let secondCalls = 0;
+    action = runeScroller(element, {
+      animation: "fade",
+      repeat: true,
+      onVisible: () => firstCalls++,
+    });
+
+    action.update({ onVisible: () => secondCalls++ });
+    mockIntersectionObserver.trigger(element, true);
+
+    expect(firstCalls).toBe(0);
+    expect(secondCalls).toBe(1);
+  });
+
+  it("creates and removes the debug indicator through update", () => {
+    action = runeScroller(element, { animation: "fade" });
+
+    action.update({ debug: true, sentinelId: "updated-debug" });
+    expect(element.querySelector("[data-sentinel-debug]")).not.toBeNull();
+
+    action.update({ debug: false });
+    expect(element.querySelector("[data-sentinel-debug]")).toBeNull();
+    expect(element.hasAttribute("data-sentinel-id")).toBe(false);
+  });
+
   it("creates and cleans up a debug sentinel", () => {
     action = runeScroller(element, {
       animation: "fade",
@@ -117,6 +144,7 @@ describe("runeScroller action", () => {
 
     action.destroy();
     expect(element.querySelector("[data-sentinel-debug]")).toBeNull();
+    expect(element.hasAttribute("data-sentinel-id")).toBe(false);
   });
 
   it("restores a position added by the action on destroy", () => {
