@@ -22,6 +22,7 @@
  * @property {number} [delay=0] - Animation delay in milliseconds
  * @property {number | number[]} [threshold=0] - IntersectionObserver threshold
  * @property {(element: HTMLElement) => void} [onVisible] - Callback when animation triggers
+ * @property {(element: HTMLElement) => void} [onHidden] - Callback when a repeating animation exits
  */
 
 /**

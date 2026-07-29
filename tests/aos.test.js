@@ -111,6 +111,26 @@ describe("AOS compatibility API", () => {
     expect(element.hasAttribute("data-aos-delay")).toBe(false);
   });
 
+  it("uses the configured animated class on visibility changes", () => {
+    const element = createAOSElement({ "data-aos": "fade" });
+    init({ animatedClassName: "custom-animated" });
+
+    mockIntersectionObserver.trigger(element, true);
+    expect(element.classList.contains("custom-animated")).toBe(true);
+
+    mockIntersectionObserver.trigger(element, false);
+    expect(element.classList.contains("custom-animated")).toBe(false);
+  });
+
+  it("removes a custom init class when disabled", () => {
+    const element = createAOSElement({ "data-aos": "fade" });
+    init({ initClassName: "custom-init" });
+
+    disable();
+
+    expect(element.classList.contains("custom-init")).toBe(false);
+  });
+
   it("exposes the documented AOS API", () => {
     expect(typeof AOS.init).toBe("function");
     expect(typeof AOS.refresh).toBe("function");
