@@ -86,6 +86,7 @@ export function runeScroller(element, options = {}) {
     duration: captureStyleProperty(element, "--duration"),
     delay: captureStyleProperty(element, "--delay"),
     easing: captureStyleProperty(element, "--easing"),
+    willChange: captureStyleProperty(element, "will-change"),
   };
 
   let currentOptions = { ...options };
@@ -122,8 +123,8 @@ export function runeScroller(element, options = {}) {
   let positionChanged = false;
   /** @type {ResizeObserver | undefined} */
   let resizeObserver;
-  /** @type {IntersectionObserver | undefined} */
-  let intersectionObserver;
+  /** @type {ReturnType<typeof createManagedObserver> | undefined} */
+  let managedObserver;
   const state = { isConnected: false };
 
   function ensurePositioningContext() {
@@ -201,25 +202,58 @@ export function runeScroller(element, options = {}) {
 
   if (currentOptions.debug) enableDebug();
 
+  /** @type {number | undefined} */
+  let willChangeTimer;
+  let willChangeActive = false;
+
+  function releaseWillChange() {
+    if (!willChangeActive) return;
+    willChangeActive = false;
+    window.clearTimeout(willChangeTimer);
+    element.removeEventListener("transitionend", releaseWillChange);
+    element.removeEventListener("animationend", releaseWillChange);
+    restoreStyleProperty(element, "will-change", original.willChange);
+  }
+
+  function activateWillChange() {
+    if (original.willChange.value || willChangeActive) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+
+    const duration = Number(currentOptions.duration ?? 400);
+    if (Number.isFinite(duration) && duration <= 0) return;
+
+    willChangeActive = true;
+    element.style.setProperty("will-change", "transform, opacity");
+    element.addEventListener("transitionend", releaseWillChange);
+    element.addEventListener("animationend", releaseWillChange);
+    const delay = Number(currentOptions.delay ?? 0);
+    const timeout = Number.isFinite(delay)
+      ? Math.max(0, duration + delay) + 100
+      : 500;
+    willChangeTimer = window.setTimeout(releaseWillChange, timeout);
+  }
+
   /** @param {IntersectionObserverEntry[]} entries */
   const handleIntersection = (entries) => {
     const entry = entries[0];
     if (!entry) return;
 
     if (entry.isIntersecting) {
+      activateWillChange();
       element.classList.add("is-visible");
       currentOptions.onVisible?.(element);
       if (!currentOptions.repeat) {
-        disconnectObserver(intersectionObserver, state);
+        disconnectObserver(managedObserver, state);
       }
     } else if (currentOptions.repeat) {
+      activateWillChange();
       element.classList.remove("is-visible");
       currentOptions.onHidden?.(element);
     }
   };
 
   function connectObserver() {
-    disconnectObserver(intersectionObserver, state);
+    disconnectObserver(managedObserver, state);
     const offset = currentOptions.offset ?? 0;
     const rootMargin = currentOptions.rootMargin ?? `0px 0px ${offset}px 0px`;
     const target = currentOptions.observerTarget ?? element;
@@ -229,11 +263,10 @@ export function runeScroller(element, options = {}) {
       element.style.position = original.position;
       positionChanged = false;
     }
-    const { observer } = createManagedObserver(target, handleIntersection, {
+    managedObserver = createManagedObserver(target, handleIntersection, {
       threshold: currentOptions.threshold ?? 0,
       rootMargin,
     });
-    intersectionObserver = observer;
     state.isConnected = true;
   }
 
@@ -294,7 +327,8 @@ export function runeScroller(element, options = {}) {
       if (restoreTransitionFrame !== undefined) {
         window.cancelAnimationFrame?.(restoreTransitionFrame);
       }
-      disconnectObserver(intersectionObserver, state);
+      releaseWillChange();
+      disconnectObserver(managedObserver, state);
       disableDebug();
       if (positionChanged) {
         element.style.position = original.position;
@@ -318,6 +352,7 @@ export function runeScroller(element, options = {}) {
       restoreStyleProperty(element, "--duration", original.duration);
       restoreStyleProperty(element, "--delay", original.delay);
       restoreStyleProperty(element, "--easing", original.easing);
+      restoreStyleProperty(element, "will-change", original.willChange);
       element.style.transition = original.transition;
     },
   };
