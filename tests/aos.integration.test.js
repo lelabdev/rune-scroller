@@ -6,6 +6,12 @@ import { mockIntersectionObserver } from "./__mocks__/IntersectionObserver.js";
 let window;
 let document;
 
+function getAOSObserver(element) {
+  return mockIntersectionObserver.getObserverFor(
+    element.querySelector("[data-aos-anchor]"),
+  );
+}
+
 function addElement(animation) {
   const element = document.createElement("div");
   element.setAttribute("data-aos", animation);
@@ -45,7 +51,10 @@ describe("AOS integration", () => {
     const slide = addElement("slide-left");
 
     init({ once: true });
-    mockIntersectionObserver.trigger(zoom, true);
+    mockIntersectionObserver.trigger(
+      zoom.querySelector("[data-aos-anchor]"),
+      true,
+    );
 
     expect(fade.getAttribute("data-animation")).toBe("fade-up");
     expect(zoom.classList.contains("is-visible")).toBe(true);
@@ -70,7 +79,7 @@ describe("AOS integration", () => {
     init();
 
     expect(mockIntersectionObserver.getAll()).toHaveLength(1);
-    expect(mockIntersectionObserver.getObserverFor(element)).toBeDefined();
+    expect(getAOSObserver(element)).toBeDefined();
   });
 
   it("disconnects the mutation observer when disabled", () => {
@@ -104,15 +113,15 @@ describe("AOS integration", () => {
     const first = addElement("fade");
     const second = addElement("zoom-in");
     init();
-    const firstObserver = mockIntersectionObserver.getObserverFor(first);
-    const secondObserver = mockIntersectionObserver.getObserverFor(second);
+    const firstObserver = getAOSObserver(first);
+    const secondObserver = getAOSObserver(second);
 
     const third = addElement("bounce-in");
     await new Promise((resolve) => window.setTimeout(resolve, 0));
 
     expect(firstObserver?.isConnected).toBe(true);
     expect(secondObserver?.isConnected).toBe(true);
-    expect(mockIntersectionObserver.getObserverFor(third)).toBeDefined();
+    expect(getAOSObserver(third)).toBeDefined();
     expect(mockIntersectionObserver.getAll()).toHaveLength(3);
   });
 
