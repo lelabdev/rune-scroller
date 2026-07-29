@@ -29,6 +29,7 @@ function createIntersectionObserver(
   $effect(() => {
     if (!element) return;
 
+    hasTriggeredOnce = false;
     observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
