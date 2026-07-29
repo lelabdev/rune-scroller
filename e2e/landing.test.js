@@ -2,12 +2,15 @@ import { test, expect } from "@playwright/test";
 
 /**
  * Integration tests against the live rune-scroller-site dev server.
- * Run `bun dev --host 0.0.0.0` in ~/dev/rune-scroller-site before these tests.
+ * Run `LANDING_URL=http://localhost:5173 bunx playwright test e2e/landing.test.js`
+ * against the separate rune-scroller-site development server.
  */
 
-const LANDING = process.env.LANDING_URL || "http://localhost:5173";
+const LANDING = process.env.LANDING_URL;
 
 test.describe("Landing page integration", () => {
+  test.skip(!LANDING, "LANDING_URL is required for the external site suite");
+
   test.beforeEach(async ({ page }) => {
     page.on("console", (msg) => {
       if (msg.type() === "error") console.log("CONSOLE ERROR:", msg.text());
