@@ -54,27 +54,27 @@ That's it. It supports the AOS-compatible surface documented below in browsers t
 <div use:rs={{ animation: 'fade-up' }}>Animates on scroll</div>
 ```
 
-### React
-
-````jsx
-import { useEffect } from "react";
 ### React (not tested — should work)
 
 ```jsx
-import { useEffect } from 'react';
-import 'rune-scroller/animations.css';
-import AOS from 'rune-scroller/aos';
+import { useEffect } from "react";
+import "rune-scroller/animations.css";
+import AOS from "rune-scroller/aos";
 
 function App() {
-	useEffect(() => { AOS.init(); }, []);
-	return (
-		<>
-			<h1 data-aos="fade-down">Welcome</h1>
-			<p data-aos="fade-up" data-aos-delay="200">Subtitle</p>
-		</>
-	);
+  useEffect(() => {
+    AOS.init();
+  }, []);
+  return (
+    <>
+      <h1 data-aos="fade-down">Welcome</h1>
+      <p data-aos="fade-up" data-aos-delay="200">
+        Subtitle
+      </p>
+    </>
+  );
 }
-````
+```
 
 ### Vue (not tested — should work)
 
@@ -153,7 +153,7 @@ export class AppComponent implements OnInit {
 | **Layout reads**          | **1 per element** (init only)                      | `offsetParent` loop per element per scroll |
 | **Resize handling**       | IntersectionObserver; ResizeObserver in debug mode | debounced scroll recalc                    |
 | **100 animated elements** | **~0ms per scroll**                                | ~2-5ms per scroll (layout thrashing)       |
-| **Animations**            | 30                                                 | 28                                         |
+| **Animations**            | 29 primary + 7 legacy aliases                      | 28                                         |
 | **Framework**             | **Any** (Svelte, React, Vue, Angular, Vanilla)     | Vanilla JS only                            |
 
 The key difference: **AOS runs JavaScript on every scroll event** for every element. rune-scroller delegates detection to the browser's native IntersectionObserver — zero JS execution until an element actually enters the viewport.
@@ -185,7 +185,7 @@ Rune Scroller implements the common declarative AOS workflow, not every legacy A
 
 ---
 
-## 🎨 Available Animations (30)
+## 🎨 Available Animations (29 primary + 7 legacy aliases)
 
 ### Fade (10)
 

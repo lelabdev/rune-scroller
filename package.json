@@ -1,7 +1,7 @@
 {
   "name": "rune-scroller",
   "version": "4.0.0",
-  "description": "Lightweight scroll animations for Svelte 5. Drop-in AOS replacement. 30 animations, zero dependencies.",
+  "description": "Lightweight scroll animations for Svelte 5. Drop-in AOS replacement. 29 animations plus 7 legacy aliases, zero dependencies.",
   "type": "module",
   "sideEffects": [
     "*.css"
@@ -54,11 +54,11 @@
     "benchmark": "bun run build && bun benchmarks/run.js",
     "preview": "vite preview",
     "prepare": "svelte-kit sync || echo ''",
-    "check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
-    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch",
+    "check": "svelte-kit sync && svelte-check --no-tsconfig && tsc --noEmit --project ./jsconfig.json",
+    "check:watch": "svelte-kit sync && svelte-check --no-tsconfig --watch",
     "format": "prettier --write .",
     "lint": "prettier --check . && eslint .",
-    "prepublishonly": "bun run check && bun run build && bun test",
+    "prepublishonly": "bun run check && bun run build && bun run test",
     "test": "bun test tests"
   },
   "packageManager": "bun@1.3.4",

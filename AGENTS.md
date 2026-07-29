@@ -8,14 +8,14 @@
 bun install                 # Install dependencies
 bun run dev                 # Start the Vite development server
 bun run check               # Sync SvelteKit and run svelte-check
-bun test                    # Run unit and integration tests with Bun
+bun run test                # Run unit and integration tests with Bun
 bunx playwright test        # Run browser E2E tests (starts e2e/serve.js on :3210)
 bun run lint                # Check Prettier formatting and ESLint
 bun run format              # Apply Prettier formatting
 bun run build               # Build publishable package files into dist/
 ```
 
-**Verification sequence:** `bun run check && bun test && bun run lint && bun run build`
+**Verification sequence:** `bun run check && bun run test && bun run lint && bun run build`
 
 ## Architecture
 

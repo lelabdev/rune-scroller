@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`disable()` function in AOS layer** — Remove AOS attributes and stop observers
 - **`destroy()` function in AOS layer** — Full cleanup for SPA navigation
 - **TypeScript types for `/aos` export** — `aos.d.ts` with proper typing
-- **55 Playwright E2E tests** — 47 API tests + 8 integration tests on the real landing page
+- **57 Playwright E2E tests** — 49 API tests + 8 integration tests on the real landing page
   - Action API: opacity, classes, duration, delay, easing, offset, repeat, onVisible, debug, destroy, 13 animation types, prefers-reduced-motion
   - AOS compat: init, data attributes, once, mirror, global options, disable, destroy, refreshHard, legacy names, multiple elements
   - Landing integration: hydration, hero visibility, scroll triggering, animation validation, no console errors
