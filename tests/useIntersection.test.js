@@ -26,5 +26,4 @@ describe("useIntersection Composable", () => {
       expect(typeof useIntersectionOnce).toBe("function");
     });
   });
-
 });
