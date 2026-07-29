@@ -24,3 +24,6 @@ export {
 
 // Utilities
 export { calculateRootMargin, ANIMATION_TYPES } from "./animations.js";
+
+// Public JSDoc types for TypeScript consumers.
+export * from "./types.js";
