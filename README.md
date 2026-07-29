@@ -31,6 +31,7 @@ npm install rune-scroller
 ```
 
 ```js
+import "rune-scroller/animations.css";
 import AOS from "rune-scroller/aos";
 AOS.init();
 ```
@@ -46,6 +47,7 @@ That's it. It supports the AOS-compatible surface documented below in browsers t
 
 ```svelte
 <script>
+	import 'rune-scroller/animations.css';
 	import rs from 'rune-scroller';
 </script>
 
@@ -60,6 +62,7 @@ import { useEffect } from "react";
 
 ```jsx
 import { useEffect } from 'react';
+import 'rune-scroller/animations.css';
 import AOS from 'rune-scroller/aos';
 
 function App() {
@@ -78,6 +81,7 @@ function App() {
 ```vue
 <script setup>
 import { onMounted } from "vue";
+import "rune-scroller/animations.css";
 import AOS from "rune-scroller/aos";
 onMounted(() => AOS.init());
 </script>
@@ -92,6 +96,7 @@ onMounted(() => AOS.init());
 ```typescript
 // app.component.ts
 import { Component, OnInit } from "@angular/core";
+import "rune-scroller/animations.css";
 import AOS from "rune-scroller/aos";
 
 @Component({ selector: "app-root", templateUrl: "./app.component.html" })
@@ -111,6 +116,7 @@ export class AppComponent implements OnInit {
 
 ```html
 <script type="module">
+  import "https://esm.sh/rune-scroller/animations.css";
   import AOS from "https://esm.sh/rune-scroller/aos";
   AOS.init();
 </script>
@@ -361,6 +367,7 @@ npm install rune-scroller
 ```diff
 - import AOS from 'aos';
 - import 'aos/dist/aos.css';
++ import 'rune-scroller/animations.css';
 + import AOS from 'rune-scroller/aos';
 ```
 
