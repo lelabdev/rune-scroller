@@ -76,13 +76,15 @@ async function runScenario(browser, port, profile, count, warm) {
   const page = await context.newPage();
   const cdp = await context.newCDPSession(page);
   await cdp.send("Performance.enable");
-  const beforeMetrics = await cdp.send("Performance.getMetrics");
   await page.setContent(
     `<!doctype html><style>body{margin:0}.item{height:80px;margin:80px 16px}</style><main>${'<div class="item"></div>'.repeat(count)}</main>`,
   );
   await page.addStyleTag({
     url: `http://127.0.0.1:${port}/dist/animations.css`,
   });
+  // Settle fixture + CSS so CDP deltas exclude construction cost.
+  await page.evaluate(() => new Promise((r) => requestAnimationFrame(r)));
+  const beforeMetrics = await cdp.send("Performance.getMetrics");
 
   const result = await page.evaluate(
     async ({ port, warm }) => {
@@ -137,8 +139,22 @@ async function runScenario(browser, port, profile, count, warm) {
 
       const scrollStart = performance.now();
       const frames = [];
-      for (let step = 0; step < 40; step++) {
-        window.scrollTo(0, step * 300);
+      const stepPx = Math.max(1, Math.floor(window.innerHeight * 0.5));
+      const maxY = Math.max(
+        0,
+        document.documentElement.scrollHeight - window.innerHeight,
+      );
+      for (let y = 0; y <= maxY; y += stepPx) {
+        window.scrollTo(0, y);
+        const frameStart = performance.now();
+        await new Promise((resolveFrame) =>
+          requestAnimationFrame(() => resolveFrame()),
+        );
+        frames.push(performance.now() - frameStart);
+      }
+      // ensure final position is the bottom even if maxY is not a multiple of stepPx
+      if (frames.length === 0 || window.scrollY < maxY) {
+        window.scrollTo(0, maxY);
         const frameStart = performance.now();
         await new Promise((resolveFrame) =>
           requestAnimationFrame(() => resolveFrame()),
@@ -154,7 +170,7 @@ async function runScenario(browser, port, profile, count, warm) {
       return {
         initializationMs,
         scrollMs,
-        maxFrameMs: Math.max(...frames),
+        maxFrameMs: frames.length ? Math.max(...frames) : 0,
         droppedFrames: frames.filter((frame) => frame > 16.7).length,
         longTaskCount: longTasks.length,
         longTaskMs: longTasks.reduce((total, task) => total + task.duration, 0),

@@ -42,7 +42,9 @@
   "files": [
     "dist",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "logo.png",
+    "CHANGELOG.md"
   ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -77,14 +79,14 @@
     "@eslint/compat": "^2.1.0",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.62.0",
+    "playwright": "^1.62.0",
     "@sveltejs/kit": "^2.70.2",
     "@sveltejs/package": "^2.5.8",
     "@sveltejs/vite-plugin-svelte": "^7.2.0",
     "@types/node": "^26.1.2",
-    "eslint": "^10.8.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-svelte": "^3.22.0",
-    "flatted": "^3.4.2",
+    "flatted": "^3.4.3",
     "globals": "^17.8.0",
     "happy-dom": "^20.11.1",
     "postcss": "^8.5.25",

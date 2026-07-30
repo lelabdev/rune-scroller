@@ -4,6 +4,7 @@ import { extname, isAbsolute, relative, resolve } from "path";
 
 const DIST = resolve(import.meta.dirname, "../dist");
 const PAGES = resolve(import.meta.dirname, "pages");
+const GENERATED = resolve(PAGES, "generated");
 
 const MIME = {
   ".html": "text/html",
@@ -44,6 +45,8 @@ const server = createServer(async (req, res) => {
   let filePath;
   if (url.startsWith("/dist/")) {
     filePath = resolveWithin(DIST, url.slice("/dist/".length));
+  } else if (url.startsWith("/generated/")) {
+    filePath = resolveWithin(GENERATED, url.slice("/generated/".length));
   } else if (url === "/" || url.endsWith(".html")) {
     filePath = resolveWithin(PAGES, url === "/" ? "index.html" : url.slice(1));
   }

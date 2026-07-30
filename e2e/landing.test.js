@@ -1,9 +1,11 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * Integration tests against the live rune-scroller-site dev server.
- * Run `LANDING_URL=http://localhost:5173 bunx playwright test e2e/landing.test.js`
- * against the separate rune-scroller-site development server.
+ * Integration tests against the live rune-scroller-site.
+ * Run with:
+ *   LANDING_URL=https://example.com bunx playwright test --config=playwright.landing.config.js
+ * Requires repo variable `LANDING_URL` in the scheduled GitHub Actions workflow.
+ * Not part of the default `bunx playwright test` suite (see playwright.config.js testIgnore).
  */
 
 const LANDING = process.env.LANDING_URL;

@@ -30,4 +30,10 @@ describe("package metadata", () => {
   it("keeps zero runtime dependencies", () => {
     expect(packageJson.dependencies ?? {}).toEqual({});
   });
+
+  it("publishes README-linked root assets", () => {
+    expect(packageJson.files).toEqual(
+      expect.arrayContaining(["logo.png", "CHANGELOG.md"]),
+    );
+  });
 });

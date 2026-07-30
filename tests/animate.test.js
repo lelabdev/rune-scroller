@@ -113,6 +113,45 @@ describe("animate DOM core", () => {
     expect(element.classList.contains("is-visible")).toBe(false);
   });
 
+  it("invokes onHidden after class removal when repeat exits", () => {
+    /** @type {HTMLElement | undefined} */
+    let hiddenElement;
+    /** @type {boolean | undefined} */
+    let wasVisibleInsideCallback;
+    action = animate(element, {
+      animation: "fade",
+      repeat: true,
+      onHidden: (target) => {
+        hiddenElement = target;
+        wasVisibleInsideCallback = target.classList.contains("is-visible");
+      },
+    });
+
+    mockIntersectionObserver.trigger(element, true);
+    mockIntersectionObserver.trigger(element, false);
+
+    expect(hiddenElement).toBe(element);
+    expect(wasVisibleInsideCallback).toBe(false);
+    expect(element.classList.contains("is-visible")).toBe(false);
+  });
+
+  it("does not call onHidden without repeat", () => {
+    let hiddenCalls = 0;
+    action = animate(element, {
+      animation: "fade",
+      repeat: false,
+      onHidden: () => {
+        hiddenCalls++;
+      },
+    });
+
+    mockIntersectionObserver.trigger(element, true);
+    mockIntersectionObserver.trigger(element, false);
+
+    expect(hiddenCalls).toBe(0);
+    expect(element.classList.contains("is-visible")).toBe(true);
+  });
+
   it("applies duration, delay, easing, and animation options", () => {
     action = animate(element, {
       animation: "zoom-in",
@@ -153,6 +192,27 @@ describe("animate update lifecycle (replacement semantics)", () => {
 
     action.update({ onVisible: () => secondCalls++ });
     mockIntersectionObserver.trigger(element, true);
+
+    expect(firstCalls).toBe(0);
+    expect(secondCalls).toBe(1);
+  });
+
+  it("replaces the onHidden callback through update", () => {
+    let firstCalls = 0;
+    let secondCalls = 0;
+    action = animate(element, {
+      animation: "fade",
+      repeat: true,
+      onHidden: () => firstCalls++,
+    });
+
+    action.update({
+      animation: "fade",
+      repeat: true,
+      onHidden: () => secondCalls++,
+    });
+    mockIntersectionObserver.trigger(element, true);
+    mockIntersectionObserver.trigger(element, false);
 
     expect(firstCalls).toBe(0);
     expect(secondCalls).toBe(1);
@@ -401,6 +461,23 @@ describe("animate cleanup", () => {
     expect(element.style.getPropertyValue("--duration")).toBe("");
     expect(element.style.getPropertyValue("--delay")).toBe("");
     expect(element.style.getPropertyValue("--easing")).toBe("");
+  });
+
+  it("does not call onHidden after destroy", () => {
+    let hiddenCalls = 0;
+    action = animate(element, {
+      animation: "fade",
+      repeat: true,
+      onHidden: () => {
+        hiddenCalls++;
+      },
+    });
+
+    mockIntersectionObserver.trigger(element, true);
+    action.destroy();
+    mockIntersectionObserver.trigger(element, false);
+
+    expect(hiddenCalls).toBe(0);
   });
 
   it("preserves stylesheet-defined positioning", () => {

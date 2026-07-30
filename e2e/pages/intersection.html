@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>useIntersection browser test</title>
+    <style>
+      body {
+        margin: 0;
+        height: 300vh;
+      }
+      .spacer {
+        height: 130vh;
+      }
+      #target,
+      #target-b {
+        width: 200px;
+        height: 100px;
+        background: teal;
+        color: white;
+      }
+      #target-b {
+        background: darkorange;
+        margin-top: 40vh;
+      }
+      #app {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 0;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <div class="spacer"></div>
+    <div id="target">Target A</div>
+    <div id="target-b">Target B</div>
+    <div class="spacer"></div>
+    <script
+      type="module"
+      src="/generated/intersection-harness.bundle.js"
+    ></script>
+  </body>
+</html>
