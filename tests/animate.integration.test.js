@@ -98,6 +98,20 @@ describe("animate integration", () => {
     expect(replacementObserver?.isConnected).toBe(false);
   });
 
+  it("disconnects a visible observer when repeat mode is disabled", () => {
+    const element = document.createElement("div");
+    document.body.appendChild(element);
+    const action = animate(element, { animation: "fade", repeat: true });
+
+    mockIntersectionObserver.trigger(element, true);
+    expect(mockIntersectionObserver.getObserverFor(element)).toBeDefined();
+
+    action.update({ animation: "fade", repeat: false });
+
+    expect(mockIntersectionObserver.getObserverFor(element)).toBeUndefined();
+    action.destroy();
+  });
+
   it("reconnects when a completed action becomes repeating", () => {
     const element = document.createElement("div");
     document.body.appendChild(element);
