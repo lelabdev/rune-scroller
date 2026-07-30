@@ -133,6 +133,23 @@ describe("useIntersection runtime lifecycle", () => {
     expect(mockIntersectionObserver.getAll()).toHaveLength(0);
   });
 
+  it("resets visibility when the observed target changes", () => {
+    installDom();
+    const { instance, target } = createHarness();
+
+    instance.setTarget(target);
+    flushSync();
+    mockIntersectionObserver.trigger(target, true);
+    expect(instance.visible()).toBe(true);
+
+    const replacement = document.createElement("div");
+    document.body.append(replacement);
+    instance.setTarget(replacement);
+    flushSync();
+
+    expect(instance.visible()).toBe(false);
+  });
+
   it("observes a replacement target after useIntersectionOnce has triggered", () => {
     installDom();
     const { instance, target } = createHarness();
