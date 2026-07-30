@@ -17,12 +17,12 @@
  * @property {string} [sentinelColor='#00e0ff'] - Debug indicator color
  * @property {string} [sentinelId] - Unique debug indicator identifier
  * @property {string} [debugLabel] - Label to show on the debug indicator
- * @property {number} [offset=0] - Viewport offset in pixels (positive = trigger earlier)
+ * @property {number} [offset=0] - Viewport offset in pixels (positive = trigger earlier). This is separate from calculateRootMargin's percentage helper.
  * @property {string} [easing='ease'] - CSS timing function
  * @property {number} [delay=0] - Animation delay in milliseconds
  * @property {number | number[]} [threshold=0] - IntersectionObserver threshold
- * @property {string} [rootMargin] - Internal observer root margin override
- * @property {HTMLElement} [observerTarget] - Internal observer target override
+ * @property {string} [rootMargin] - IntersectionObserver root margin override
+ * @property {HTMLElement} [observerTarget] - Element to observe instead of the animated element
  * @property {(element: HTMLElement) => void} [onVisible] - Callback when animation triggers
  * @property {(element: HTMLElement) => void} [onHidden] - Callback when a repeating animation exits
  */
