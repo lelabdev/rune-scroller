@@ -57,9 +57,8 @@ describe("DOM Utilities", () => {
         transitionProperty: "opacity, transform",
       });
 
-      const { checkAndWarnIfCSSNotLoaded } = await import(
-        "../src/lib/dom-utils.js?css-loaded"
-      );
+      const { checkAndWarnIfCSSNotLoaded } =
+        await import("../src/lib/dom-utils.js?css-loaded");
 
       expect(checkAndWarnIfCSSNotLoaded()).toBe(true);
       global.getComputedStyle = originalGetComputedStyle;
@@ -75,9 +74,8 @@ describe("DOM Utilities", () => {
       });
       console.warn = (message) => warnings.push(message);
 
-      const { checkAndWarnIfCSSNotLoaded } = await import(
-        "../src/lib/dom-utils.js?css-missing"
-      );
+      const { checkAndWarnIfCSSNotLoaded } =
+        await import("../src/lib/dom-utils.js?css-missing");
 
       expect(checkAndWarnIfCSSNotLoaded()).toBe(false);
       expect(warnings).toHaveLength(1);
