@@ -27,9 +27,10 @@ const componentSource = `
   import { useIntersection, useIntersectionOnce } from "${composableUrl}";
 
   let target = $state(null);
+  let observerOptions = $state({ threshold: 0 });
   const events = [];
-  const intersection = useIntersection({ threshold: 0 }, (visible) => events.push(visible));
-  const onceIntersection = useIntersectionOnce({ threshold: 0 });
+  const intersection = useIntersection(observerOptions, (visible) => events.push(visible));
+  const onceIntersection = useIntersectionOnce(observerOptions);
 
   $effect(() => {
     intersection.element = target;
@@ -38,6 +39,10 @@ const componentSource = `
 
   export function setTarget(value) {
     target = value;
+  }
+
+  export function setThreshold(value) {
+    observerOptions.threshold = value;
   }
 
   export function visible() {
@@ -131,6 +136,24 @@ describe("useIntersection runtime lifecycle", () => {
     mounted = [];
 
     expect(mockIntersectionObserver.getAll()).toHaveLength(0);
+  });
+
+  it("reacts to observer option changes", () => {
+    installDom();
+    const { instance, target } = createHarness();
+
+    instance.setTarget(target);
+    flushSync();
+    expect(
+      mockIntersectionObserver.getObserverFor(target)?.options.threshold,
+    ).toBe(0);
+
+    instance.setThreshold(0.75);
+    flushSync();
+
+    expect(
+      mockIntersectionObserver.getObserverFor(target)?.options.threshold,
+    ).toBe(0.75);
   });
 
   it("resets visibility when the observed target changes", () => {
