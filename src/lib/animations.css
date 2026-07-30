@@ -1,7 +1,7 @@
 /**
  * Rune Scroller — scroll animation styles
  * CSS custom properties for flexible animation control
- * Supports both native and AOS-compatible animation names
+ * Supports primary animation names and v2.x legacy aliases
  */
 
 /* ===== Distance variable ===== */

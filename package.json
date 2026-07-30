@@ -1,7 +1,7 @@
 {
   "name": "rune-scroller",
   "version": "4.0.0",
-  "description": "Lightweight scroll animations for Svelte 5. Drop-in AOS replacement. 29 animations plus 7 legacy aliases, zero dependencies.",
+  "description": "Framework-neutral scroll animations for the DOM with a Svelte 5 action. 29 primary animations plus 7 legacy aliases, zero dependencies.",
   "type": "module",
   "sideEffects": [
     "*.css"
@@ -23,17 +23,19 @@
     "scroll-trigger",
     "intersection-observer",
     "lightweight",
-    "performance"
+    "performance",
+    "vanilla-js",
+    "dom"
   ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "svelte": "./dist/index.js",
       "default": "./dist/index.js"
     },
-    "./aos": {
-      "types": "./dist/aos.d.ts",
-      "default": "./dist/aos.js"
+    "./svelte": {
+      "types": "./dist/svelte.d.ts",
+      "svelte": "./dist/svelte.js",
+      "default": "./dist/svelte.js"
     },
     "./animations.css": "./dist/animations.css"
   },
@@ -43,10 +45,14 @@
     "LICENSE"
   ],
   "main": "./dist/index.js",
-  "svelte": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "peerDependencies": {
     "svelte": "^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "svelte": {
+      "optional": true
+    }
   },
   "scripts": {
     "dev": "vite dev",
@@ -70,7 +76,6 @@
     "@sveltejs/package": "^2.5.7",
     "@sveltejs/vite-plugin-svelte": "^6.2.0",
     "@types/node": "^22",
-    "aos": "2.3.4",
     "eslint": "^9.36.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-svelte": "^3.12.4",

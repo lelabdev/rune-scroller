@@ -5,7 +5,6 @@ import { chromium } from "playwright";
 
 const root = resolve(import.meta.dirname, "..");
 const dist = resolve(root, "dist");
-const aosDist = resolve(root, "node_modules/aos/dist");
 const outputDir = resolve(root, "benchmarks/results");
 const samples = Number(process.env.BENCHMARK_SAMPLES ?? 3);
 const counts = [50, 200, 1000];
@@ -18,17 +17,6 @@ const profiles = [
     deviceScaleFactor: 2,
   },
 ];
-
-const files = {
-  "/dist/index.js": resolve(dist, "index.js"),
-  "/dist/runeScroller.js": resolve(dist, "runeScroller.js"),
-  "/dist/dom-utils.js": resolve(dist, "dom-utils.js"),
-  "/dist/observer-utils.js": resolve(dist, "observer-utils.js"),
-  "/dist/animations.js": resolve(dist, "animations.js"),
-  "/dist/animations.css": resolve(dist, "animations.css"),
-  "/vendor/aos.js": resolve(aosDist, "aos.js"),
-  "/vendor/aos.css": resolve(aosDist, "aos.css"),
-};
 
 function median(values) {
   const sorted = [...values].sort((a, b) => a - b);
@@ -60,10 +48,8 @@ function summarize(samplesForScenario) {
 function startServer() {
   const server = createServer(async (request, response) => {
     const path = request.url?.split("?")[0] ?? "";
-    const file = path.startsWith("/dist/")
-      ? resolve(dist, path.slice("/dist/".length))
-      : files[path];
-    if (!file || !file.startsWith(root)) {
+    const file = resolve(dist, path.slice("/dist/".length));
+    if (!file || !file.startsWith(root) || !file.startsWith(dist)) {
       response.writeHead(404).end();
       return;
     }
@@ -85,7 +71,7 @@ function startServer() {
   });
 }
 
-async function runScenario(browser, port, profile, library, count, warm) {
+async function runScenario(browser, port, profile, count, warm) {
   const context = await browser.newContext(profile);
   const page = await context.newPage();
   const cdp = await context.newCDPSession(page);
@@ -95,11 +81,11 @@ async function runScenario(browser, port, profile, library, count, warm) {
     `<!doctype html><style>body{margin:0}.item{height:80px;margin:80px 16px}</style><main>${'<div class="item"></div>'.repeat(count)}</main>`,
   );
   await page.addStyleTag({
-    url: `http://127.0.0.1:${port}/${library === "aos" ? "vendor/aos.css" : "dist/animations.css"}`,
+    url: `http://127.0.0.1:${port}/dist/animations.css`,
   });
 
   const result = await page.evaluate(
-    async ({ library, port, warm }) => {
+    async ({ port, warm }) => {
       const originalObserver = window.IntersectionObserver;
       const originalAddEventListener = EventTarget.prototype.addEventListener;
       let observerCount = 0;
@@ -135,35 +121,18 @@ async function runScenario(browser, port, profile, library, count, warm) {
           requestAnimationFrame(resolveFrame),
         );
       const start = performance.now();
-      let cleanup = () => {};
-      if (library === "aos") {
-        await new Promise((resolveScript, reject) => {
-          const script = document.createElement("script");
-          script.src = `http://127.0.0.1:${port}/vendor/aos.js`;
-          script.onload = resolveScript;
-          script.onerror = reject;
-          document.head.append(script);
-        });
-        for (const element of elements)
-          element.setAttribute("data-aos", "fade-up");
-        window.AOS.init({ once: false, duration: 400, offset: 120 });
-        // AOS v2 has no public destroy method; closing the isolated context
-        // releases its listeners and observed DOM after each sample.
-        cleanup = () => {};
-      } else {
-        const { runeScroller } = await import(
-          `http://127.0.0.1:${port}/dist/index.js`
-        );
-        const actions = elements.map((element) =>
-          runeScroller(element, {
-            animation: "fade-up",
-            repeat: true,
-            duration: 400,
-            offset: 120,
-          }),
-        );
-        cleanup = () => actions.forEach((action) => action.destroy());
-      }
+      const { animate } = await import(
+        `http://127.0.0.1:${port}/dist/index.js`
+      );
+      const actions = elements.map((element) =>
+        animate(element, {
+          animation: "fade-up",
+          repeat: true,
+          duration: 400,
+          offset: 120,
+        }),
+      );
+      const cleanup = () => actions.forEach((action) => action.destroy());
       const initializationMs = performance.now() - start;
 
       const scrollStart = performance.now();
@@ -194,7 +163,7 @@ async function runScenario(browser, port, profile, library, count, warm) {
         heap,
       };
     },
-    { library, port, warm },
+    { port, warm },
   );
 
   const afterMetrics = await cdp.send("Performance.getMetrics");
@@ -226,32 +195,20 @@ const browser = await chromium.launch({
 const results = [];
 try {
   for (const profile of profiles) {
-    for (const library of ["rune", "aos"]) {
-      for (const count of counts) {
-        const runs = [];
-        for (let sample = 0; sample < samples; sample++) {
-          runs.push(
-            await runScenario(
-              browser,
-              port,
-              profile,
-              library,
-              count,
-              sample > 0,
-            ),
-          );
-        }
-        results.push({
-          profile: profile.name,
-          library,
-          count,
-          runs,
-          summary: summarize(runs),
-        });
-        console.log(
-          `${profile.name} ${library} ${count}: ${runs.length} samples`,
-        );
+    for (const count of counts) {
+      const runs = [];
+      for (let sample = 0; sample < samples; sample++) {
+        runs.push(await runScenario(browser, port, profile, count, sample > 0));
       }
+      results.push({
+        profile: profile.name,
+        count,
+        runs,
+        summary: summarize(runs),
+      });
+      console.log(
+        `${profile.name} rune-scroller ${count}: ${runs.length} samples`,
+      );
     }
   }
 } finally {
@@ -275,10 +232,10 @@ await writeFile(
   `${JSON.stringify(report, null, 2)}\n`,
 );
 const rows = results.map(
-  ({ profile, library, count, summary }) =>
-    `| ${profile} | ${library} | ${count} | ${summary.initializationMs.median.toFixed(2)} | ${summary.scrollMs.median.toFixed(2)} | ${summary.maxFrameMs.median.toFixed(2)} | ${summary.droppedFrames.median.toFixed(0)} | ${summary.observerCount.median.toFixed(0)} | ${summary.listenerCount.median.toFixed(0)} | ${summary.scriptMs.median.toFixed(2)} | ${summary.layoutMs.median.toFixed(2)} | ${summary.styleMs.median.toFixed(2)} | ${summary.heap.median.toFixed(0)} |`,
+  ({ profile, count, summary }) =>
+    `| ${profile} | ${count} | ${summary.initializationMs.median.toFixed(2)} | ${summary.scrollMs.median.toFixed(2)} | ${summary.maxFrameMs.median.toFixed(2)} | ${summary.droppedFrames.median.toFixed(0)} | ${summary.observerCount.median.toFixed(0)} | ${summary.listenerCount.median.toFixed(0)} | ${summary.scriptMs.median.toFixed(2)} | ${summary.layoutMs.median.toFixed(2)} | ${summary.styleMs.median.toFixed(2)} | ${summary.heap.median.toFixed(0)} |`,
 );
 await writeFile(
   resolve(outputDir, "latest.md"),
-  `# Benchmark Results\n\nGenerated: ${report.generatedAt}\n\n| Profile | Library | Elements | Init median (ms) | Scroll median (ms) | Max frame median (ms) | Dropped frames median | Observers | Scroll/resize listeners | Script median (ms) | Layout median (ms) | Style median (ms) | Heap median (bytes) |\n| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |\n${rows.join("\n")}\n\nResults are machine-specific. Run \`bun run benchmark\` on the target machine before making public performance claims.\n`,
+  `# Benchmark Results\n\nGenerated: ${report.generatedAt}\n\n| Profile | Elements | Init median (ms) | Scroll median (ms) | Max frame median (ms) | Dropped frames median | Observers | Scroll/resize listeners | Script median (ms) | Layout median (ms) | Style median (ms) | Heap median (bytes) |\n| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |\n${rows.join("\n")}\n\nResults are machine-specific. Run \`bun run benchmark\` on the target machine before making public performance claims.\n`,
 );

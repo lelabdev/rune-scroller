@@ -58,11 +58,17 @@ function restoreStyleProperty(element, property, original) {
 }
 
 /**
+ * Animate an element when it enters the viewport.
+ *
+ * Framework-neutral DOM core. Returns a deterministic lifecycle handle whose
+ * `update(newOptions)` treats the argument as the complete new option set, so
+ * options removed by a reactive caller are no longer retained.
+ *
  * @param {HTMLElement} element
- * @param {import('./types.js').RuneScrollerOptions} [options]
- * @returns {{ update: (newOptions?: import('./types.js').RuneScrollerOptions) => void, destroy: () => void }}
+ * @param {import('./types.js').AnimateOptions} [options]
+ * @returns {import('./types.js').AnimateHandle}
  */
-export function runeScroller(element, options = {}) {
+export function animate(element, options = {}) {
   if (typeof window === "undefined") {
     return {
       update: () => {},
@@ -291,54 +297,72 @@ export function runeScroller(element, options = {}) {
   connectObserver();
 
   return {
+    // Svelte action + reactive contract: the argument is the full new option
+    // set. Options that are no longer present revert to their defaults or to
+    // the caller-owned value, so a reactive update never retains stale values.
     update(newOptions = {}) {
       if (destroyed) return;
 
       const previousOptions = currentOptions;
-      currentOptions = { ...currentOptions, ...newOptions };
+      currentOptions = newOptions;
 
-      if (newOptions.animation !== undefined) {
-        animation = normalizeAnimation(newOptions.animation);
-        element.setAttribute("data-animation", animation);
-      }
-      if (newOptions.duration !== undefined || newOptions.delay !== undefined) {
+      animation = normalizeAnimation(currentOptions.animation);
+      element.setAttribute("data-animation", animation);
+
+      // Duration and delay are independent options: replacement semantics
+      // require each to revert to its caller-owned value when removed, even
+      // while the other timing option remains active.
+      if (currentOptions.duration !== undefined) {
         originalDuration ??= captureStyleProperty(element, "--duration");
-        originalDelay ??= captureStyleProperty(element, "--delay");
-        setCSSVariables(element, newOptions.duration, newOptions.delay);
-      }
-      if (newOptions.easing !== undefined) {
-        originalEasing ??= captureStyleProperty(element, "--easing");
-        element.style.setProperty("--easing", newOptions.easing);
+        element.style.setProperty("--duration", `${currentOptions.duration}ms`);
+      } else if (previousOptions.duration !== undefined) {
+        if (originalDuration)
+          restoreStyleProperty(element, "--duration", originalDuration);
+        originalDuration = undefined;
       }
 
-      const observerOptionsChanged =
-        newOptions.offset !== undefined ||
-        newOptions.threshold !== undefined ||
-        newOptions.rootMargin !== undefined ||
-        newOptions.observerTarget !== undefined;
+      if (currentOptions.delay !== undefined) {
+        originalDelay ??= captureStyleProperty(element, "--delay");
+        element.style.setProperty("--delay", `${currentOptions.delay}ms`);
+      } else if (previousOptions.delay !== undefined) {
+        if (originalDelay)
+          restoreStyleProperty(element, "--delay", originalDelay);
+        originalDelay = undefined;
+      }
+
+      if (currentOptions.easing !== undefined) {
+        originalEasing ??= captureStyleProperty(element, "--easing");
+        element.style.setProperty("--easing", currentOptions.easing);
+      } else if (previousOptions.easing !== undefined) {
+        if (originalEasing)
+          restoreStyleProperty(element, "--easing", originalEasing);
+        originalEasing = undefined;
+      }
+
+      const observerChanged =
+        currentOptions.offset !== previousOptions.offset ||
+        currentOptions.threshold !== previousOptions.threshold ||
+        currentOptions.rootMargin !== previousOptions.rootMargin ||
+        currentOptions.observerTarget !== previousOptions.observerTarget;
       const repeatNeedsReconnect =
-        newOptions.repeat === true &&
+        currentOptions.repeat === true &&
         previousOptions.repeat !== true &&
         !state.isConnected;
 
-      if (observerOptionsChanged || repeatNeedsReconnect) {
+      if (observerChanged || repeatNeedsReconnect) {
         connectObserver();
       }
 
-      const debugChanged =
-        newOptions.debug !== undefined &&
-        newOptions.debug !== previousOptions.debug;
-      const debugAppearanceChanged =
-        newOptions.offset !== undefined ||
-        newOptions.sentinelColor !== undefined ||
-        newOptions.debugLabel !== undefined ||
-        newOptions.sentinelId !== undefined;
-
-      if (debugChanged) {
+      if (currentOptions.debug !== previousOptions.debug) {
         if (currentOptions.debug) enableDebug();
         else disableDebug();
-      } else if (currentOptions.debug && debugAppearanceChanged) {
-        renderSentinel();
+      } else if (currentOptions.debug) {
+        const debugAppearanceChanged =
+          currentOptions.offset !== previousOptions.offset ||
+          currentOptions.sentinelColor !== previousOptions.sentinelColor ||
+          currentOptions.debugLabel !== previousOptions.debugLabel ||
+          currentOptions.sentinelId !== previousOptions.sentinelId;
+        if (debugAppearanceChanged) renderSentinel();
       }
     },
     destroy() {

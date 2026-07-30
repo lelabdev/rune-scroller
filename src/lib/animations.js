@@ -4,12 +4,12 @@
  */
 
 /**
- * All available animation types in the library
- * Includes both native rune-scroller animations and AOS-compatible names
+ * All available animation types in the library: primary names plus the
+ * v2.x legacy aliases that are still preserved.
  * @type {readonly string[]}
  */
 export const ANIMATION_TYPES = [
-  // Fade (10)
+  // Fade (9)
   "fade",
   "fade-up",
   "fade-down",

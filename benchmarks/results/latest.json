@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-29T20:12:11.846Z",
+  "generatedAt": "2026-07-30T00:35:35.807Z",
   "environment": {
     "node": "v24.3.0",
     "platform": "linux",
@@ -9,167 +9,67 @@
   "results": [
     {
       "profile": "desktop",
-      "library": "rune",
       "count": 50,
       "runs": [
         {
-          "initializationMs": 18.900000005960464,
-          "scrollMs": 637.5,
-          "maxFrameMs": 17.600000008940697,
-          "droppedFrames": 5,
+          "initializationMs": 30.900000005960464,
+          "scrollMs": 642.5999999940395,
+          "maxFrameMs": 16.69999998807907,
+          "droppedFrames": 0,
           "longTaskCount": 0,
           "longTaskMs": 0,
           "observerCount": 1,
           "listenerCount": 0,
-          "heap": 1702808,
-          "scriptMs": 4.197,
-          "layoutMs": 0.431,
-          "styleMs": 22.881
+          "heap": 1549076,
+          "scriptMs": 5.797,
+          "layoutMs": 0.712,
+          "styleMs": 26.058999999999997
         },
         {
-          "initializationMs": 18.299999997019768,
-          "scrollMs": 640.3999999910593,
-          "maxFrameMs": 17.100000008940697,
-          "droppedFrames": 5,
-          "longTaskCount": 0,
-          "longTaskMs": 0,
-          "observerCount": 1,
-          "listenerCount": 0,
-          "heap": 1702996,
-          "scriptMs": 4.71,
-          "layoutMs": 0.47300000000000003,
-          "styleMs": 25.137
-        },
-        {
-          "initializationMs": 19.200000002980232,
-          "scrollMs": 645.7000000029802,
-          "maxFrameMs": 16.799999997019768,
-          "droppedFrames": 1,
-          "longTaskCount": 0,
-          "longTaskMs": 0,
-          "observerCount": 1,
-          "listenerCount": 0,
-          "heap": 1702108,
-          "scriptMs": 4.171,
-          "layoutMs": 0.496,
-          "styleMs": 21.867
-        }
-      ],
-      "summary": {
-        "initializationMs": {
-          "median": 18.900000005960464,
-          "variance": 0.14000000218550365
-        },
-        "scrollMs": {
-          "median": 640.3999999910593,
-          "variance": 11.526666680375735
-        },
-        "maxFrameMs": {
-          "median": 17.100000008940697,
-          "variance": 0.10888889180289378
-        },
-        "droppedFrames": {
-          "median": 5,
-          "variance": 3.555555555555556
-        },
-        "longTaskCount": {
-          "median": 0,
-          "variance": 0
-        },
-        "longTaskMs": {
-          "median": 0,
-          "variance": 0
-        },
-        "observerCount": {
-          "median": 1,
-          "variance": 0
-        },
-        "listenerCount": {
-          "median": 0,
-          "variance": 0
-        },
-        "heap": {
-          "median": 1702808,
-          "variance": 145987.55555555556
-        },
-        "scriptMs": {
-          "median": 4.197,
-          "variance": 0.06159622222222217
-        },
-        "layoutMs": {
-          "median": 0.47300000000000003,
-          "variance": 0.0007242222222222225
-        },
-        "styleMs": {
-          "median": 22.881,
-          "variance": 1.8678479999999995
-        }
-      }
-    },
-    {
-      "profile": "desktop",
-      "library": "rune",
-      "count": 200,
-      "runs": [
-        {
-          "initializationMs": 18.599999994039536,
-          "scrollMs": 647.7000000029802,
-          "maxFrameMs": 17.100000008940697,
-          "droppedFrames": 2,
-          "longTaskCount": 0,
-          "longTaskMs": 0,
-          "observerCount": 1,
-          "listenerCount": 0,
-          "heap": 1978940,
-          "scriptMs": 9.129999999999999,
-          "layoutMs": 1.433,
-          "styleMs": 40.977
-        },
-        {
-          "initializationMs": 21.099999994039536,
-          "scrollMs": 635,
+          "initializationMs": 23.899999991059303,
+          "scrollMs": 663.1000000089407,
           "maxFrameMs": 16.700000002980232,
           "droppedFrames": 1,
           "longTaskCount": 0,
           "longTaskMs": 0,
           "observerCount": 1,
           "listenerCount": 0,
-          "heap": 1976556,
-          "scriptMs": 9.033,
-          "layoutMs": 1.411,
-          "styleMs": 43.13
+          "heap": 1549512,
+          "scriptMs": 4.876,
+          "layoutMs": 0.565,
+          "styleMs": 20.195
         },
         {
-          "initializationMs": 17.700000002980232,
-          "scrollMs": 640.1000000089407,
-          "maxFrameMs": 17.100000008940697,
-          "droppedFrames": 2,
+          "initializationMs": 25,
+          "scrollMs": 662.2000000029802,
+          "maxFrameMs": 16.700000002980232,
+          "droppedFrames": 1,
           "longTaskCount": 0,
           "longTaskMs": 0,
           "observerCount": 1,
           "listenerCount": 0,
-          "heap": 1979068,
-          "scriptMs": 8.958,
-          "layoutMs": 1.411,
-          "styleMs": 40.336999999999996
+          "heap": 1549428,
+          "scriptMs": 4.645,
+          "layoutMs": 0.593,
+          "styleMs": 19.955000000000002
         }
       ],
       "summary": {
         "initializationMs": {
-          "median": 18.599999994039536,
-          "variance": 2.0688888803455563
+          "median": 25,
+          "variance": 9.446666699846586
         },
         "scrollMs": {
-          "median": 640.1000000089407,
-          "variance": 27.22888889736599
+          "median": 662.2000000029802,
+          "variance": 89.46888899690576
         },
         "maxFrameMs": {
-          "median": 17.100000008940697,
-          "variance": 0.0355555566151937
+          "median": 16.700000002980232,
+          "variance": 4.934324553889725e-17
         },
         "droppedFrames": {
-          "median": 2,
-          "variance": 0.2222222222222222
+          "median": 1,
+          "variance": 0.22222222222222224
         },
         "longTaskCount": {
           "median": 0,
@@ -188,86 +88,183 @@
           "variance": 0
         },
         "heap": {
-          "median": 1978940,
-          "variance": 1334442.6666666667
+          "median": 1549428,
+          "variance": 35672.8888888889
         },
         "scriptMs": {
-          "median": 9.033,
-          "variance": 0.0049575555555554885
+          "median": 4.876,
+          "variance": 0.24763399999999994
         },
         "layoutMs": {
-          "median": 1.411,
-          "variance": 0.00010755555555555574
+          "median": 0.593,
+          "variance": 0.004061555555555556
         },
         "styleMs": {
-          "median": 40.977,
-          "variance": 1.4273175555555622
+          "median": 20.195,
+          "variance": 7.966990222222212
         }
       }
     },
     {
       "profile": "desktop",
-      "library": "rune",
-      "count": 1000,
+      "count": 200,
       "runs": [
         {
-          "initializationMs": 35.70000000298023,
-          "scrollMs": 704.7999999970198,
-          "maxFrameMs": 18,
+          "initializationMs": 19,
+          "scrollMs": 652.1000000089407,
+          "maxFrameMs": 16.30000001192093,
+          "droppedFrames": 0,
+          "longTaskCount": 0,
+          "longTaskMs": 0,
+          "observerCount": 1,
+          "listenerCount": 0,
+          "heap": 1826092,
+          "scriptMs": 9.667,
+          "layoutMs": 1.149,
+          "styleMs": 32.174
+        },
+        {
+          "initializationMs": 19,
+          "scrollMs": 647.9000000059605,
+          "maxFrameMs": 16.700000002980232,
           "droppedFrames": 1,
           "longTaskCount": 0,
           "longTaskMs": 0,
           "observerCount": 1,
           "listenerCount": 0,
-          "heap": 3006392,
-          "scriptMs": 26.824,
-          "layoutMs": 6.423,
-          "styleMs": 132.359
+          "heap": 1825864,
+          "scriptMs": 9.016,
+          "layoutMs": 1.138,
+          "styleMs": 34.747
         },
         {
-          "initializationMs": 30.400000005960464,
-          "scrollMs": 667.6999999880791,
+          "initializationMs": 18.400000005960464,
+          "scrollMs": 637.8999999910593,
+          "maxFrameMs": 16.600000008940697,
+          "droppedFrames": 0,
+          "longTaskCount": 0,
+          "longTaskMs": 0,
+          "observerCount": 1,
+          "listenerCount": 0,
+          "heap": 1825560,
+          "scriptMs": 8.867999999999999,
+          "layoutMs": 1.299,
+          "styleMs": 31.877999999999997
+        }
+      ],
+      "summary": {
+        "initializationMs": {
+          "median": 19,
+          "variance": 0.07999999841054281
+        },
+        "scrollMs": {
+          "median": 647.9000000059605,
+          "variance": 35.475555647876526
+        },
+        "maxFrameMs": {
+          "median": 16.600000008940697,
+          "variance": 0.028888887763023386
+        },
+        "droppedFrames": {
+          "median": 0,
+          "variance": 0.22222222222222224
+        },
+        "longTaskCount": {
+          "median": 0,
+          "variance": 0
+        },
+        "longTaskMs": {
+          "median": 0,
+          "variance": 0
+        },
+        "observerCount": {
+          "median": 1,
+          "variance": 0
+        },
+        "listenerCount": {
+          "median": 0,
+          "variance": 0
+        },
+        "heap": {
+          "median": 1825864,
+          "variance": 47491.55555555556
+        },
+        "scriptMs": {
+          "median": 9.016,
+          "variance": 0.12045622222222248
+        },
+        "layoutMs": {
+          "median": 1.149,
+          "variance": 0.005393555555555554
+        },
+        "styleMs": {
+          "median": 32.174,
+          "variance": 1.6599006666666691
+        }
+      }
+    },
+    {
+      "profile": "desktop",
+      "count": 1000,
+      "runs": [
+        {
+          "initializationMs": 34.5,
+          "scrollMs": 664.7999999970198,
           "maxFrameMs": 16.400000005960464,
           "droppedFrames": 0,
           "longTaskCount": 0,
           "longTaskMs": 0,
           "observerCount": 1,
           "listenerCount": 0,
-          "heap": 2998852,
-          "scriptMs": 22.997,
-          "layoutMs": 5.443,
-          "styleMs": 109.71400000000001
+          "heap": 2834200,
+          "scriptMs": 22.953000000000003,
+          "layoutMs": 5.671,
+          "styleMs": 106.27000000000001
         },
         {
-          "initializationMs": 34.5,
-          "scrollMs": 674.2999999970198,
-          "maxFrameMs": 25.200000002980232,
+          "initializationMs": 31.200000002980232,
+          "scrollMs": 660.3999999910593,
+          "maxFrameMs": 16.599999994039536,
+          "droppedFrames": 0,
+          "longTaskCount": 0,
+          "longTaskMs": 0,
+          "observerCount": 1,
+          "listenerCount": 0,
+          "heap": 2850040,
+          "scriptMs": 22.212,
+          "layoutMs": 5.8950000000000005,
+          "styleMs": 111.84700000000001
+        },
+        {
+          "initializationMs": 33.30000001192093,
+          "scrollMs": 666.0999999940395,
+          "maxFrameMs": 17.399999991059303,
           "droppedFrames": 1,
           "longTaskCount": 0,
           "longTaskMs": 0,
           "observerCount": 1,
           "listenerCount": 0,
-          "heap": 3012264,
-          "scriptMs": 28.792,
-          "layoutMs": 5.002000000000001,
-          "styleMs": 100.803
+          "heap": 2855968,
+          "scriptMs": 20.262,
+          "layoutMs": 5.239,
+          "styleMs": 88.114
         }
       ],
       "summary": {
         "initializationMs": {
-          "median": 34.5,
-          "variance": 5.148888880742921
+          "median": 33.30000001192093,
+          "variance": 1.859999998807907
         },
         "scrollMs": {
-          "median": 674.2999999970198,
-          "variance": 261.13555564237964
+          "median": 664.7999999970198,
+          "variance": 5.948888897630904
         },
         "maxFrameMs": {
-          "median": 18,
-          "variance": 14.648888885709974
+          "median": 16.599999994039536,
+          "variance": 0.18666666229565942
         },
         "droppedFrames": {
-          "median": 1,
+          "median": 0,
           "variance": 0.22222222222222224
         },
         "longTaskCount": {
@@ -287,185 +284,85 @@
           "variance": 0
         },
         "heap": {
-          "median": 3006392,
-          "variance": 30134858.666666668
+          "median": 2850040,
+          "variance": 84432512
         },
         "scriptMs": {
-          "median": 26.824,
-          "variance": 5.788997555555558
+          "median": 22.212,
+          "variance": 1.2881180000000017
         },
         "layoutMs": {
-          "median": 5.443,
-          "variance": 0.352680222222222
+          "median": 5.671,
+          "variance": 0.07412622222222236
         },
         "styleMs": {
-          "median": 109.71400000000001,
-          "variance": 176.44256466666675
+          "median": 106.27000000000001,
+          "variance": 102.66650600000004
         }
       }
     },
     {
-      "profile": "desktop",
-      "library": "aos",
+      "profile": "mobile",
       "count": 50,
       "runs": [
         {
-          "initializationMs": 10.400000005960464,
-          "scrollMs": 654.7999999970198,
-          "maxFrameMs": 17.299999997019768,
-          "droppedFrames": 2,
-          "longTaskCount": 0,
-          "longTaskMs": 0,
-          "observerCount": 0,
-          "listenerCount": 2,
-          "heap": 1589492,
-          "scriptMs": 2.639,
-          "layoutMs": 0.298,
-          "styleMs": 23.637999999999998
-        },
-        {
-          "initializationMs": 10,
-          "scrollMs": 653.0999999940395,
-          "maxFrameMs": 17.299999997019768,
-          "droppedFrames": 1,
-          "longTaskCount": 0,
-          "longTaskMs": 0,
-          "observerCount": 0,
-          "listenerCount": 2,
-          "heap": 1589424,
-          "scriptMs": 2.4979999999999998,
-          "layoutMs": 0.24899999999999997,
-          "styleMs": 22.272
-        },
-        {
-          "initializationMs": 10,
-          "scrollMs": 650.9000000059605,
-          "maxFrameMs": 17.30000001192093,
-          "droppedFrames": 2,
-          "longTaskCount": 0,
-          "longTaskMs": 0,
-          "observerCount": 0,
-          "listenerCount": 2,
-          "heap": 1589448,
-          "scriptMs": 2.764,
-          "layoutMs": 0.348,
-          "styleMs": 24.724
-        }
-      ],
-      "summary": {
-        "initializationMs": {
-          "median": 10,
-          "variance": 0.0355555566151937
-        },
-        "scrollMs": {
-          "median": 653.0999999940395,
-          "variance": 2.548888876438141
-        },
-        "maxFrameMs": {
-          "median": 17.299999997019768,
-          "variance": 4.934324553889725e-17
-        },
-        "droppedFrames": {
-          "median": 2,
-          "variance": 0.2222222222222222
-        },
-        "longTaskCount": {
-          "median": 0,
-          "variance": 0
-        },
-        "longTaskMs": {
-          "median": 0,
-          "variance": 0
-        },
-        "observerCount": {
-          "median": 0,
-          "variance": 0
-        },
-        "listenerCount": {
-          "median": 2,
-          "variance": 0
-        },
-        "heap": {
-          "median": 1589448,
-          "variance": 792.888888888889
-        },
-        "scriptMs": {
-          "median": 2.639,
-          "variance": 0.01180688888888889
-        },
-        "layoutMs": {
-          "median": 0.298,
-          "variance": 0.0016335555555555556
-        },
-        "styleMs": {
-          "median": 23.637999999999998,
-          "variance": 1.0064062222222236
-        }
-      }
-    },
-    {
-      "profile": "desktop",
-      "library": "aos",
-      "count": 200,
-      "runs": [
-        {
-          "initializationMs": 17.200000002980232,
-          "scrollMs": 641.9000000059605,
-          "maxFrameMs": 16.799999997019768,
-          "droppedFrames": 1,
-          "longTaskCount": 0,
-          "longTaskMs": 0,
-          "observerCount": 0,
-          "listenerCount": 2,
-          "heap": 1644932,
-          "scriptMs": 4.366,
-          "layoutMs": 0.74,
-          "styleMs": 59.065
-        },
-        {
-          "initializationMs": 16.5,
-          "scrollMs": 642.5,
-          "maxFrameMs": 16.5,
+          "initializationMs": 20.200000002980232,
+          "scrollMs": 643.5,
+          "maxFrameMs": 16.599999994039536,
           "droppedFrames": 0,
           "longTaskCount": 0,
           "longTaskMs": 0,
-          "observerCount": 0,
-          "listenerCount": 2,
-          "heap": 1646728,
-          "scriptMs": 4.452,
-          "layoutMs": 0.751,
-          "styleMs": 61.948
+          "observerCount": 1,
+          "listenerCount": 0,
+          "heap": 1548612,
+          "scriptMs": 3.657,
+          "layoutMs": 0.424,
+          "styleMs": 21.437
         },
         {
-          "initializationMs": 24.799999997019768,
-          "scrollMs": 635.6000000089407,
-          "maxFrameMs": 16.899999991059303,
+          "initializationMs": 18.899999991059303,
+          "scrollMs": 640,
+          "maxFrameMs": 16.700000002980232,
           "droppedFrames": 1,
           "longTaskCount": 0,
           "longTaskMs": 0,
-          "observerCount": 0,
-          "listenerCount": 2,
-          "heap": 1645276,
-          "scriptMs": 5.316000000000001,
-          "layoutMs": 0.8809999999999999,
-          "styleMs": 62.647999999999996
+          "observerCount": 1,
+          "listenerCount": 0,
+          "heap": 1548340,
+          "scriptMs": 4.074999999999999,
+          "layoutMs": 0.537,
+          "styleMs": 23.221
+        },
+        {
+          "initializationMs": 18.599999994039536,
+          "scrollMs": 634.5999999940395,
+          "maxFrameMs": 16.599999994039536,
+          "droppedFrames": 0,
+          "longTaskCount": 0,
+          "longTaskMs": 0,
+          "observerCount": 1,
+          "listenerCount": 0,
+          "heap": 1548624,
+          "scriptMs": 3.709,
+          "layoutMs": 0.434,
+          "styleMs": 21.785
         }
       ],
       "summary": {
         "initializationMs": {
-          "median": 17.200000002980232,
-          "variance": 14.126666651566824
+          "median": 18.899999991059303,
+          "variance": 0.48222222864627845
         },
         "scrollMs": {
-          "median": 641.9000000059605,
-          "variance": 9.739999981323878
+          "median": 640,
+          "variance": 13.402222241163253
         },
         "maxFrameMs": {
-          "median": 16.799999997019768,
-          "variance": 0.028888887763023393
+          "median": 16.599999994039536,
+          "variance": 0.002222222619586539
         },
         "droppedFrames": {
-          "median": 1,
+          "median": 0,
           "variance": 0.22222222222222224
         },
         "longTaskCount": {
@@ -477,392 +374,94 @@
           "variance": 0
         },
         "observerCount": {
-          "median": 0,
-          "variance": 0
-        },
-        "listenerCount": {
-          "median": 2,
-          "variance": 0
-        },
-        "heap": {
-          "median": 1645276,
-          "variance": 605806.2222222221
-        },
-        "scriptMs": {
-          "median": 4.452,
-          "variance": 0.18404355555555593
-        },
-        "layoutMs": {
-          "median": 0.751,
-          "variance": 0.004100222222222216
-        },
-        "styleMs": {
-          "median": 61.948,
-          "variance": 2.4043975555555552
-        }
-      }
-    },
-    {
-      "profile": "desktop",
-      "library": "aos",
-      "count": 1000,
-      "runs": [
-        {
-          "initializationMs": 70.30000001192093,
-          "scrollMs": 877.7999999970198,
-          "maxFrameMs": 48.1000000089407,
-          "droppedFrames": 10,
-          "longTaskCount": 1,
-          "longTaskMs": 66,
-          "observerCount": 0,
-          "listenerCount": 2,
-          "heap": 1967576,
-          "scriptMs": 9.303,
-          "layoutMs": 3.7390000000000003,
-          "styleMs": 170.81
-        },
-        {
-          "initializationMs": 56.900000005960464,
-          "scrollMs": 860.7000000029802,
-          "maxFrameMs": 46.5,
-          "droppedFrames": 11,
-          "longTaskCount": 1,
-          "longTaskMs": 52,
-          "observerCount": 0,
-          "listenerCount": 2,
-          "heap": 1967388,
-          "scriptMs": 11.088000000000001,
-          "layoutMs": 3.354,
-          "styleMs": 167.911
-        },
-        {
-          "initializationMs": 68.90000000596046,
-          "scrollMs": 853.7000000029802,
-          "maxFrameMs": 49.5,
-          "droppedFrames": 14,
-          "longTaskCount": 1,
-          "longTaskMs": 64,
-          "observerCount": 0,
-          "listenerCount": 2,
-          "heap": 1967736,
-          "scriptMs": 9.198,
-          "layoutMs": 4.128,
-          "styleMs": 159.419
-        }
-      ],
-      "summary": {
-        "initializationMs": {
-          "median": 68.90000000596046,
-          "variance": 36.16888890849219
-        },
-        "scrollMs": {
-          "median": 860.7000000029802,
-          "variance": 102.46888883431753
-        },
-        "maxFrameMs": {
-          "median": 48.1000000089407,
-          "variance": 1.5022222226195865
-        },
-        "droppedFrames": {
-          "median": 11,
-          "variance": 2.8888888888888893
-        },
-        "longTaskCount": {
           "median": 1,
           "variance": 0
         },
-        "longTaskMs": {
-          "median": 64,
-          "variance": 38.22222222222222
-        },
-        "observerCount": {
+        "listenerCount": {
           "median": 0,
           "variance": 0
         },
-        "listenerCount": {
-          "median": 2,
-          "variance": 0
-        },
         "heap": {
-          "median": 1967576,
-          "variance": 20227.555555555555
+          "median": 1548612,
+          "variance": 17198.222222222223
         },
         "scriptMs": {
-          "median": 9.303,
-          "variance": 0.7521500000000003
+          "median": 3.709,
+          "variance": 0.03459822222222209
         },
         "layoutMs": {
-          "median": 3.7390000000000003,
-          "variance": 0.09984688888888889
+          "median": 0.434,
+          "variance": 0.0026086666666666684
         },
         "styleMs": {
-          "median": 167.911,
-          "variance": 23.36368288888885
+          "median": 21.785,
+          "variance": 0.5962062222222217
         }
       }
     },
     {
       "profile": "mobile",
-      "library": "rune",
-      "count": 50,
+      "count": 200,
       "runs": [
         {
-          "initializationMs": 15.900000005960464,
-          "scrollMs": 643,
-          "maxFrameMs": 17.099999994039536,
-          "droppedFrames": 2,
-          "longTaskCount": 0,
-          "longTaskMs": 0,
-          "observerCount": 1,
-          "listenerCount": 0,
-          "heap": 1701868,
-          "scriptMs": 3.9579999999999997,
-          "layoutMs": 0.49200000000000005,
-          "styleMs": 25.555999999999997
-        },
-        {
-          "initializationMs": 17.299999997019768,
-          "scrollMs": 649.6000000089407,
-          "maxFrameMs": 16.799999997019768,
-          "droppedFrames": 1,
-          "longTaskCount": 0,
-          "longTaskMs": 0,
-          "observerCount": 1,
-          "listenerCount": 0,
-          "heap": 1701540,
-          "scriptMs": 4.002999999999999,
-          "layoutMs": 0.47,
-          "styleMs": 26.159000000000002
-        },
-        {
-          "initializationMs": 16.900000005960464,
-          "scrollMs": 645.3999999910593,
-          "maxFrameMs": 16.5,
+          "initializationMs": 17.700000002980232,
+          "scrollMs": 641.5999999940395,
+          "maxFrameMs": 16.400000005960464,
           "droppedFrames": 0,
           "longTaskCount": 0,
           "longTaskMs": 0,
           "observerCount": 1,
           "listenerCount": 0,
-          "heap": 1702008,
-          "scriptMs": 4.048,
-          "layoutMs": 0.501,
-          "styleMs": 25.599
-        }
-      ],
-      "summary": {
-        "initializationMs": {
-          "median": 16.900000005960464,
-          "variance": 0.346666663090388
-        },
-        "scrollMs": {
-          "median": 645.3999999910593,
-          "variance": 7.44000002503395
-        },
-        "maxFrameMs": {
-          "median": 16.799999997019768,
-          "variance": 0.05999999880790711
-        },
-        "droppedFrames": {
-          "median": 1,
-          "variance": 0.6666666666666666
-        },
-        "longTaskCount": {
-          "median": 0,
-          "variance": 0
-        },
-        "longTaskMs": {
-          "median": 0,
-          "variance": 0
-        },
-        "observerCount": {
-          "median": 1,
-          "variance": 0
-        },
-        "listenerCount": {
-          "median": 0,
-          "variance": 0
-        },
-        "heap": {
-          "median": 1701868,
-          "variance": 38467.55555555556
-        },
-        "scriptMs": {
-          "median": 4.002999999999999,
-          "variance": 0.0013500000000000092
-        },
-        "layoutMs": {
-          "median": 0.49200000000000005,
-          "variance": 0.00016955555555555604
-        },
-        "styleMs": {
-          "median": 25.599,
-          "variance": 0.07545088888888989
-        }
-      }
-    },
-    {
-      "profile": "mobile",
-      "library": "rune",
-      "count": 200,
-      "runs": [
-        {
-          "initializationMs": 19.299999997019768,
-          "scrollMs": 642.7000000029802,
-          "maxFrameMs": 17.799999997019768,
-          "droppedFrames": 1,
-          "longTaskCount": 0,
-          "longTaskMs": 0,
-          "observerCount": 1,
-          "listenerCount": 0,
-          "heap": 1976996,
-          "scriptMs": 8.461,
-          "layoutMs": 1.345,
-          "styleMs": 44.568999999999996
-        },
-        {
-          "initializationMs": 18.200000002980232,
-          "scrollMs": 644.2999999970198,
-          "maxFrameMs": 16.899999991059303,
-          "droppedFrames": 3,
-          "longTaskCount": 0,
-          "longTaskMs": 0,
-          "observerCount": 1,
-          "listenerCount": 0,
-          "heap": 1979832,
-          "scriptMs": 8.094000000000001,
-          "layoutMs": 1.3190000000000002,
-          "styleMs": 43.339000000000006
+          "heap": 1824100,
+          "scriptMs": 8.174000000000001,
+          "layoutMs": 1.105,
+          "styleMs": 37.992
         },
         {
           "initializationMs": 17.400000005960464,
-          "scrollMs": 639.7999999970198,
-          "maxFrameMs": 17.200000002980232,
-          "droppedFrames": 2,
-          "longTaskCount": 0,
-          "longTaskMs": 0,
-          "observerCount": 1,
-          "listenerCount": 0,
-          "heap": 1979720,
-          "scriptMs": 8.272,
-          "layoutMs": 1.411,
-          "styleMs": 45.868
-        }
-      ],
-      "summary": {
-        "initializationMs": {
-          "median": 18.200000002980232,
-          "variance": 0.6066666609048843
-        },
-        "scrollMs": {
-          "median": 642.7000000029802,
-          "variance": 3.468888890610801
-        },
-        "maxFrameMs": {
-          "median": 17.200000002980232,
-          "variance": 0.1400000011920929
-        },
-        "droppedFrames": {
-          "median": 2,
-          "variance": 0.6666666666666666
-        },
-        "longTaskCount": {
-          "median": 0,
-          "variance": 0
-        },
-        "longTaskMs": {
-          "median": 0,
-          "variance": 0
-        },
-        "observerCount": {
-          "median": 1,
-          "variance": 0
-        },
-        "listenerCount": {
-          "median": 0,
-          "variance": 0
-        },
-        "heap": {
-          "median": 1979720,
-          "variance": 1719512.8888888888
-        },
-        "scriptMs": {
-          "median": 8.272,
-          "variance": 0.022454888888888778
-        },
-        "layoutMs": {
-          "median": 1.345,
-          "variance": 0.0014995555555555524
-        },
-        "styleMs": {
-          "median": 44.568999999999996,
-          "variance": 1.066237999999997
-        }
-      }
-    },
-    {
-      "profile": "mobile",
-      "library": "rune",
-      "count": 1000,
-      "runs": [
-        {
-          "initializationMs": 32.5,
-          "scrollMs": 675.1000000089407,
-          "maxFrameMs": 16.099999994039536,
+          "scrollMs": 638.7000000029802,
+          "maxFrameMs": 16.600000008940697,
           "droppedFrames": 0,
           "longTaskCount": 0,
           "longTaskMs": 0,
           "observerCount": 1,
           "listenerCount": 0,
-          "heap": 3012416,
-          "scriptMs": 19.366999999999997,
-          "layoutMs": 5.321000000000001,
-          "styleMs": 117.16
+          "heap": 1826448,
+          "scriptMs": 8.722999999999999,
+          "layoutMs": 1.506,
+          "styleMs": 41.739
         },
         {
-          "initializationMs": 34.69999998807907,
-          "scrollMs": 670.7000000029802,
-          "maxFrameMs": 20.200000002980232,
-          "droppedFrames": 3,
+          "initializationMs": 18.299999997019768,
+          "scrollMs": 636.6000000089407,
+          "maxFrameMs": 16.5,
+          "droppedFrames": 0,
           "longTaskCount": 0,
           "longTaskMs": 0,
           "observerCount": 1,
           "listenerCount": 0,
-          "heap": 3005644,
-          "scriptMs": 23.168999999999997,
-          "layoutMs": 6.308,
-          "styleMs": 113.386
-        },
-        {
-          "initializationMs": 34,
-          "scrollMs": 664.7999999970198,
-          "maxFrameMs": 17,
-          "droppedFrames": 1,
-          "longTaskCount": 0,
-          "longTaskMs": 0,
-          "observerCount": 1,
-          "listenerCount": 0,
-          "heap": 3009112,
-          "scriptMs": 20.458000000000002,
-          "layoutMs": 5.759,
-          "styleMs": 126.03200000000001
+          "heap": 1826412,
+          "scriptMs": 7.622,
+          "layoutMs": 1.2630000000000001,
+          "styleMs": 41.558
         }
       ],
       "summary": {
         "initializationMs": {
-          "median": 34,
-          "variance": 0.8422222145398458
+          "median": 17.700000002980232,
+          "variance": 0.1399999972184499
         },
         "scrollMs": {
-          "median": 670.7000000029802,
-          "variance": 17.806666707595188
+          "median": 638.7000000029802,
+          "variance": 4.202222197122044
         },
         "maxFrameMs": {
-          "median": 17,
-          "variance": 3.0955555670128927
+          "median": 16.5,
+          "variance": 0.00666666686534883
         },
         "droppedFrames": {
-          "median": 1,
-          "variance": 1.5555555555555554
+          "median": 0,
+          "variance": 0
         },
         "longTaskCount": {
           "median": 0,
@@ -881,317 +480,118 @@
           "variance": 0
         },
         "heap": {
-          "median": 3009112,
-          "variance": 7644824.888888889
+          "median": 1826412,
+          "variance": 1206638.2222222222
         },
         "scriptMs": {
-          "median": 20.458000000000002,
-          "variance": 2.5550006666666647
+          "median": 8.174000000000001,
+          "variance": 0.20203399999999969
         },
         "layoutMs": {
-          "median": 5.759,
-          "variance": 0.16304599999999975
+          "median": 1.2630000000000001,
+          "variance": 0.027201555555555552
         },
         "styleMs": {
-          "median": 117.16,
-          "variance": 28.09741955555562
+          "median": 41.558,
+          "variance": 2.976569555555557
         }
       }
     },
     {
       "profile": "mobile",
-      "library": "aos",
-      "count": 50,
-      "runs": [
-        {
-          "initializationMs": 9.299999997019768,
-          "scrollMs": 652.5,
-          "maxFrameMs": 17.400000005960464,
-          "droppedFrames": 2,
-          "longTaskCount": 0,
-          "longTaskMs": 0,
-          "observerCount": 0,
-          "listenerCount": 2,
-          "heap": 1589704,
-          "scriptMs": 2.6159999999999997,
-          "layoutMs": 0.27399999999999997,
-          "styleMs": 21.538
-        },
-        {
-          "initializationMs": 12.099999994039536,
-          "scrollMs": 646.2999999970198,
-          "maxFrameMs": 16.700000002980232,
-          "droppedFrames": 3,
-          "longTaskCount": 0,
-          "longTaskMs": 0,
-          "observerCount": 0,
-          "listenerCount": 2,
-          "heap": 1589904,
-          "scriptMs": 3.022,
-          "layoutMs": 0.386,
-          "styleMs": 22.15
-        },
-        {
-          "initializationMs": 10,
-          "scrollMs": 651.0999999940395,
-          "maxFrameMs": 17.099999994039536,
-          "droppedFrames": 2,
-          "longTaskCount": 0,
-          "longTaskMs": 0,
-          "observerCount": 0,
-          "listenerCount": 2,
-          "heap": 1589928,
-          "scriptMs": 2.343,
-          "layoutMs": 0.322,
-          "styleMs": 22.185
-        }
-      ],
-      "summary": {
-        "initializationMs": {
-          "median": 10,
-          "variance": 1.4155555513832303
-        },
-        "scrollMs": {
-          "median": 651.0999999940395,
-          "variance": 7.0488888916704395
-        },
-        "maxFrameMs": {
-          "median": 17.099999994039536,
-          "variance": 0.08222222268581393
-        },
-        "droppedFrames": {
-          "median": 2,
-          "variance": 0.22222222222222224
-        },
-        "longTaskCount": {
-          "median": 0,
-          "variance": 0
-        },
-        "longTaskMs": {
-          "median": 0,
-          "variance": 0
-        },
-        "observerCount": {
-          "median": 0,
-          "variance": 0
-        },
-        "listenerCount": {
-          "median": 2,
-          "variance": 0
-        },
-        "heap": {
-          "median": 1589904,
-          "variance": 10083.555555555555
-        },
-        "scriptMs": {
-          "median": 2.6159999999999997,
-          "variance": 0.07782288888888884
-        },
-        "layoutMs": {
-          "median": 0.322,
-          "variance": 0.0021048888888888905
-        },
-        "styleMs": {
-          "median": 22.15,
-          "variance": 0.08826422222222179
-        }
-      }
-    },
-    {
-      "profile": "mobile",
-      "library": "aos",
-      "count": 200,
-      "runs": [
-        {
-          "initializationMs": 17,
-          "scrollMs": 645.7000000029802,
-          "maxFrameMs": 17,
-          "droppedFrames": 1,
-          "longTaskCount": 0,
-          "longTaskMs": 0,
-          "observerCount": 0,
-          "listenerCount": 2,
-          "heap": 1647728,
-          "scriptMs": 4.169,
-          "layoutMs": 0.75,
-          "styleMs": 56.75
-        },
-        {
-          "initializationMs": 17.19999998807907,
-          "scrollMs": 646.5,
-          "maxFrameMs": 17.200000002980232,
-          "droppedFrames": 3,
-          "longTaskCount": 0,
-          "longTaskMs": 0,
-          "observerCount": 0,
-          "listenerCount": 2,
-          "heap": 1646820,
-          "scriptMs": 4.094,
-          "layoutMs": 0.772,
-          "styleMs": 63.05
-        },
-        {
-          "initializationMs": 18.19999998807907,
-          "scrollMs": 642.3000000119209,
-          "maxFrameMs": 17.5,
-          "droppedFrames": 1,
-          "longTaskCount": 0,
-          "longTaskMs": 0,
-          "observerCount": 0,
-          "listenerCount": 2,
-          "heap": 1646772,
-          "scriptMs": 4.513,
-          "layoutMs": 0.757,
-          "styleMs": 60.862
-        }
-      ],
-      "summary": {
-        "initializationMs": {
-          "median": 17.19999998807907,
-          "variance": 0.2755555518468222
-        },
-        "scrollMs": {
-          "median": 645.7000000029802,
-          "variance": 3.315555537144343
-        },
-        "maxFrameMs": {
-          "median": 17.200000002980232,
-          "variance": 0.04222222215599484
-        },
-        "droppedFrames": {
-          "median": 1,
-          "variance": 0.888888888888889
-        },
-        "longTaskCount": {
-          "median": 0,
-          "variance": 0
-        },
-        "longTaskMs": {
-          "median": 0,
-          "variance": 0
-        },
-        "observerCount": {
-          "median": 0,
-          "variance": 0
-        },
-        "listenerCount": {
-          "median": 2,
-          "variance": 0
-        },
-        "heap": {
-          "median": 1646820,
-          "variance": 193411.5555555556
-        },
-        "scriptMs": {
-          "median": 4.169,
-          "variance": 0.0332802222222222
-        },
-        "layoutMs": {
-          "median": 0.757,
-          "variance": 0.00008422222222222236
-        },
-        "styleMs": {
-          "median": 60.862,
-          "variance": 6.820654222222218
-        }
-      }
-    },
-    {
-      "profile": "mobile",
-      "library": "aos",
       "count": 1000,
       "runs": [
         {
-          "initializationMs": 65.29999999701977,
-          "scrollMs": 909.3000000119209,
-          "maxFrameMs": 51.8999999910593,
-          "droppedFrames": 13,
-          "longTaskCount": 1,
-          "longTaskMs": 60,
-          "observerCount": 0,
-          "listenerCount": 2,
-          "heap": 1968312,
-          "scriptMs": 12.852,
-          "layoutMs": 3.559,
-          "styleMs": 167.457
+          "initializationMs": 30.600000008940697,
+          "scrollMs": 668.8999999910593,
+          "maxFrameMs": 16.100000008940697,
+          "droppedFrames": 0,
+          "longTaskCount": 0,
+          "longTaskMs": 0,
+          "observerCount": 1,
+          "listenerCount": 0,
+          "heap": 2838284,
+          "scriptMs": 19.292,
+          "layoutMs": 4.871,
+          "styleMs": 107.304
         },
         {
-          "initializationMs": 84.70000000298023,
-          "scrollMs": 898.0999999940395,
-          "maxFrameMs": 51.599999994039536,
-          "droppedFrames": 15,
-          "longTaskCount": 2,
-          "longTaskMs": 131,
-          "observerCount": 0,
-          "listenerCount": 2,
-          "heap": 1965548,
-          "scriptMs": 9.874,
-          "layoutMs": 4.622,
-          "styleMs": 166.92100000000002
+          "initializationMs": 32.20000000298023,
+          "scrollMs": 663.0999999940395,
+          "maxFrameMs": 16.599999994039536,
+          "droppedFrames": 0,
+          "longTaskCount": 0,
+          "longTaskMs": 0,
+          "observerCount": 1,
+          "listenerCount": 0,
+          "heap": 2853976,
+          "scriptMs": 20.6,
+          "layoutMs": 5.551,
+          "styleMs": 115.19699999999999
         },
         {
-          "initializationMs": 58.900000005960464,
-          "scrollMs": 846.1999999880791,
-          "maxFrameMs": 44.099999994039536,
-          "droppedFrames": 14,
-          "longTaskCount": 1,
-          "longTaskMs": 53,
-          "observerCount": 0,
-          "listenerCount": 2,
-          "heap": 1965608,
-          "scriptMs": 8.833,
-          "layoutMs": 3.315,
-          "styleMs": 163.407
+          "initializationMs": 31.799999997019768,
+          "scrollMs": 668.5999999940395,
+          "maxFrameMs": 16.200000002980232,
+          "droppedFrames": 0,
+          "longTaskCount": 0,
+          "longTaskMs": 0,
+          "observerCount": 1,
+          "listenerCount": 0,
+          "heap": 2843412,
+          "scriptMs": 19.571,
+          "layoutMs": 6.53,
+          "styleMs": 114.444
         }
       ],
       "summary": {
         "initializationMs": {
-          "median": 65.29999999701977,
-          "variance": 120.32888888478278
+          "median": 31.799999997019768,
+          "variance": 0.4622222174538506
         },
         "scrollMs": {
-          "median": 898.0999999940395,
-          "variance": 755.6288893364535
+          "median": 668.5999999940395,
+          "variance": 7.108888884849018
         },
         "maxFrameMs": {
-          "median": 51.599999994039536,
-          "variance": 13.019999994635583
+          "median": 16.200000002980232,
+          "variance": 0.04666666408379876
         },
         "droppedFrames": {
-          "median": 14,
-          "variance": 0.6666666666666666
-        },
-        "longTaskCount": {
-          "median": 1,
-          "variance": 0.2222222222222222
-        },
-        "longTaskMs": {
-          "median": 60,
-          "variance": 1241.5555555555554
-        },
-        "observerCount": {
           "median": 0,
           "variance": 0
         },
+        "longTaskCount": {
+          "median": 0,
+          "variance": 0
+        },
+        "longTaskMs": {
+          "median": 0,
+          "variance": 0
+        },
+        "observerCount": {
+          "median": 1,
+          "variance": 0
+        },
         "listenerCount": {
-          "median": 2,
+          "median": 0,
           "variance": 0
         },
         "heap": {
-          "median": 1965608,
-          "variance": 1661656.8888888888
+          "median": 2843412,
+          "variance": 42681482.666666664
         },
         "scriptMs": {
-          "median": 9.874,
-          "variance": 2.900502888888889
+          "median": 19.571,
+          "variance": 0.3163939999999999
         },
         "layoutMs": {
-          "median": 3.559,
-          "variance": 0.32197266666666663
+          "median": 5.551,
+          "variance": 0.4636802222222221
         },
         "styleMs": {
-          "median": 166.92100000000002,
-          "variance": 3.2264435555555444
+          "median": 114.444,
+          "variance": 12.649561999999975
         }
       }
     }
