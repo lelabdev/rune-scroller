@@ -135,6 +135,27 @@ describe("animate update lifecycle (replacement semantics)", () => {
     expect(secondCalls).toBe(1);
   });
 
+  it("handles replacement updates with a reused options object", () => {
+    const options = {
+      animation: "fade",
+      duration: 300,
+      debug: true,
+      threshold: 0,
+    };
+    action = animate(element, options);
+
+    delete options.duration;
+    options.debug = false;
+    options.threshold = 1;
+    action.update(options);
+
+    expect(element.style.getPropertyValue("--duration")).toBe("");
+    expect(element.querySelector("[data-sentinel-debug]")).toBeNull();
+    expect(
+      mockIntersectionObserver.getObserverFor(element)?.options.threshold,
+    ).toBe(1);
+  });
+
   it("does not retain a duration removed by a reactive update", () => {
     action = animate(element, { animation: "fade", duration: 300 });
 
