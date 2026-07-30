@@ -36,11 +36,13 @@
  */
 
 /**
- * Configuration options for IntersectionObserver
+ * Options for `useIntersection` / `useIntersectionOnce` only (not `animate`).
+ * Composable defaults: threshold 0.5, rootMargin '-10% 0px -10% 0px', root null.
+ * Differ from AnimateOptions (threshold 0, offset-derived rootMargin).
  * @typedef {Object} IntersectionOptions
- * @property {number | number[]} [threshold] - IntersectionObserver threshold
- * @property {string} [rootMargin] - Custom margin around root element
- * @property {Element | null} [root] - Root element for intersection observation
+ * @property {number | number[]} [threshold=0.5] - IntersectionObserver threshold
+ * @property {string} [rootMargin='-10% 0px -10% 0px'] - margin around root
+ * @property {Element | null} [root=null] - root element for observation
  */
 
 /**

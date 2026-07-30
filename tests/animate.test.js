@@ -47,12 +47,16 @@ describe("animate DOM core", () => {
     const second = animate(element, { animation: "zoom-in" });
 
     expect(element.getAttribute("data-animation")).toBe("fade-up");
+
+    second.destroy(); // no-op — first still owns the element
+    mockIntersectionObserver.trigger(element, true);
+    expect(element.classList.contains("is-visible")).toBe(true);
+
     first.destroy();
     expect(element.classList.contains("scroll-animate")).toBe(false);
 
     action = animate(element, { animation: "zoom-in" });
     expect(element.getAttribute("data-animation")).toBe("zoom-in");
-    second.destroy();
   });
 
   it("uses fade-in as the default animation", () => {
@@ -239,6 +243,26 @@ describe("animate update lifecycle (replacement semantics)", () => {
     ).toBe(1);
   });
 
+  it("does not reconnect when threshold arrays are deeply equal", () => {
+    action = animate(element, { animation: "fade", threshold: [0, 0.5] });
+    const before = mockIntersectionObserver.getAll().length;
+    const firstObserver = mockIntersectionObserver.getObserverFor(element);
+
+    action.update({ animation: "fade", threshold: [0, 0.5] });
+    expect(mockIntersectionObserver.getAll()).toHaveLength(before);
+    expect(mockIntersectionObserver.getObserverFor(element)).toBe(
+      firstObserver,
+    );
+
+    action.update({ animation: "fade", threshold: [0, 1] });
+    expect(
+      mockIntersectionObserver.getObserverFor(element)?.options.threshold,
+    ).toEqual([0, 1]);
+    expect(mockIntersectionObserver.getObserverFor(element)).not.toBe(
+      firstObserver,
+    );
+  });
+
   it("does not retain a duration removed by a reactive update", () => {
     action = animate(element, { animation: "fade", duration: 300 });
 
@@ -419,6 +443,29 @@ describe("animate cleanup", () => {
     );
 
     element.dispatchEvent(new window.Event("transitionend"));
+    expect(element.style.getPropertyValue("will-change")).toBe("");
+  });
+
+  it("ignores bubbled child transitionend for will-change release", () => {
+    action = animate(element, { animation: "fade", repeat: true });
+    mockIntersectionObserver.trigger(element, true);
+    expect(element.style.getPropertyValue("will-change")).toBe(
+      "transform, opacity",
+    );
+
+    const child = document.createElement("span");
+    element.appendChild(child);
+    child.dispatchEvent(new window.Event("transitionend", { bubbles: true }));
+    expect(element.style.getPropertyValue("will-change")).toBe(
+      "transform, opacity",
+    );
+
+    const endEvent = new window.Event("transitionend");
+    Object.defineProperty(endEvent, "propertyName", {
+      value: "opacity",
+      configurable: true,
+    });
+    element.dispatchEvent(endEvent);
     expect(element.style.getPropertyValue("will-change")).toBe("");
   });
 

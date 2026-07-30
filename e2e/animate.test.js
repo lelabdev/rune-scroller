@@ -2,6 +2,34 @@ import { test, expect } from "@playwright/test";
 
 const BASE = "http://localhost:3210";
 
+async function waitVisible(page, selector = "#target") {
+  await page.waitForFunction(
+    (sel) => document.querySelector(sel)?.classList.contains("is-visible"),
+    selector,
+    { timeout: 5000 },
+  );
+}
+
+async function waitNotVisible(page, selector = "#target") {
+  await page.waitForFunction(
+    (sel) => !document.querySelector(sel)?.classList.contains("is-visible"),
+    selector,
+    { timeout: 5000 },
+  );
+}
+
+async function waitOpacityAbove(page, selector = "#target", min = 0.9) {
+  await page.waitForFunction(
+    ({ sel, floor }) => {
+      const el = document.querySelector(sel);
+      if (!el) return false;
+      return Number(getComputedStyle(el).opacity) > floor;
+    },
+    { sel: selector, floor: min },
+    { timeout: 5000 },
+  );
+}
+
 /**
  * Load the framework-neutral core from the root entry and run a script.
  * This verifies that `dist/index.js` resolves and works in a real browser
@@ -25,7 +53,6 @@ async function setupCorePage(page, { script } = {}) {
 
 async function scrollToTarget(page) {
   await page.evaluate(() => window.scrollTo(0, window.innerHeight));
-  await page.waitForTimeout(300);
 }
 
 test.describe("animate core (dist/index.js)", () => {
@@ -79,6 +106,7 @@ test.describe("animate core (dist/index.js)", () => {
       script: `animate(document.getElementById('target'), { animation: 'fade-up' });`,
     });
     await scrollToTarget(page);
+    await waitVisible(page);
     const hasClass = await page.$eval("#target", (el) =>
       el.classList.contains("is-visible"),
     );
@@ -118,13 +146,14 @@ test.describe("animate core (dist/index.js)", () => {
     });
 
     await scrollToTarget(page);
+    await waitVisible(page);
     let hasClass = await page.$eval("#target", (el) =>
       el.classList.contains("is-visible"),
     );
     expect(hasClass).toBe(true);
 
     await page.evaluate(() => window.scrollTo(0, 0));
-    await page.waitForTimeout(300);
+    await waitNotVisible(page);
     hasClass = await page.$eval("#target", (el) =>
       el.classList.contains("is-visible"),
     );
@@ -142,6 +171,7 @@ test.describe("animate core (dist/index.js)", () => {
 			`,
     });
     await scrollToTarget(page);
+    await waitVisible(page);
     const tag = await page.evaluate(() => window.__received);
     expect(tag).toBe("DIV");
   });
@@ -171,7 +201,8 @@ test.describe("animate core (dist/index.js)", () => {
       script: `animate(document.getElementById('target'), { animation: 'fade-up' });`,
     });
     await scrollToTarget(page);
-    await page.waitForTimeout(200);
+    await waitVisible(page);
+    await waitOpacityAbove(page);
 
     const opacity = await page.$eval(
       "#target",

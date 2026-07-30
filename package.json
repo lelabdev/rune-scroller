@@ -1,6 +1,6 @@
 {
   "name": "rune-scroller",
-  "version": "4.0.0",
+  "version": "5.0.0",
   "description": "Framework-neutral scroll animations for the DOM with a Svelte 5 action. 29 primary animations plus 7 legacy aliases, zero dependencies.",
   "type": "module",
   "sideEffects": [

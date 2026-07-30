@@ -22,7 +22,9 @@ Built with native IntersectionObserver — zero JS on scroll and GPU-accelerated
 
 ---
 
-## 🚀 Quick Start
+## Installation
+
+### Quick Start
 
 ### Svelte 5 (recommended)
 
@@ -181,9 +183,11 @@ interface AnimateHandle {
 
 ## Intersection behavior
 
-Only one active `animate()` handle is supported per element. Destroy the existing handle before creating another one for the same element.
+Only one active `animate()` handle is supported per element. The first handle owns the element: only its `update` / `destroy` run. A second `animate()` / `rs` call on the same node returns a no-op handle — destroy the owner before creating a new one.
 
 The `animate` action and core use pixel-based observer offsets. `offset: 120` adds `120px` to the viewport bottom margin and triggers earlier. `threshold` defaults to `0`, and `rootMargin` defaults to the margin derived from `offset` (`0px 0px 0px 0px` when no offset is provided).
+
+Invalid `animation` values fall back to `'fade-in'` (with a dev-only console warning). `bounce-in` ignores `easing` / `--easing` and always uses `cubic-bezier(0.68, -0.55, 0.265, 1.55)` (see `animations.css`).
 
 `calculateRootMargin()` is a separate percentage-based helper: its `offset` argument ranges from `0` to `100` and returns a percentage root margin. The Svelte intersection composables use their own defaults (`threshold: 0.5` and `rootMargin: '-10% 0px -10% 0px'`); their options are reactive when passed as a Svelte state object.
 

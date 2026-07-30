@@ -6,14 +6,30 @@ import {
   unmount,
 } from "../node_modules/svelte/src/index-client.js";
 import { Window } from "happy-dom";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { mockIntersectionObserver } from "./__mocks__/IntersectionObserver.js";
 
-const composableSource = readFileSync(
-  resolve(import.meta.dirname, "../src/lib/useIntersection.svelte.js"),
-  "utf8",
+const distPath = resolve(
+  import.meta.dirname,
+  "../dist/useIntersection.svelte.js",
 );
+
+if (!existsSync(distPath)) {
+  const build = Bun.spawnSync(["bun", "run", "build"], {
+    cwd: resolve(import.meta.dirname, ".."),
+    stdout: "inherit",
+    stderr: "inherit",
+    env: process.env,
+  });
+  if (build.exitCode !== 0) {
+    throw new Error(
+      `bun run build failed while preparing ${distPath} (exit ${build.exitCode})`,
+    );
+  }
+}
+
+const composableSource = readFileSync(distPath, "utf8");
 const composable = compileModule(composableSource, {
   filename: "useIntersection.svelte.js",
   generate: "client",
@@ -22,7 +38,15 @@ const composableUrl = `data:text/javascript;base64,${Buffer.from(
   composable.js.code,
 ).toString("base64")}`;
 
-const componentSource = `
+function compileHarness(componentSource) {
+  const compiled = compile(componentSource, { generate: "client" });
+  const componentUrl = `data:text/javascript;base64,${Buffer.from(
+    compiled.js.code,
+  ).toString("base64")}`;
+  return import(componentUrl).then((mod) => mod.default);
+}
+
+const reactiveComponentSource = `
 <script>
   import { useIntersection, useIntersectionOnce } from "${composableUrl}";
 
@@ -58,13 +82,37 @@ const componentSource = `
   }
 </script>`;
 
-const compiled = compile(componentSource, { generate: "client" });
-const componentUrl = `data:text/javascript;base64,${Buffer.from(
-  compiled.js.code,
-).toString("base64")}`;
-const Component = (await import(componentUrl)).default;
+const defaultComponentSource = `
+<script>
+  import { useIntersection, useIntersectionOnce } from "${composableUrl}";
+
+  let target = $state(null);
+  const intersection = useIntersection({});
+  const onceIntersection = useIntersectionOnce({});
+
+  $effect(() => {
+    intersection.element = target;
+    onceIntersection.element = target;
+  });
+
+  export function setTarget(value) {
+    target = value;
+  }
+
+  export function visible() {
+    return intersection.isVisible;
+  }
+
+  export function onceVisible() {
+    return onceIntersection.isVisible;
+  }
+</script>`;
+
+const Component = await compileHarness(reactiveComponentSource);
+const DefaultsComponent = await compileHarness(defaultComponentSource);
 
 let mounted = [];
+/** @type {Window | undefined} */
 let win;
 
 function installDom() {
@@ -80,10 +128,10 @@ function installDom() {
   mockIntersectionObserver.install();
 }
 
-function createHarness() {
+function createHarness(component = Component) {
   const target = document.createElement("div");
   document.body.append(target);
-  const instance = mount(Component, { target: document.body });
+  const instance = mount(component, { target: document.body });
   mounted.push(instance);
   return { instance, target };
 }
@@ -104,9 +152,7 @@ afterEach(() => {
 
 describe("useIntersection runtime lifecycle", () => {
   it("evaluates safely without browser globals", async () => {
-    const module = await import(
-      `../src/lib/useIntersection.svelte.js?ssr=${Date.now()}`
-    );
+    const module = await import(`${distPath}?ssr=${Date.now()}`);
 
     expect(module.useIntersection).toBeFunction();
     expect(module.useIntersectionOnce).toBeFunction();
@@ -194,5 +240,64 @@ describe("useIntersection runtime lifecycle", () => {
         .getAll()
         .filter((observer) => observer.observedElements.has(replacement)),
     ).toHaveLength(1);
+  });
+
+  it("applies composable defaults when options are empty", () => {
+    installDom();
+    const { instance, target } = createHarness(DefaultsComponent);
+
+    instance.setTarget(target);
+    flushSync();
+
+    const observers = mockIntersectionObserver
+      .getAll()
+      .filter((observer) => observer.observedElements.has(target));
+    expect(observers.length).toBeGreaterThanOrEqual(1);
+    for (const observer of observers) {
+      expect(observer.options.threshold).toBe(0.5);
+      expect(observer.options.rootMargin).toBe("-10% 0px -10% 0px");
+    }
+  });
+
+  it("clears observers when the target is set to null", () => {
+    installDom();
+    const { instance, target } = createHarness(DefaultsComponent);
+
+    instance.setTarget(target);
+    flushSync();
+    expect(mockIntersectionObserver.getObserverFor(target)).toBeDefined();
+
+    instance.setTarget(null);
+    flushSync();
+
+    expect(mockIntersectionObserver.getObserverFor(target)).toBeUndefined();
+    expect(mockIntersectionObserver.getAll()).toHaveLength(0);
+  });
+
+  it("useIntersectionOnce unobserves after the first intersect", () => {
+    installDom();
+    const { instance, target } = createHarness(DefaultsComponent);
+
+    instance.setTarget(target);
+    flushSync();
+
+    const before = mockIntersectionObserver
+      .getAll()
+      .filter((observer) => observer.observedElements.has(target));
+    expect(before).toHaveLength(2);
+
+    mockIntersectionObserver.trigger(target, true);
+    expect(instance.onceVisible()).toBe(true);
+
+    const after = mockIntersectionObserver
+      .getAll()
+      .filter((observer) => observer.observedElements.has(target));
+    // continuous composable still observes; once unobserves
+    expect(after).toHaveLength(1);
+    expect(instance.onceVisible()).toBe(true);
+
+    mockIntersectionObserver.trigger(target, false);
+    mockIntersectionObserver.trigger(target, true);
+    expect(instance.onceVisible()).toBe(true);
   });
 });

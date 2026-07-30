@@ -4,7 +4,11 @@ import {
   createSentinel,
   checkAndWarnIfCSSNotLoaded,
 } from "./dom-utils.js";
-import { createManagedObserver, disconnectObserver } from "./observer-utils.js";
+import {
+  createManagedObserver,
+  disconnectObserver,
+  thresholdsMatch,
+} from "./observer-utils.js";
 import { ANIMATION_TYPES } from "./animations.js";
 
 const DEFAULT_ANIMATION = "fade-in";
@@ -270,12 +274,30 @@ export function animate(element, options = {}) {
     if (!willChangeActive) return;
     willChangeActive = false;
     window.clearTimeout(willChangeTimer);
-    element.removeEventListener("transitionend", releaseWillChange);
-    element.removeEventListener("animationend", releaseWillChange);
+    element.removeEventListener("transitionend", onTransitionEnd);
+    element.removeEventListener("animationend", onAnimationEnd);
     if (originalWillChange) {
       restoreStyleProperty(element, "will-change", originalWillChange);
       originalWillChange = undefined;
     }
+  }
+
+  /** @param {Event} event */
+  function onTransitionEnd(event) {
+    if (event.target !== element) return;
+    const prop =
+      "propertyName" in event
+        ? /** @type {{ propertyName?: string }} */ (event).propertyName
+        : undefined;
+    if (prop && prop !== "transform" && prop !== "opacity" && prop !== "all")
+      return;
+    releaseWillChange();
+  }
+
+  /** @param {Event} event */
+  function onAnimationEnd(event) {
+    if (event.target !== element) return;
+    releaseWillChange();
   }
 
   function activateWillChange() {
@@ -289,8 +311,8 @@ export function animate(element, options = {}) {
     originalWillChange ??= captureStyleProperty(element, "will-change");
     willChangeActive = true;
     element.style.setProperty("will-change", "transform, opacity");
-    element.addEventListener("transitionend", releaseWillChange);
-    element.addEventListener("animationend", releaseWillChange);
+    element.addEventListener("transitionend", onTransitionEnd);
+    element.addEventListener("animationend", onAnimationEnd);
     const delay = Number(currentOptions.delay ?? 0);
     const timeout = Number.isFinite(delay)
       ? Math.max(0, duration + delay) + 100
@@ -389,7 +411,7 @@ export function animate(element, options = {}) {
 
       const observerChanged =
         currentOptions.offset !== previousOptions.offset ||
-        currentOptions.threshold !== previousOptions.threshold ||
+        !thresholdsMatch(currentOptions.threshold, previousOptions.threshold) ||
         currentOptions.rootMargin !== previousOptions.rootMargin ||
         currentOptions.observerTarget !== previousOptions.observerTarget;
       const repeatNeedsReconnect =

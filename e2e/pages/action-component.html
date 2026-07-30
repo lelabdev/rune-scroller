@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>use:rs component test</title>
+    <link rel="stylesheet" href="/dist/animations.css" />
+    <style>
+      body {
+        margin: 0;
+        height: 300vh;
+      }
+      .spacer {
+        height: 130vh;
+      }
+      #hosted {
+        width: 200px;
+        height: 100px;
+        background: teal;
+        color: white;
+      }
+      #app {
+        /* host mounts into the scroll flow via #mount-root below */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="spacer"></div>
+    <div id="mount-root"></div>
+    <div class="spacer"></div>
+    <script type="module" src="/generated/action-component.bundle.js"></script>
+  </body>
+</html>
