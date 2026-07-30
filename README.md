@@ -159,6 +159,8 @@ interface AnimateOptions {
 
 ## Intersection behavior
 
+Only one active `animate()` handle is supported per element. Destroy the existing handle before creating another one for the same element.
+
 The `animate` action and core use pixel-based observer offsets. `offset: 120` adds `120px` to the viewport bottom margin and triggers earlier. `threshold` defaults to `0`, and `rootMargin` defaults to the margin derived from `offset` (`0px 0px 0px 0px` when no offset is provided).
 
 `calculateRootMargin()` is a separate percentage-based helper: its `offset` argument ranges from `0` to `100` and returns a percentage root margin. The Svelte intersection composables use their own defaults (`threshold: 0.5` and `rootMargin: '-10% 0px -10% 0px'`); their options are reactive when passed as a Svelte state object.
