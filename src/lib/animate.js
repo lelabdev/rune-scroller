@@ -33,6 +33,22 @@ function normalizeAnimation(animation) {
 }
 
 /**
+ * Snapshot caller options so replacement comparisons are not affected by
+ * mutations to an object retained by the caller after animate/update.
+ *
+ * @param {import('./types.js').AnimateOptions} options
+ * @returns {import('./types.js').AnimateOptions}
+ */
+function snapshotOptions(options) {
+  return {
+    ...options,
+    threshold: Array.isArray(options.threshold)
+      ? [...options.threshold]
+      : options.threshold,
+  };
+}
+
+/**
  * @param {HTMLElement} element
  * @param {string} property
  * @returns {{ value: string, priority: string }}
@@ -100,7 +116,7 @@ export function animate(element, options = {}) {
   /** @type {{ value: string, priority: string } | undefined} */
   let originalWillChange;
 
-  let currentOptions = options;
+  let currentOptions = snapshotOptions(options);
   let animation = normalizeAnimation(currentOptions.animation);
   setupAnimationElement(element, animation);
 
@@ -304,7 +320,7 @@ export function animate(element, options = {}) {
       if (destroyed) return;
 
       const previousOptions = currentOptions;
-      currentOptions = newOptions;
+      currentOptions = snapshotOptions(newOptions);
 
       animation = normalizeAnimation(currentOptions.animation);
       element.setAttribute("data-animation", animation);
