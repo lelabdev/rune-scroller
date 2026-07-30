@@ -123,7 +123,22 @@ These v2.x names still work and map to a primary animation: `fade-in`, `fade-in-
 
 ### Customizable distance
 
-All animations use the `--rs-distance` CSS variable (default: `100px`):
+Directional travel distance is controlled by the `--rs-distance` CSS variable (default: `100px`). Only animations that move along an axis honor it:
+
+**Honors `--rs-distance`:**
+
+- Directional/diagonal fades: `fade-up`, `fade-down`, `fade-left`, `fade-right`, `fade-up-right`, `fade-up-left`, `fade-down-right`, `fade-down-left`
+- Directional zooms: `zoom-in-up` / `zoom-in-down` / `zoom-in-left` / `zoom-in-right`, `zoom-out-up` / `zoom-out-down` / `zoom-out-left` / `zoom-out-right`
+- `slide-rotate`
+- Legacy directional fades: `fade-in-up`, `fade-in-down`, `fade-in-left`, `fade-in-right`
+
+**Does not use `--rs-distance`:**
+
+- Opacity-only: `fade`, `fade-in`
+- Scale-only: `zoom-in`, `zoom-out`
+- Slide family (`slide-up` / `slide-down` / `slide-left` / `slide-right`) — uses `100%` translates
+- Flip family (`flip-left` / `flip-right` / `flip-up` / `flip-down`, legacy `flip`, `flip-x`) — fixed angles
+- `bounce-in` — scale keyframes
 
 ```html
 <div style="--rs-distance: 200px" data-animation="fade-up">Farther slide</div>
@@ -138,20 +153,27 @@ Both the Svelte action and `animate` accept the same options. `update()` receive
 ```typescript
 interface AnimateOptions {
   animation?: AnimationType; // default: 'fade-in'
-  duration?: number; // default: 400
-  delay?: number; // default: 0
-  easing?: string; // default: 'ease'
-  repeat?: boolean; // default: false
-  debug?: boolean; // default: false
-  offset?: number; // pixels, positive = earlier trigger
-  threshold?: number | number[]; // IntersectionObserver threshold
-  rootMargin?: string; // explicit IntersectionObserver margin
-  observerTarget?: HTMLElement; // observe another element
-  sentinelColor?: string; // debug indicator color
-  sentinelId?: string; // debug indicator identifier
+  duration?: number; // ms; default: 400
+  delay?: number; // ms; default: 0
+  easing?: string; // CSS timing function; default: 'ease'
+  repeat?: boolean; // re-run on leave/re-enter; default: false
+  debug?: boolean; // visual trigger indicator only; default: false
+  offset?: number; // px added to viewport bottom margin; positive = earlier; default: 0
+  // separate from calculateRootMargin()'s 0–100 percentage helper
+  threshold?: number | number[]; // IntersectionObserver threshold; default: 0
+  rootMargin?: string; // if set, overrides the margin derived from offset
+  // default when omitted: `0px 0px ${offset}px 0px`
+  observerTarget?: HTMLElement; // observe this node instead of the animated element
+  sentinelColor?: string; // debug indicator color; default: '#00e0ff'
+  sentinelId?: string; // debug indicator id
   debugLabel?: string; // debug indicator label
-  onVisible?: (el: HTMLElement) => void;
-  onHidden?: (el: HTMLElement) => void; // repeat mode only
+  onVisible?: (el: HTMLElement) => void; // after `is-visible` is added
+  onHidden?: (el: HTMLElement) => void; // repeat mode only; after `is-visible` is removed
+}
+
+interface AnimateHandle {
+  update(newOptions?: AnimateOptions): void; // complete replacement
+  destroy(): void;
 }
 ```
 
@@ -185,7 +207,39 @@ import type {
   AnimationType,
   AnimateOptions,
   AnimateHandle,
+  IntersectionOptions,
+  UseIntersectionReturn,
 } from "rune-scroller";
+// IntersectionOptions / UseIntersectionReturn are also valid from "rune-scroller/svelte"
+```
+
+### Intersection composables
+
+`useIntersection` and `useIntersectionOnce` live on the Svelte entry. Bind a target by assigning the DOM node to `intersection.element` (getter/setter); assign `null` to stop observing. Defaults differ from `animate`: `threshold: 0.5`, `rootMargin: '-10% 0px -10% 0px'`, `root: null`. Options are reactive when passed as a Svelte `$state` object (the effect re-subscribes). Cleanup runs on unmount or when `element` is cleared.
+
+- `useIntersection(options?, onVisible?)` — `onVisible(isVisible: boolean)` fires on every enter/leave transition (not once).
+- `useIntersectionOnce(options?)` — no callback parameter; unobserves after the first intersect; `isVisible` stays `true` after the first enter.
+
+```svelte
+<script>
+  import { useIntersection, useIntersectionOnce } from "rune-scroller/svelte";
+
+  let node = $state(null);
+  const intersection = useIntersection({}, (visible) => {
+    /* boolean on each enter/leave */
+  });
+  const once = useIntersectionOnce();
+
+  $effect(() => {
+    intersection.element = node;
+    once.element = node;
+  });
+</script>
+
+<div bind:this={node}>
+  visible: {intersection.isVisible}
+  once: {once.isVisible}
+</div>
 ```
 
 ---

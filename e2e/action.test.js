@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { ANIMATION_TYPES } from "../dist/animations.js";
 
 const BASE = "http://localhost:3210";
 
@@ -235,6 +236,58 @@ test.describe("onVisible callback", () => {
 });
 
 // ============================================================
+// onHidden callback
+// ============================================================
+
+test.describe("onHidden callback", () => {
+  test("fires when element leaves viewport with repeat", async ({ page }) => {
+    await setupActionPage(page, {
+      script: `
+				window.__hiddenFired = false;
+				window.__hiddenTag = null;
+				rs(document.getElementById('target'), {
+					animation: 'fade-up',
+					repeat: true,
+					onHidden: (el) => {
+						window.__hiddenFired = true;
+						window.__hiddenTag = el.tagName;
+					}
+				});
+			`,
+    });
+
+    await scrollToTarget(page);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(300);
+    const result = await page.evaluate(() => ({
+      fired: window.__hiddenFired,
+      tag: window.__hiddenTag,
+    }));
+    expect(result.fired).toBe(true);
+    expect(result.tag).toBe("DIV");
+  });
+
+  test("does not fire without repeat", async ({ page }) => {
+    await setupActionPage(page, {
+      script: `
+				window.__hiddenFired = false;
+				rs(document.getElementById('target'), {
+					animation: 'fade-up',
+					repeat: false,
+					onHidden: () => { window.__hiddenFired = true; }
+				});
+			`,
+    });
+
+    await scrollToTarget(page);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(300);
+    const fired = await page.evaluate(() => window.__hiddenFired);
+    expect(fired).toBe(false);
+  });
+});
+
+// ============================================================
 // Offset
 // ============================================================
 
@@ -277,22 +330,13 @@ test.describe("debug mode", () => {
 // ============================================================
 
 test.describe("animation types", () => {
-  const animations = [
-    "fade",
-    "fade-up",
-    "fade-down",
-    "fade-left",
-    "fade-right",
-    "zoom-in",
-    "zoom-out",
-    "slide-up",
-    "slide-down",
-    "slide-left",
-    "slide-right",
-    "flip-left",
-    "flip-right",
-  ];
-  for (const anim of animations) {
+  if (!Array.isArray(ANIMATION_TYPES) || ANIMATION_TYPES.length === 0) {
+    throw new Error(
+      "ANIMATION_TYPES missing from dist/animations.js — run `bun run build` first",
+    );
+  }
+
+  for (const anim of ANIMATION_TYPES) {
     test(`${anim}: starts hidden, becomes visible on scroll`, async ({
       page,
     }) => {
@@ -300,21 +344,24 @@ test.describe("animation types", () => {
         script: `rs(document.getElementById('target'), { animation: '${anim}' });`,
       });
 
-      // Check element is hidden — either via opacity or not having is-visible
-      const isHidden = await page.$eval("#target", (el) => {
-        const hasVisible = el.classList.contains("is-visible");
-        const opacity = Number(getComputedStyle(el).opacity);
-        return { hasVisible, opacity };
-      });
-      expect(isHidden.hasVisible).toBe(false);
+      const before = await page.$eval("#target", (el) => ({
+        hasVisible: el.classList.contains("is-visible"),
+        animation: el.getAttribute("data-animation"),
+      }));
+      expect(before.hasVisible).toBe(false);
+      expect(before.animation).toBe(anim);
 
       await scrollToTarget(page);
-      await page.waitForTimeout(500);
+      await page.waitForTimeout(anim === "bounce-in" ? 700 : 500);
 
-      const hasClass = await page.$eval("#target", (el) =>
-        el.classList.contains("is-visible"),
-      );
-      expect(hasClass).toBe(true);
+      const after = await page.$eval("#target", (el) => ({
+        hasVisible: el.classList.contains("is-visible"),
+        opacity: Number(getComputedStyle(el).opacity),
+        animation: el.getAttribute("data-animation"),
+      }));
+      expect(after.hasVisible).toBe(true);
+      expect(after.opacity).toBeGreaterThan(0.9);
+      expect(after.animation).toBe(anim);
     });
   }
 });
