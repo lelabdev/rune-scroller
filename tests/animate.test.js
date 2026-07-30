@@ -32,6 +32,16 @@ afterEach(() => {
 });
 
 describe("animate DOM core", () => {
+  it("handles calls before document.body exists", () => {
+    const detachedElement = document.createElement("div");
+    document.documentElement.removeChild(document.body);
+
+    expect(() => {
+      action = animate(detachedElement, { animation: "fade" });
+    }).not.toThrow();
+    expect(detachedElement.classList.contains("scroll-animate")).toBe(true);
+  });
+
   it("uses fade-in as the default animation", () => {
     action = animate(element);
 
