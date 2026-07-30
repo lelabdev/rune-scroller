@@ -82,6 +82,25 @@ describe("DOM Utilities", () => {
       console.warn = originalWarn;
       global.getComputedStyle = originalGetComputedStyle;
     });
+
+    it("rechecks after a failed probe when CSS becomes available", async () => {
+      const originalGetComputedStyle = global.getComputedStyle;
+      let pass = 0;
+      global.getComputedStyle = () => {
+        pass += 1;
+        return {
+          transitionProperty: pass === 1 ? "opacity" : "opacity, transform",
+        };
+      };
+
+      const { checkAndWarnIfCSSNotLoaded } =
+        await import("../src/lib/dom-utils.js?css-recheck");
+
+      expect(checkAndWarnIfCSSNotLoaded()).toBe(false);
+      expect(checkAndWarnIfCSSNotLoaded()).toBe(true);
+
+      global.getComputedStyle = originalGetComputedStyle;
+    });
   });
 
   describe("setCSSVariables", () => {

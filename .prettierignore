@@ -1,0 +1,7 @@
+.superpowers/
+node_modules/
+dist/
+.svelte-kit/
+test-results/
+e2e/pages/generated/
+*.tgz

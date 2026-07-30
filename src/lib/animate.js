@@ -20,7 +20,10 @@ const activeElements = new WeakSet();
  * @returns {import('./types.js').AnimationType}
  */
 function normalizeAnimation(animation) {
-  if (typeof animation === "string" && ANIMATION_TYPES.includes(animation)) {
+  if (
+    typeof animation === "string" &&
+    /** @type {readonly string[]} */ (ANIMATION_TYPES).includes(animation)
+  ) {
     return /** @type {import('./types.js').AnimationType} */ (animation);
   }
 
@@ -129,6 +132,10 @@ export function animate(element, options = {}) {
   let originalPosition;
   /** @type {{ hasAttribute: boolean, value: string | null } | undefined} */
   let originalSentinelAttribute;
+  originalSentinelAttribute = {
+    hasAttribute: element.hasAttribute("data-sentinel-id"),
+    value: element.getAttribute("data-sentinel-id"),
+  };
   /** @type {{ value: string, priority: string } | undefined} */
   let originalDuration;
   /** @type {{ value: string, priority: string } | undefined} */
@@ -431,6 +438,7 @@ export function animate(element, options = {}) {
         currentOptions.repeat !== true &&
         isIntersecting
       ) {
+        hasTriggered = true;
         disconnectObserver(managedObserver, state);
       }
 
