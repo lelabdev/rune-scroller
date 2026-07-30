@@ -263,6 +263,23 @@ describe("animate update lifecycle (replacement semantics)", () => {
     );
   });
 
+  it("latches one-shot completion when repeat turns off while intersecting", () => {
+    action = animate(element, { animation: "fade", repeat: true });
+    mockIntersectionObserver.trigger(element, true);
+    expect(element.classList.contains("is-visible")).toBe(true);
+    expect(mockIntersectionObserver.getObserverFor(element)).toBeDefined();
+
+    action.update({ animation: "fade", repeat: false });
+
+    expect(element.classList.contains("is-visible")).toBe(true);
+    expect(mockIntersectionObserver.getObserverFor(element)).toBeUndefined();
+
+    // A later update that would reconnect if hasTriggered were still false
+    action.update({ animation: "fade", repeat: false, offset: 40 });
+    expect(mockIntersectionObserver.getObserverFor(element)).toBeUndefined();
+    expect(element.classList.contains("is-visible")).toBe(true);
+  });
+
   it("does not retain a duration removed by a reactive update", () => {
     action = animate(element, { animation: "fade", duration: 300 });
 

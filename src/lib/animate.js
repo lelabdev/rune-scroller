@@ -431,6 +431,7 @@ export function animate(element, options = {}) {
         currentOptions.repeat !== true &&
         isIntersecting
       ) {
+        hasTriggered = true;
         disconnectObserver(managedObserver, state);
       }
 
