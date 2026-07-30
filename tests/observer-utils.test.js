@@ -71,6 +71,22 @@ describe("Observer Utilities", () => {
       expect(result.isConnected).toBe(true);
     });
 
+    it("snapshots threshold arrays before sharing observers", () => {
+      const thresholds = [0];
+      const first = createManagedObserver(testElement, () => {}, {
+        threshold: thresholds,
+      });
+
+      thresholds[0] = 1;
+      const second = createManagedObserver(testElement, () => {}, {
+        threshold: [1],
+      });
+
+      expect(second.observer).not.toBe(first.observer);
+      first.release();
+      second.release();
+    });
+
     it("handles threshold option", () => {
       result = createManagedObserver(testElement, () => {}, {
         threshold: 0.25,
