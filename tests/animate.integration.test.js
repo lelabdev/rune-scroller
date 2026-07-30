@@ -61,6 +61,29 @@ describe("animate integration", () => {
     expect(observer?.isConnected).toBe(false);
   });
 
+  it("keeps a completed one-shot animation disconnected after an observer update", () => {
+    const element = document.createElement("div");
+    document.body.appendChild(element);
+    let visibleCalls = 0;
+    const action = animate(element, {
+      animation: "fade",
+      onVisible: () => visibleCalls++,
+    });
+
+    mockIntersectionObserver.trigger(element, true);
+    action.update({
+      animation: "fade",
+      offset: 100,
+      onVisible: () => visibleCalls++,
+    });
+    expect(mockIntersectionObserver.getObserverFor(element)).toBeUndefined();
+    mockIntersectionObserver.trigger(element, true);
+
+    expect(visibleCalls).toBe(1);
+    expect(mockIntersectionObserver.getObserverFor(element)).toBeUndefined();
+    action.destroy();
+  });
+
   it("disconnects a replacement observer when the action is destroyed", () => {
     const element = document.createElement("div");
     document.body.appendChild(element);
