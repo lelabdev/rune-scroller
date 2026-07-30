@@ -129,6 +129,10 @@ export function animate(element, options = {}) {
   let originalPosition;
   /** @type {{ hasAttribute: boolean, value: string | null } | undefined} */
   let originalSentinelAttribute;
+  originalSentinelAttribute = {
+    hasAttribute: element.hasAttribute("data-sentinel-id"),
+    value: element.getAttribute("data-sentinel-id"),
+  };
   /** @type {{ value: string, priority: string } | undefined} */
   let originalDuration;
   /** @type {{ value: string, priority: string } | undefined} */

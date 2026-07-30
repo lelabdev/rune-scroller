@@ -580,6 +580,17 @@ describe("animate cleanup", () => {
     expect(element.style.getPropertyValue("--easing")).toBe("steps(2)");
   });
 
+  it("preserves a caller data-sentinel-id when debug never ran", () => {
+    element.setAttribute("data-sentinel-id", "caller-owned");
+    action = animate(element, { animation: "fade" }); // debug omitted/false
+    expect(element.getAttribute("data-sentinel-id")).toBe("caller-owned");
+
+    action.destroy();
+    action = null;
+
+    expect(element.getAttribute("data-sentinel-id")).toBe("caller-owned");
+  });
+
   it("restores positioning added for an internal observer target", () => {
     const target = document.createElement("span");
     element.appendChild(target);
