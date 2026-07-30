@@ -41,6 +41,10 @@ describe("animations.css", () => {
     expect(css.includes("--rs-distance")).toBe(true);
   });
 
+  it("uses the shared default duration for bounce-in", () => {
+    expect(css).toContain("animation: rs-bounce var(--duration, 400ms)");
+  });
+
   it("contains prefers-reduced-motion media query", () => {
     expect(css.includes("prefers-reduced-motion")).toBe(true);
   });
