@@ -20,7 +20,10 @@ const activeElements = new WeakSet();
  * @returns {import('./types.js').AnimationType}
  */
 function normalizeAnimation(animation) {
-  if (typeof animation === "string" && ANIMATION_TYPES.includes(animation)) {
+  if (
+    typeof animation === "string" &&
+    /** @type {readonly string[]} */ (ANIMATION_TYPES).includes(animation)
+  ) {
     return /** @type {import('./types.js').AnimationType} */ (animation);
   }
 

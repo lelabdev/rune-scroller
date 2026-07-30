@@ -6,7 +6,7 @@
 /**
  * All available animation types in the library: primary names plus the
  * v2.x legacy aliases that are still preserved.
- * @type {readonly string[]}
+ * @type {readonly import('./types.js').AnimationType[]}
  */
 export const ANIMATION_TYPES = [
   // Fade (9)
