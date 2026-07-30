@@ -22,6 +22,17 @@ describe("animations.css", () => {
     }
   });
 
+  it("scopes animation selectors to initialized elements", () => {
+    const selectors = css
+      .split("\n")
+      .filter((line) => line.includes("[data-animation"));
+
+    expect(selectors.length).toBeGreaterThan(0);
+    for (const selector of selectors) {
+      expect(selector).toContain(".scroll-animate[data-animation");
+    }
+  });
+
   it("references .is-visible class", () => {
     expect(css.includes(".is-visible")).toBe(true);
   });
