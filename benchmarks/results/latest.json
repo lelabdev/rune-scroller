@@ -4,11 +4,7 @@
     "node": "v24.3.0",
     "platform": "linux",
     "samples": 1,
-    "counts": [
-      50,
-      200,
-      1000
-    ]
+    "counts": [50, 200, 1000]
   },
   "results": [
     {
