@@ -14,12 +14,6 @@ function createIntersectionObserver(
   onIntersect = undefined,
   once = false,
 ) {
-  const {
-    threshold = 0.5,
-    rootMargin = "-10% 0px -10% 0px",
-    root = null,
-  } = options;
-
   let element = $state(null);
   let isVisible = $state(false);
   let hasTriggeredOnce = false;
@@ -28,6 +22,10 @@ function createIntersectionObserver(
 
   $effect(() => {
     if (!element) return;
+
+    const threshold = options.threshold ?? 0.5;
+    const rootMargin = options.rootMargin ?? "-10% 0px -10% 0px";
+    const root = options.root ?? null;
 
     hasTriggeredOnce = false;
     isVisible = false;
