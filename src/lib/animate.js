@@ -156,6 +156,7 @@ export function animate(element, options = {}) {
   /** @type {ReturnType<typeof createManagedObserver> | undefined} */
   let managedObserver;
   const state = { isConnected: false };
+  let hasTriggered = false;
 
   function ensurePositioningContext() {
     if (!element.style.position || element.style.position === "static") {
@@ -279,8 +280,11 @@ export function animate(element, options = {}) {
     if (!entry) return;
 
     if (entry.isIntersecting) {
+      if (!currentOptions.repeat && hasTriggered) return;
+
       activateWillChange();
       element.classList.add("is-visible");
+      if (!currentOptions.repeat) hasTriggered = true;
       currentOptions.onVisible?.(element);
       if (!currentOptions.repeat) {
         disconnectObserver(managedObserver, state);
@@ -365,7 +369,10 @@ export function animate(element, options = {}) {
         previousOptions.repeat !== true &&
         !state.isConnected;
 
-      if (observerChanged || repeatNeedsReconnect) {
+      if (
+        (observerChanged || repeatNeedsReconnect) &&
+        (currentOptions.repeat || !hasTriggered)
+      ) {
         connectObserver();
       }
 
