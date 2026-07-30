@@ -30,6 +30,7 @@ function createIntersectionObserver(
     if (!element) return;
 
     hasTriggeredOnce = false;
+    isVisible = false;
     observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
