@@ -175,7 +175,7 @@ export function animate(element, options = {}) {
       currentOptions.offset,
       currentOptions.sentinelColor,
       currentOptions.debugLabel,
-      sentinelId ?? currentOptions.sentinelId,
+      currentOptions.sentinelId ?? sentinelId,
     );
     sentinelId = result.id;
     originalSentinelAttribute ??= {
@@ -398,7 +398,12 @@ export function animate(element, options = {}) {
           currentOptions.sentinelColor !== previousOptions.sentinelColor ||
           currentOptions.debugLabel !== previousOptions.debugLabel ||
           currentOptions.sentinelId !== previousOptions.sentinelId;
-        if (debugAppearanceChanged) renderSentinel();
+        if (debugAppearanceChanged) {
+          if (currentOptions.sentinelId !== previousOptions.sentinelId) {
+            sentinelId = currentOptions.sentinelId;
+          }
+          renderSentinel();
+        }
       }
     },
     destroy() {
