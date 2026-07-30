@@ -235,6 +235,20 @@ describe("animate update lifecycle (replacement semantics)", () => {
     expect(mockIntersectionObserver.getObserverFor(target)).toBeUndefined();
   });
 
+  it("replaces the debug sentinel ID through update", () => {
+    action = animate(element, {
+      animation: "fade",
+      debug: true,
+      sentinelId: "first",
+    });
+
+    action.update({ animation: "fade", debug: true, sentinelId: "second" });
+    expect(element.getAttribute("data-sentinel-id")).toBe("second");
+
+    action.update({ animation: "fade", debug: true });
+    expect(element.getAttribute("data-sentinel-id")).not.toBe("second");
+  });
+
   it("creates and removes the debug indicator through update", () => {
     action = animate(element, { animation: "fade" });
 
