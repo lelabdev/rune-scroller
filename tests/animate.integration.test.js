@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { Window } from "happy-dom";
-import { runeScroller } from "../src/lib/runeScroller.js";
+import { animate } from "../src/lib/animate.js";
 import { mockIntersectionObserver } from "./__mocks__/IntersectionObserver.js";
 
 let window;
@@ -25,7 +25,7 @@ afterEach(() => {
   delete globalThis.getComputedStyle;
 });
 
-describe("runeScroller integration", () => {
+describe("animate integration", () => {
   it("keeps flex children in place while animating independently", () => {
     const container = document.createElement("div");
     container.style.display = "flex";
@@ -34,8 +34,8 @@ describe("runeScroller integration", () => {
     container.append(first, second);
     document.body.appendChild(container);
 
-    const firstAction = runeScroller(first, { animation: "fade-up" });
-    const secondAction = runeScroller(second, { animation: "zoom-in" });
+    const firstAction = animate(first, { animation: "fade-up" });
+    const secondAction = animate(second, { animation: "zoom-in" });
 
     mockIntersectionObserver.trigger(first, true);
 
@@ -50,7 +50,7 @@ describe("runeScroller integration", () => {
   it("disconnects a non-repeating observer after the first intersection", () => {
     const element = document.createElement("div");
     document.body.appendChild(element);
-    const action = runeScroller(element, { animation: "fade" });
+    const action = animate(element, { animation: "fade" });
     const observer = mockIntersectionObserver.getObserverFor(element);
 
     mockIntersectionObserver.trigger(element, true);
@@ -64,7 +64,7 @@ describe("runeScroller integration", () => {
   it("disconnects a replacement observer when the action is destroyed", () => {
     const element = document.createElement("div");
     document.body.appendChild(element);
-    const action = runeScroller(element, { animation: "fade", offset: 0 });
+    const action = animate(element, { animation: "fade", offset: 0 });
 
     action.update({ offset: 100 });
     const replacementObserver =
@@ -78,7 +78,7 @@ describe("runeScroller integration", () => {
   it("reconnects when a completed action becomes repeating", () => {
     const element = document.createElement("div");
     document.body.appendChild(element);
-    const action = runeScroller(element, { animation: "fade" });
+    const action = animate(element, { animation: "fade" });
 
     mockIntersectionObserver.trigger(element, true);
     expect(mockIntersectionObserver.getObserverFor(element)).toBeUndefined();
@@ -91,18 +91,22 @@ describe("runeScroller integration", () => {
     action.destroy();
   });
 
-  it("preserves a custom target and root margin when options change", () => {
+  it("preserves a custom target and root margin when an update passes them", () => {
     const element = document.createElement("div");
     const target = document.createElement("span");
     element.appendChild(target);
     document.body.appendChild(element);
-    const action = runeScroller(element, {
+    const action = animate(element, {
       animation: "fade",
       observerTarget: target,
       rootMargin: "10px 20px 30px 40px",
     });
 
-    action.update({ threshold: 0.75 });
+    action.update({
+      observerTarget: target,
+      rootMargin: "10px 20px 30px 40px",
+      threshold: 0.75,
+    });
     const replacementObserver = mockIntersectionObserver.getObserverFor(target);
 
     expect(replacementObserver).toBeDefined();
@@ -117,8 +121,8 @@ describe("runeScroller integration", () => {
     const second = document.createElement("div");
     document.body.append(first, second);
 
-    const firstAction = runeScroller(first, { animation: "fade", offset: 120 });
-    const secondAction = runeScroller(second, {
+    const firstAction = animate(first, { animation: "fade", offset: 120 });
+    const secondAction = animate(second, {
       animation: "zoom-in",
       offset: 120,
     });
@@ -144,8 +148,8 @@ describe("runeScroller integration", () => {
     const second = document.createElement("div");
     document.body.append(first, second);
 
-    const firstAction = runeScroller(first, { animation: "fade", offset: 120 });
-    const secondAction = runeScroller(second, {
+    const firstAction = animate(first, { animation: "fade", offset: 120 });
+    const secondAction = animate(second, {
       animation: "fade",
       offset: 240,
     });
@@ -161,7 +165,7 @@ describe("runeScroller integration", () => {
     element.style.position = "absolute";
     document.body.appendChild(element);
 
-    const action = runeScroller(element, { animation: "fade" });
+    const action = animate(element, { animation: "fade" });
     action.destroy();
 
     expect(element.style.position).toBe("absolute");

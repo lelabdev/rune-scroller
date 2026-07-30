@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { Window } from "happy-dom";
-import { runeScroller } from "../src/lib/runeScroller.js";
+import { animate } from "../src/lib/animate.js";
 import { mockIntersectionObserver } from "./__mocks__/IntersectionObserver.js";
 
 let window;
@@ -31,15 +31,15 @@ afterEach(() => {
   delete globalThis.getComputedStyle;
 });
 
-describe("runeScroller action", () => {
+describe("animate DOM core", () => {
   it("uses fade-in as the default animation", () => {
-    action = runeScroller(element);
+    action = animate(element);
 
     expect(element.getAttribute("data-animation")).toBe("fade-in");
   });
 
   it("observes the animated element without changing its positioning", () => {
-    action = runeScroller(element, { animation: "fade-up" });
+    action = animate(element, { animation: "fade-up" });
 
     expect(mockIntersectionObserver.getObserverFor(element)).toBeDefined();
     expect(element.querySelector("[data-sentinel-id]")).toBeNull();
@@ -54,12 +54,12 @@ describe("runeScroller action", () => {
     });
 
     expect(() => {
-      action = runeScroller(element, { animation: "fade" });
+      action = animate(element, { animation: "fade" });
     }).not.toThrow();
   });
 
   it("uses a positive offset to extend the viewport bottom", () => {
-    action = runeScroller(element, { animation: "fade", offset: 120 });
+    action = animate(element, { animation: "fade", offset: 120 });
 
     expect(
       mockIntersectionObserver.getObserverFor(element)?.options.rootMargin,
@@ -68,7 +68,7 @@ describe("runeScroller action", () => {
 
   it("adds the visible class and invokes onVisible on intersection", () => {
     let visibleElement;
-    action = runeScroller(element, {
+    action = animate(element, {
       animation: "fade",
       onVisible: (target) => {
         visibleElement = target;
@@ -82,7 +82,7 @@ describe("runeScroller action", () => {
   });
 
   it("removes the visible class on exit in repeat mode", () => {
-    action = runeScroller(element, { animation: "fade", repeat: true });
+    action = animate(element, { animation: "fade", repeat: true });
 
     mockIntersectionObserver.trigger(element, true);
     mockIntersectionObserver.trigger(element, false);
@@ -91,7 +91,7 @@ describe("runeScroller action", () => {
   });
 
   it("applies duration, delay, easing, and animation options", () => {
-    action = runeScroller(element, {
+    action = animate(element, {
       animation: "zoom-in",
       duration: 0,
       delay: 0,
@@ -103,9 +103,11 @@ describe("runeScroller action", () => {
     expect(element.style.getPropertyValue("--delay")).toBe("0ms");
     expect(element.style.getPropertyValue("--easing")).toBe("linear");
   });
+});
 
+describe("animate update lifecycle (replacement semantics)", () => {
   it("applies zero duration and delay through update", () => {
-    action = runeScroller(element, {
+    action = animate(element, {
       animation: "fade",
       duration: 300,
       delay: 300,
@@ -120,7 +122,7 @@ describe("runeScroller action", () => {
   it("replaces the visibility callback through update", () => {
     let firstCalls = 0;
     let secondCalls = 0;
-    action = runeScroller(element, {
+    action = animate(element, {
       animation: "fade",
       repeat: true,
       onVisible: () => firstCalls++,
@@ -133,8 +135,87 @@ describe("runeScroller action", () => {
     expect(secondCalls).toBe(1);
   });
 
+  it("does not retain a duration removed by a reactive update", () => {
+    action = animate(element, { animation: "fade", duration: 300 });
+
+    expect(element.style.getPropertyValue("--duration")).toBe("300ms");
+
+    action.update({ animation: "fade" });
+
+    expect(element.style.getPropertyValue("--duration")).toBe("");
+  });
+
+  it("removes duration while delay remains through update", () => {
+    action = animate(element, {
+      animation: "fade",
+      duration: 500,
+      delay: 100,
+    });
+
+    expect(element.style.getPropertyValue("--duration")).toBe("500ms");
+    expect(element.style.getPropertyValue("--delay")).toBe("100ms");
+
+    action.update({ animation: "fade", delay: 100 });
+
+    expect(element.style.getPropertyValue("--duration")).toBe("");
+    expect(element.style.getPropertyValue("--delay")).toBe("100ms");
+  });
+
+  it("removes delay while duration remains through update", () => {
+    action = animate(element, {
+      animation: "fade",
+      duration: 500,
+      delay: 100,
+    });
+
+    expect(element.style.getPropertyValue("--duration")).toBe("500ms");
+    expect(element.style.getPropertyValue("--delay")).toBe("100ms");
+
+    action.update({ animation: "fade", duration: 500 });
+
+    expect(element.style.getPropertyValue("--duration")).toBe("500ms");
+    expect(element.style.getPropertyValue("--delay")).toBe("");
+  });
+
+  it("does not retain a debug indicator removed by a reactive update", () => {
+    action = animate(element, { animation: "fade", debug: true });
+
+    expect(element.querySelector("[data-sentinel-debug]")).not.toBeNull();
+
+    action.update({ animation: "fade" });
+
+    expect(element.querySelector("[data-sentinel-debug]")).toBeNull();
+    expect(element.hasAttribute("data-sentinel-id")).toBe(false);
+  });
+
+  it("does not retain an easing removed by a reactive update", () => {
+    action = animate(element, { animation: "fade", easing: "linear" });
+
+    expect(element.style.getPropertyValue("--easing")).toBe("linear");
+
+    action.update({ animation: "fade" });
+
+    expect(element.style.getPropertyValue("--easing")).toBe("");
+  });
+
+  it("reverts to observing the element when an observer target is removed", () => {
+    const target = document.createElement("span");
+    element.appendChild(target);
+    action = animate(element, {
+      animation: "fade",
+      observerTarget: target,
+    });
+
+    expect(mockIntersectionObserver.getObserverFor(target)).toBeDefined();
+
+    action.update({ animation: "fade" });
+
+    expect(mockIntersectionObserver.getObserverFor(element)).toBeDefined();
+    expect(mockIntersectionObserver.getObserverFor(target)).toBeUndefined();
+  });
+
   it("creates and removes the debug indicator through update", () => {
-    action = runeScroller(element, { animation: "fade" });
+    action = animate(element, { animation: "fade" });
 
     action.update({ debug: true, sentinelId: "updated-debug" });
     expect(element.querySelector("[data-sentinel-debug]")).not.toBeNull();
@@ -158,7 +239,7 @@ describe("runeScroller action", () => {
       }
     };
 
-    action = runeScroller(element, { animation: "fade" });
+    action = animate(element, { animation: "fade" });
     action.update({ debug: true });
     expect(instances).toHaveLength(1);
     expect(instances[0].disconnected).toBe(false);
@@ -172,17 +253,29 @@ describe("runeScroller action", () => {
     const originalWarn = console.warn;
     const warnings = [];
     console.warn = (message) => warnings.push(message);
-    action = runeScroller(element, { animation: "fade" });
+    action = animate(element, { animation: "fade" });
 
-    action.update({ animation: /** @type {*} */ ("not-an-animation") });
+    action.update({ animation: "not-an-animation" });
 
     expect(element.getAttribute("data-animation")).toBe("fade-in");
     expect(warnings).toHaveLength(1);
     console.warn = originalWarn;
   });
 
+  it("restores a previously removed duration when it is re-added", () => {
+    action = animate(element, { animation: "fade", duration: 300 });
+
+    action.update({ animation: "fade" });
+    expect(element.style.getPropertyValue("--duration")).toBe("");
+
+    action.update({ animation: "fade", duration: 600 });
+    expect(element.style.getPropertyValue("--duration")).toBe("600ms");
+  });
+});
+
+describe("animate cleanup", () => {
   it("creates and cleans up a debug sentinel", () => {
-    action = runeScroller(element, {
+    action = animate(element, {
       animation: "fade",
       debug: true,
       debugLabel: "trigger",
@@ -198,7 +291,7 @@ describe("runeScroller action", () => {
   });
 
   it("uses will-change only while an animation is active", () => {
-    action = runeScroller(element, { animation: "fade", repeat: true });
+    action = animate(element, { animation: "fade", repeat: true });
 
     expect(element.style.getPropertyValue("will-change")).toBe("");
 
@@ -212,7 +305,7 @@ describe("runeScroller action", () => {
   });
 
   it("does not retain a compositor hint for zero-duration animations", () => {
-    action = runeScroller(element, {
+    action = animate(element, {
       animation: "fade",
       duration: 0,
       delay: 0,
@@ -225,7 +318,7 @@ describe("runeScroller action", () => {
 
   it("skips compositor hints when reduced motion is enabled", () => {
     window.matchMedia = () => ({ matches: true });
-    action = runeScroller(element, { animation: "fade" });
+    action = animate(element, { animation: "fade" });
 
     mockIntersectionObserver.trigger(element, true);
 
@@ -233,7 +326,7 @@ describe("runeScroller action", () => {
   });
 
   it("restores action-owned DOM state on destroy", () => {
-    action = runeScroller(element, {
+    action = animate(element, {
       animation: "fade",
       duration: 800,
       delay: 100,
@@ -260,7 +353,7 @@ describe("runeScroller action", () => {
     element.style.setProperty("--delay", "1s");
     element.style.setProperty("--easing", "steps(2)");
 
-    action = runeScroller(element, {
+    action = animate(element, {
       animation: "fade",
       duration: 800,
       debug: true,
@@ -279,7 +372,7 @@ describe("runeScroller action", () => {
   it("restores positioning added for an internal observer target", () => {
     const target = document.createElement("span");
     element.appendChild(target);
-    action = runeScroller(element, {
+    action = animate(element, {
       animation: "fade",
       observerTarget: target,
     });
@@ -294,7 +387,7 @@ describe("runeScroller action", () => {
     const browserWindow = globalThis.window;
     delete globalThis.window;
 
-    const ssrAction = runeScroller(element, { animation: "fade" });
+    const ssrAction = animate(element, { animation: "fade" });
 
     expect(typeof ssrAction.update).toBe("function");
     expect(typeof ssrAction.destroy).toBe("function");

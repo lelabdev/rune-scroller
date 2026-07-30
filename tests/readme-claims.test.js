@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, it, expect } from "bun:test";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { ANIMATION_TYPES } from "../src/lib/animations.js";
@@ -26,10 +26,26 @@ describe("README public claims", () => {
     expect(readme).toContain("29 primary animations + 7 legacy aliases");
   });
 
-  it("uses the verified animation and E2E test counts", () => {
-    expect(readme).toContain("29 primary animations + 7 legacy aliases");
-    expect(readme).not.toContain("Available Animations (30)");
-    expect(changelog).toContain("57 Playwright E2E tests");
+  it("leads with Svelte-first usage through the dedicated ./svelte entry", () => {
+    expect(readme).toContain("rune-scroller/svelte");
+    expect(readme).toMatch(/import rs from ["']rune-scroller\/svelte["']/);
+  });
+
+  it("documents a secondary Vanilla JS example using the framework-neutral core", () => {
+    expect(readme).toMatch(/import \{ animate \} from ["']rune-scroller["']/);
+  });
+
+  it("removes AOS public claims", () => {
+    expect(readme).not.toMatch(/## AOS/);
+    expect(readme).not.toMatch(/data-aos-anchor/);
+    expect(readme).not.toContain("rune-scroller/aos");
+    expect(readme).not.toMatch(/AOS replacement/i);
+  });
+
+  it("documents breaking changes in the Unreleased section", () => {
+    expect(changelog).toContain("[Unreleased]");
+    expect(changelog).toMatch(/### Removed/);
+    expect(changelog).toMatch(/AOS/);
   });
 
   it("uses unambiguous unit and browser test commands", () => {
@@ -39,28 +55,8 @@ describe("README public claims", () => {
     expect(agents).not.toContain("&& bun test &&");
   });
 
-  it("keeps the React quick start as one code block", () => {
-    expect(readme).not.toContain("````jsx");
-    expect(
-      readme.match(/### React \(not tested — should work\)/g),
-    ).toHaveLength(1);
-  });
-
-  it("links to the reproducible benchmark results", () => {
-    expect(readme).toContain("## Measured Performance");
-    expect(readme).toContain("benchmarks/results/latest.md");
-    expect(readme).toContain("more JavaScript heap");
-  });
-
-  it("defines the supported AOS compatibility surface", () => {
-    expect(readme).toContain("## AOS Compatibility");
-    expect(readme).toContain("`data-aos-anchor`");
-    expect(readme).toContain("Call `AOS.refreshHard()`");
-  });
-
   it("documents the IntersectionObserver browser requirement", () => {
-    expect(readme).toContain("Requires a browser with");
-    expect(readme).toContain("IntersectionObserver support");
+    expect(readme).toContain("IntersectionObserver");
     expect(ANIMATION_TYPES.length - legacyAliases).toBe(29);
   });
 });

@@ -22,12 +22,12 @@ async function setupActionPage(page, { html, script } = {}) {
   }
 
   // Load the module
-  await page.addScriptTag({ url: `${BASE}/dist/index.js`, type: "module" });
+  await page.addScriptTag({ url: `${BASE}/dist/svelte.js`, type: "module" });
 
   // Run test script
   if (script) {
     await page.evaluate(`(async () => {
-			const { runeScroller, rs } = await import('${BASE}/dist/index.js');
+			const { runeScroller, rs } = await import('${BASE}/dist/svelte.js');
 			window.runeScroller = runeScroller;
 			window.rs = rs;
 			${script}
@@ -144,7 +144,7 @@ test.describe("runeScroller action", () => {
       document.getElementById("target").style.setProperty("--delay", "300ms");
     });
     await page.evaluate(`(async () => {
-			const { rs } = await import('${BASE}/dist/index.js');
+			const { rs } = await import('${BASE}/dist/svelte.js');
 			window.rs = rs;
 			rs(document.getElementById('target'), { animation: 'fade' });
 		})()`);

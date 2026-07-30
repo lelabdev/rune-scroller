@@ -1,6 +1,6 @@
 # Rune Scroller
 
-`rune-scroller` is a zero-dependency, SSR-safe scroll-animation library for Svelte 5. It exposes a native Svelte action and an AOS-compatible DOM API; published artifacts are generated in `dist/`.
+`rune-scroller` is a zero-dependency, SSR-safe scroll-animation library for Svelte 5. It exposes a framework-neutral DOM core with a native Svelte action; published artifacts are generated in `dist/`.
 
 ## Commands
 
@@ -21,9 +21,9 @@ bun run build               # Build publishable package files into dist/
 
 ```text
 src/lib/
-├── index.js                    # Main public Svelte entry point
-├── runeScroller.js             # Svelte action lifecycle and observer wiring
-├── aos.js                      # AOS-compatible data-attribute API
+├── index.js                    # Framework-neutral public entry (animate + utils + types)
+├── animate.js                  # Framework-neutral DOM core: animate() lifecycle and observer wiring
+├── svelte.js                   # Dedicated Svelte entry: action + rune composables
 ├── animations.js               # Animation names and root-margin utilities
 ├── animations.css              # Animation styles; imported explicitly by consumers
 ├── dom-utils.js                # DOM, CSS-variable, and debug-sentinel helpers
@@ -35,21 +35,25 @@ e2e/                            # Playwright fixtures, server, and browser tests
 dist/                           # Generated package output; rebuild after public API changes
 ```
 
-The package exports are defined in `package.json`. Keep `.` (Svelte action), `./aos`, and `./animations.css` compatible unless making an intentional major-version change.
+The package exports are defined in `package.json`. Keep `.` (framework-neutral
+`animate` core), `./svelte` (Svelte action + composables), and
+`./animations.css` compatible unless making an intentional major-version
+change.
 
 ## Critical Rules
 
 - Preserve SSR guards: browser globals (`window`, `document`, observers) must never be accessed during server-side evaluation.
-- Preserve cleanup: every created `IntersectionObserver`, `ResizeObserver`, `MutationObserver`, listener, or sentinel needs a matching destroy/disconnect path.
-- AOS mode is a compatibility layer. Keep its `init`, `refresh`, `refreshHard`, `disable`, and `destroy` behavior aligned with documented AOS expectations.
-- Consumers import CSS explicitly. Do not add an automatic CSS import to `src/lib/index.js`; it breaks Node and edge SSR runtimes.
+- Preserve cleanup: every created `IntersectionObserver`, `ResizeObserver`, listener, or sentinel needs a matching destroy/disconnect path.
+- Keep the framework-neutral core (`src/lib/index.js`, `src/lib/animate.js`) free of Svelte runtime imports. Rune-based code lives in `src/lib/svelte.js` and `src/lib/useIntersection.svelte.js`.
+- `animate` and the Svelte action share the same lifecycle. `update(newOptions)` uses replacement semantics: the argument is the complete new option set, so removed options are never retained.
+- Consumers import CSS explicitly. Do not add an automatic CSS import to `src/lib/index.js` or `src/lib/svelte.js`; it breaks Node and edge SSR runtimes.
 - Add tests for observable behavior changes, including lifecycle cleanup and browser behavior when relevant.
 
 ## Code Style
 
 - Use ESM JavaScript with JSDoc types for public APIs; do not introduce TypeScript source files without a project-wide decision.
 - Follow Prettier and ESLint. Keep browser DOM operations defensive for SSR and test DOM environments.
-- Keep public API changes in sync with `src/lib/index.js`, `package.json` exports, JSDoc types, tests, and `README.md`.
+- Keep public API changes in sync with `src/lib/index.js`, `src/lib/svelte.js`, `package.json` exports, JSDoc types, tests, and `README.md`.
 
 ```js
 // ✅ Guard browser-only behavior
@@ -74,6 +78,7 @@ destroy() {
 - Put behavior-level unit and integration tests in `tests/` using Bun's test runner.
 - Use `tests/__mocks__/` for browser APIs unavailable in the test environment.
 - Put browser flows in `e2e/`; Playwright serves fixtures through `e2e/serve.js` on port 3210.
+- Cover both the framework-neutral core (`dist/index.js` → `animate`) and the Svelte entry (`dist/svelte.js` → action) with contract and browser tests.
 - Run `bunx playwright test` for changes involving actual observer, DOM, CSS, or Svelte-action behavior.
 
 ## Git Workflow
@@ -87,7 +92,7 @@ destroy() {
 
 - ✅ Always maintain SSR safety, accessible reduced-motion behavior, and observer cleanup.
 - ✅ Always treat `README.md` and package exports as part of the public contract.
-- ⚠️ Ask first before adding runtime dependencies, changing export paths, or modifying the AOS compatibility surface.
+- ⚠️ Ask first before adding runtime dependencies, changing export paths, or modifying the public API surface.
 - 🚫 Never import the package stylesheet automatically from JavaScript.
 - 🚫 Never make browser globals mandatory at module load time.
 - 🚫 Never edit generated `dist/` files by hand; regenerate them with `bun run build`.

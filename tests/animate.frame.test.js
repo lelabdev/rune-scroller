@@ -1,8 +1,8 @@
 import { describe, expect, it } from "bun:test";
 import { Window } from "happy-dom";
-import { runeScroller } from "../src/lib/runeScroller.js";
+import { animate } from "../src/lib/animate.js";
 
-describe("runeScroller scheduling", () => {
+describe("animate scheduling", () => {
   it("uses the animation frame scheduler from the browser window", () => {
     const window = new Window();
     const document = window.document;
@@ -22,7 +22,7 @@ describe("runeScroller scheduling", () => {
     const element = document.createElement("div");
     document.body.appendChild(element);
 
-    expect(() => runeScroller(element, { animation: "fade" })).not.toThrow();
+    expect(() => animate(element, { animation: "fade" })).not.toThrow();
 
     globalThis.window = originalWindow;
     globalThis.document = originalDocument;

@@ -1,7 +1,10 @@
 /**
- * Rune Scroller - Lightweight scroll animations for Svelte 5
+ * Rune Scroller — framework-neutral scroll animation core.
  *
- * Main entry point exporting all public APIs
+ * This entry point is free of any framework runtime. It exposes `animate`, a
+ * plain DOM API that works in Vanilla JS and in adapters for any framework.
+ * Svelte consumers should import the action and composables from
+ * `rune-scroller/svelte`.
  *
  * @module rune-scroller
  */
@@ -10,17 +13,10 @@
 //   import 'rune-scroller/animations.css'
 // This avoids SSR issues with automatic CSS imports in Node/edge runtimes.
 
-// Main action (default export - recommended)
-import { runeScroller } from "./runeScroller.js";
-export default runeScroller;
-export { runeScroller };
-export { runeScroller as rs };
-
-// Composables
-export {
-  useIntersection,
-  useIntersectionOnce,
-} from "./useIntersection.svelte.js";
+// Core DOM API (default export — recommended for Vanilla JS)
+import { animate } from "./animate.js";
+export default animate;
+export { animate };
 
 // Utilities
 export { calculateRootMargin, ANIMATION_TYPES } from "./animations.js";

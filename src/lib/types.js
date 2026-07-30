@@ -1,15 +1,15 @@
 /**
- * Centralized type definitions for Rune Scroller library
+ * Centralized type definitions for Rune Scroller
  */
 
 /**
- * Animation type names (includes AOS-compatible names)
+ * Animation type names (primary names plus v2.x legacy aliases)
  * @typedef {'fade' | 'fade-up' | 'fade-down' | 'fade-left' | 'fade-right' | 'fade-up-right' | 'fade-up-left' | 'fade-down-right' | 'fade-down-left' | 'zoom-in' | 'zoom-in-up' | 'zoom-in-down' | 'zoom-in-left' | 'zoom-in-right' | 'zoom-out' | 'zoom-out-up' | 'zoom-out-down' | 'zoom-out-left' | 'zoom-out-right' | 'slide-up' | 'slide-down' | 'slide-left' | 'slide-right' | 'flip-left' | 'flip-right' | 'flip-up' | 'flip-down' | 'slide-rotate' | 'bounce-in' | 'fade-in' | 'fade-in-up' | 'fade-in-down' | 'fade-in-left' | 'fade-in-right' | 'flip' | 'flip-x'} AnimationType
  */
 
 /**
- * Options for the runeScroller action
- * @typedef {Object} RuneScrollerOptions
+ * Options for the framework-neutral `animate` core and the Svelte action.
+ * @typedef {Object} AnimateOptions
  * @property {AnimationType} [animation='fade-in'] - Animation type to apply
  * @property {number} [duration=400] - Animation duration in milliseconds
  * @property {boolean} [repeat=false] - Repeat animation on every scroll
@@ -25,6 +25,14 @@
  * @property {HTMLElement} [observerTarget] - Internal observer target override
  * @property {(element: HTMLElement) => void} [onVisible] - Callback when animation triggers
  * @property {(element: HTMLElement) => void} [onHidden] - Callback when a repeating animation exits
+ */
+
+/**
+ * Deterministic lifecycle handle returned by `animate` and the Svelte action.
+ * `update` receives the complete new option set (replacement semantics).
+ * @typedef {Object} AnimateHandle
+ * @property {(newOptions?: AnimateOptions) => void} update - Replace the active options
+ * @property {() => void} destroy - Release observers, listeners, and DOM state
  */
 
 /**

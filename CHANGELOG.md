@@ -5,6 +5,25 @@ All notable changes to Rune Scroller will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Breaking Changes
+
+- **Restructured around a framework-neutral core.** The root entry now exports `animate(element, options)`, a plain DOM API with deterministic `update()` and `destroy()` lifecycle methods. It is free of Svelte runtime imports, so a core-only installation does not require Svelte at runtime.
+- **Dedicated Svelte entry.** The Svelte action and the rune-based intersection composables moved to `rune-scroller/svelte`. Svelte consumers should import the action (`runeScroller` / `rs`) and `useIntersection` / `useIntersectionOnce` from there.
+- **Optional Svelte peer dependency.** `svelte` is now an optional peer dependency (`peerDependenciesMeta.svelte.optional = true`) for core-only consumers.
+- **Option replacement semantics.** `update(newOptions)` now treats its argument as the complete new option set. Options removed by a reactive caller revert to their defaults (or the caller-owned value) instead of being retained.
+
+### Removed
+
+- **AOS compatibility layer removed entirely.** The `./aos` export, the AOS implementation, AOS-specific tests, fixtures, and documentation are gone. There is no more `data-aos-*` attribute support, global AOS lifecycle (`init` / `refresh` / `refreshHard` / `disable` / `destroy`), anchor placement, or `MutationObserver` watching.
+- Removed all AOS migration and compatibility claims from the public contract and README.
+
+### Changed
+
+- `RuneScrollerOptions` type renamed to `AnimateOptions`; added `AnimateHandle` return type.
+- The published animations, explicit `./animations.css` export, SSR safety, observer sharing, cleanup, and reduced-motion behavior are preserved.
+
 ## [4.0.0] - 2026-05-05
 
 ### Breaking Changes

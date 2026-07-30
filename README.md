@@ -4,7 +4,7 @@
 	<img src="./logo.png" alt="Rune Scroller Logo" width="200" />
 </div>
 
-**Lightweight scroll animations. AOS replacement.**
+**Lightweight scroll animations for the DOM. Svelte-first, framework-neutral core.**
 
 Built with native IntersectionObserver — zero JS on scroll and GPU-accelerated. Requires a browser with [IntersectionObserver support](https://caniuse.com/intersectionobserver).
 
@@ -24,170 +24,74 @@ Built with native IntersectionObserver — zero JS on scroll and GPU-accelerated
 
 ## 🚀 Quick Start
 
-### Any framework — Svelte, React, Vue, Angular, Vanilla JS
+### Svelte 5 (recommended)
 
 ```bash
 npm install rune-scroller
 ```
 
-```js
-import "rune-scroller/animations.css";
-import AOS from "rune-scroller/aos";
-AOS.init();
-```
-
-```html
-<div data-aos="fade-up" data-aos-duration="800">Animated</div>
-<div data-aos="zoom-in" data-aos-delay="200">Delayed zoom</div>
-```
-
-That's it. It supports the AOS-compatible surface documented below in browsers that support IntersectionObserver.
-
-### Svelte (native action)
-
 ```svelte
 <script>
 	import 'rune-scroller/animations.css';
-	import rs from 'rune-scroller';
+	import rs from 'rune-scroller/svelte';
 </script>
 
 <div use:rs={{ animation: 'fade-up' }}>Animates on scroll</div>
 ```
 
-### React (not tested — should work)
+The stylesheet import is always explicit — Rune Scroller never injects CSS automatically, which keeps it safe in Node and edge SSR runtimes.
 
-```jsx
-import { useEffect } from "react";
+### Vanilla JS (framework-neutral core)
+
+The root entry exposes a plain `animate(element, options)` API that works in any framework or with no framework at all. It is free of Svelte runtime imports.
+
+```js
 import "rune-scroller/animations.css";
-import AOS from "rune-scroller/aos";
+import { animate } from "rune-scroller";
 
-function App() {
-  useEffect(() => {
-    AOS.init();
-  }, []);
-  return (
-    <>
-      <h1 data-aos="fade-down">Welcome</h1>
-      <p data-aos="fade-up" data-aos-delay="200">
-        Subtitle
-      </p>
-    </>
-  );
-}
+const element = document.querySelector("#hero");
+const animation = animate(element, { animation: "fade-up" });
+
+// Update with a complete new option set (replacement semantics)
+animation.update({ animation: "zoom-in", duration: 800 });
+
+// Release observers and restore DOM state
+animation.destroy();
 ```
 
-### Vue (not tested — should work)
+### Other frameworks
 
-```vue
-<script setup>
-import { onMounted } from "vue";
-import "rune-scroller/animations.css";
-import AOS from "rune-scroller/aos";
-onMounted(() => AOS.init());
-</script>
-
-<template>
-  <div data-aos="fade-up">Animated</div>
-</template>
-```
-
-### Angular (not tested — should work)
-
-```typescript
-// app.component.ts
-import { Component, OnInit } from "@angular/core";
-import "rune-scroller/animations.css";
-import AOS from "rune-scroller/aos";
-
-@Component({ selector: "app-root", templateUrl: "./app.component.html" })
-export class AppComponent implements OnInit {
-  ngOnInit() {
-    AOS.init();
-  }
-}
-```
-
-```html
-<!-- app.component.html -->
-<div data-aos="fade-up">Animated</div>
-```
-
-### CDN (not tested — should work)
-
-```html
-<script type="module">
-  import "https://esm.sh/rune-scroller/animations.css";
-  import AOS from "https://esm.sh/rune-scroller/aos";
-  AOS.init();
-</script>
-
-<div data-aos="fade-up">Works without any build step</div>
-```
+`animate` is plain DOM, so it works in React, Vue, Angular, or any setup that can hand it an `HTMLElement`. Call `animate(node, options)` on mount and `animation.destroy()` on unmount. For a first-class, rune-based experience, Svelte consumers use the dedicated `rune-scroller/svelte` entry.
 
 ---
 
 ## ✨ Features
 
-- **Framework agnostic** — Svelte, React, Vue, Angular, Vanilla JS, CDN
-- **AOS-compatible** — Familiar `data-aos` attributes and `init()` API
+- **Svelte-first, framework-neutral core** — Native Svelte 5 action plus a Vanilla `animate` API
 - **Zero dependencies** — Pure JS + native IntersectionObserver
 - **Bundle size** — Current minified and gzip figures are published by Bundlephobia above
 - **29 primary animations + 7 legacy aliases** — Fade, Zoom, Flip, Slide, Bounce
 - **Zero JS on scroll** — Browser handles detection natively
-- **TypeScript support** — Full type definitions
+- **TypeScript support** — Full type definitions for the core and the Svelte entry
 - **SSR-ready** — SvelteKit, Next.js, Nuxt compatible
 - **GPU-accelerated** — CSS transforms via `translate3d`
 - **Accessible** — Respects `prefers-reduced-motion`
 - **No wrapper divs** — Your layouts stay intact
 
----
+## How It Works
 
-### AOS vs rune-scroller
+1. The animated element is observed directly with `IntersectionObserver`.
+2. When it enters the viewport, the `is-visible` class triggers its CSS transition.
+3. Positive `offset` values extend the viewport bottom, triggering animations earlier while scrolling down.
+4. `debug: true` adds a visual sentinel indicator only; it does not affect observation.
 
-|                           | rune-scroller                                      | AOS                                        |
-| ------------------------- | -------------------------------------------------- | ------------------------------------------ |
-| **Bundle size**           | See the Bundlephobia badge above                   | See Bundlephobia                           |
-| **Dependencies**          | **0**                                              | lodash.throttle, lodash.debounce           |
-| **Scroll detection**      | **IntersectionObserver** (native, C++)             | Scroll event + throttle (JS)               |
-| **Per-scroll cost**       | **0** — browser handles it                         | Iterates ALL elements every 99ms           |
-| **Layout reads**          | **1 per element** (init only)                      | `offsetParent` loop per element per scroll |
-| **Resize handling**       | IntersectionObserver; ResizeObserver in debug mode | debounced scroll recalc                    |
-| **100 animated elements** | **~0ms per scroll**                                | ~2-5ms per scroll (layout thrashing)       |
-| **Animations**            | 29 primary + 7 legacy aliases                      | 28                                         |
-| **Framework**             | **Any** (Svelte, React, Vue, Angular, Vanilla)     | Vanilla JS only                            |
-
-The key difference: **AOS runs JavaScript on every scroll event** for every element. rune-scroller delegates detection to the browser's native IntersectionObserver — zero JS execution until an element actually enters the viewport.
-
-## Measured Performance
-
-The reproducible benchmark compares Rune Scroller and `aos@2.3.4` with 50, 200, and 1,000 elements across desktop and mobile Chromium profiles. At 1,000 elements on the measured machine, Rune Scroller completed the scroll scenario in **662–664 ms** versus **869–886 ms** for AOS, and its median worst frame remained **below 17 ms** versus **40–49 ms** for AOS.
-
-Rune Scroller uses one shared `IntersectionObserver` and no scroll or resize listener in this scenario. AOS uses two scroll/resize listeners. Rune Scroller currently retains more JavaScript heap at 1,000 elements, so the results do not claim a memory advantage.
-
-See the complete raw samples, medians, variance inputs, environment, and methodology in [`benchmarks/results/latest.md`](./benchmarks/results/latest.md). Run `bun run benchmark` on the target machine before using these numbers in public material.
-
-## AOS Compatibility
-
-Rune Scroller implements the common declarative AOS workflow, not every legacy AOS behavior.
-
-| Surface                                             | Behavior                                                                                                                     |
-| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `data-aos`, duration, delay, easing, offset         | Supported. Invalid numeric values use the configured defaults.                                                               |
-| `data-aos-once`                                     | Supported: the element remains visible after its first entry.                                                                |
-| `data-aos-mirror`                                   | Supported: the element animates out on an intersection exit and can animate in again. `mirror` takes precedence over `once`. |
-| Anchor placement                                    | Supported through `data-aos-anchor-placement`.                                                                               |
-| `data-aos-anchor`                                   | Not supported. Use the native action's `observerTarget` for custom targets.                                                  |
-| Runtime insertion/removal                           | Supported automatically through `MutationObserver`.                                                                          |
-| Runtime changes to existing `data-aos-*` attributes | Call `AOS.refreshHard()` after changing attributes.                                                                          |
-| `AOS.refresh()`                                     | Intentional no-op: `IntersectionObserver` recalculates geometry automatically.                                               |
-| `AOS.refreshHard()`                                 | Rebuilds AOS actions for the current `[data-aos]` elements.                                                                  |
-| AOS events and `data-aos-id`                        | Not supported.                                                                                                               |
+**No wrapper divs** — the original element is observed directly, so flex and grid layouts stay intact.
 
 ---
 
 ## 🎨 Available Animations (29 primary + 7 legacy aliases)
 
-### Fade (10)
+### Fade (9)
 
 - `fade` — Simple opacity fade
 - `fade-up` / `fade-down` / `fade-left` / `fade-right` — Fade + translate
@@ -213,103 +117,64 @@ Rune Scroller implements the common declarative AOS workflow, not every legacy A
 - `slide-rotate` — Slide + rotate
 - `bounce-in` — Bouncy spring entrance
 
+### Legacy aliases (7)
+
+These v2.x names still work and map to a primary animation: `fade-in`, `fade-in-up`, `fade-in-down`, `fade-in-left`, `fade-in-right`, `flip`, `flip-x`.
+
 ### Customizable distance
 
 All animations use the `--rs-distance` CSS variable (default: `100px`):
 
 ```html
-<div data-aos="fade-up" style="--rs-distance: 200px">Farther slide</div>
+<div style="--rs-distance: 200px" data-animation="fade-up">Farther slide</div>
 ```
 
 ---
 
 ## ⚙️ Options
 
-### AOS Mode (data attributes)
-
-| Attribute           | Example         | Description                |
-| ------------------- | --------------- | -------------------------- |
-| `data-aos`          | `"fade-up"`     | Animation name             |
-| `data-aos-duration` | `"800"`         | Duration in ms             |
-| `data-aos-delay`    | `"200"`         | Delay in ms                |
-| `data-aos-easing`   | `"ease-in-out"` | CSS timing function        |
-| `data-aos-offset`   | `"120"`         | Trigger offset in px       |
-| `data-aos-once`     | `"true"`        | Animate only once          |
-| `data-aos-mirror`   | `"true"`        | Animate on scroll away too |
-
-### AOS init options
-
-```js
-AOS.init({
-  offset: 120,
-  duration: 400,
-  delay: 0,
-  easing: "ease",
-  once: false,
-  mirror: false,
-  startEvent: "DOMContentLoaded",
-});
-```
-
-### Svelte Action options
+Both the Svelte action and `animate` accept the same options. `update()` receives the **complete** new option set — options you remove are no longer retained.
 
 ```typescript
-interface RuneScrollerOptions {
+interface AnimateOptions {
   animation?: AnimationType; // default: 'fade-in'
   duration?: number; // default: 400
   delay?: number; // default: 0
   easing?: string; // default: 'ease'
   repeat?: boolean; // default: false
-  debug?: boolean;
+  debug?: boolean; // default: false
   offset?: number; // positive = earlier trigger
-  onVisible?: (el: HTMLElement) => void;
   sentinelColor?: string; // debug indicator color
   sentinelId?: string; // debug indicator identifier
+  debugLabel?: string; // debug indicator label
+  onVisible?: (el: HTMLElement) => void;
+  onHidden?: (el: HTMLElement) => void; // repeat mode only
 }
 ```
-
----
-
-## 🎯 How It Works
-
-1. The animated element is observed directly with `IntersectionObserver`.
-2. When it enters the viewport, the `is-visible` class triggers its CSS transition.
-3. Positive `offset` values extend the viewport bottom, triggering animations earlier while scrolling down.
-4. `debug: true` adds a visual sentinel indicator only; it does not affect observation.
-
-**No wrapper divs** — the original element is observed directly, so flex and grid layouts stay intact.
-
----
-
-## ♿ Accessibility
-
-Respects `prefers-reduced-motion` — animations are disabled automatically.
 
 ---
 
 ## 📚 API Reference
 
 ```typescript
-// Framework agnostic (AOS mode)
-import AOS from "rune-scroller/aos";
-AOS.init();
-AOS.refresh();
-AOS.refreshHard();
+// Framework-neutral core (default + named)
+import animate, { animate as animateCore } from "rune-scroller";
+import { ANIMATION_TYPES, calculateRootMargin } from "rune-scroller";
 
-// Svelte action (default)
-import rs from "rune-scroller";
-
-// Named exports
+// Svelte action and rune composables
+import rs from "rune-scroller/svelte";
 import {
   runeScroller,
   useIntersection,
   useIntersectionOnce,
-  calculateRootMargin,
-  ANIMATION_TYPES,
-} from "rune-scroller";
+} from "rune-scroller/svelte";
 
 // Types
-import type { AnimationType, RuneScrollerOptions } from "rune-scroller";
+import type {
+  AnimationType,
+  AnimateOptions,
+  AnimateHandle,
+} from "rune-scroller";
 ```
 
 ---
@@ -332,11 +197,11 @@ bunx playwright test
 
 ## 📖 Examples
 
-### Staggered Animations
+### Staggered Animations (Svelte)
 
 ```svelte
 <script>
-	import rs from 'rune-scroller';
+	import rs from 'rune-scroller/svelte';
 	const items = ['Item 1', 'Item 2', 'Item 3'];
 </script>
 
@@ -347,31 +212,27 @@ bunx playwright test
 {/each}
 ```
 
-### Hero Section
+### Hero Section (Vanilla)
 
-```html
-<h1 data-aos="fade-down" data-aos-duration="1000">Welcome</h1>
-<p data-aos="fade-up" data-aos-duration="1200">Subtitle</p>
-<button data-aos="zoom-in" data-aos-duration="800">Get Started</button>
+```js
+import { animate } from "rune-scroller";
+
+animate(document.querySelector("h1"), {
+  animation: "fade-down",
+  duration: 1000,
+});
+animate(document.querySelector("p"), { animation: "fade-up", duration: 1200 });
+animate(document.querySelector("button"), {
+  animation: "zoom-in",
+  duration: 800,
+});
 ```
 
 ---
 
-## 🔄 Replacing AOS
+## ♿ Accessibility
 
-```bash
-npm uninstall aos
-npm install rune-scroller
-```
-
-```diff
-- import AOS from 'aos';
-- import 'aos/dist/aos.css';
-+ import 'rune-scroller/animations.css';
-+ import AOS from 'rune-scroller/aos';
-```
-
-Everything else stays the same. Same attributes, same options.
+Respects `prefers-reduced-motion` — animations are disabled automatically.
 
 ---
 
