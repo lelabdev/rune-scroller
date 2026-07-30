@@ -42,6 +42,19 @@ describe("animate DOM core", () => {
     expect(detachedElement.classList.contains("scroll-animate")).toBe(true);
   });
 
+  it("rejects multiple active handles on the same element", () => {
+    const first = animate(element, { animation: "fade-up" });
+    const second = animate(element, { animation: "zoom-in" });
+
+    expect(element.getAttribute("data-animation")).toBe("fade-up");
+    first.destroy();
+    expect(element.classList.contains("scroll-animate")).toBe(false);
+
+    action = animate(element, { animation: "zoom-in" });
+    expect(element.getAttribute("data-animation")).toBe("zoom-in");
+    second.destroy();
+  });
+
   it("uses fade-in as the default animation", () => {
     action = animate(element);
 

@@ -8,6 +8,8 @@ import { createManagedObserver, disconnectObserver } from "./observer-utils.js";
 import { ANIMATION_TYPES } from "./animations.js";
 
 const DEFAULT_ANIMATION = "fade-in";
+/** @type {WeakSet<HTMLElement>} */
+const activeElements = new WeakSet();
 
 /**
  * @param {unknown} animation
@@ -91,6 +93,22 @@ export function animate(element, options = {}) {
       destroy: () => {},
     };
   }
+
+  if (activeElements.has(element)) {
+    if (
+      typeof process !== "undefined" &&
+      process.env?.NODE_ENV !== "production"
+    ) {
+      console.warn(
+        "[rune-scroller] animate() already owns this element. Destroy the existing handle before creating another.",
+      );
+    }
+    return {
+      update: () => {},
+      destroy: () => {},
+    };
+  }
+  activeElements.add(element);
 
   if (typeof document !== "undefined") {
     checkAndWarnIfCSSNotLoaded();
@@ -414,6 +432,7 @@ export function animate(element, options = {}) {
     destroy() {
       if (destroyed) return;
       destroyed = true;
+      activeElements.delete(element);
       window.cancelAnimationFrame?.(animationFrame);
       if (restoreTransitionFrame !== undefined) {
         window.cancelAnimationFrame?.(restoreTransitionFrame);
