@@ -380,6 +380,18 @@ describe("animate cleanup", () => {
     expect(element.style.getPropertyValue("--easing")).toBe("");
   });
 
+  it("preserves stylesheet-defined positioning", () => {
+    globalThis.getComputedStyle = () => ({
+      position: "absolute",
+      transitionProperty: "opacity, transform",
+    });
+
+    action = animate(element, { animation: "fade", debug: true });
+
+    expect(element.style.position).toBe("");
+    action.destroy();
+  });
+
   it("preserves caller-owned DOM state on destroy", () => {
     element.classList.add("scroll-animate", "is-visible");
     element.setAttribute("data-animation", "caller-animation");

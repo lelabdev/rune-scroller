@@ -160,7 +160,12 @@ export function animate(element, options = {}) {
   let isIntersecting = false;
 
   function ensurePositioningContext() {
-    if (!element.style.position || element.style.position === "static") {
+    const computedPosition =
+      element.style.position ||
+      (typeof getComputedStyle === "function"
+        ? getComputedStyle(element).position
+        : undefined);
+    if (!computedPosition || computedPosition === "static") {
       originalPosition ??= element.style.position;
       element.style.position = "relative";
       positionChanged = true;
