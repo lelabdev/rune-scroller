@@ -89,7 +89,7 @@ export function createSentinel(
  * @returns {boolean} True if CSS appears to be loaded
  */
 export function checkAndWarnIfCSSNotLoaded() {
-  if (typeof document === "undefined") return false;
+  if (typeof document === "undefined" || !document.body) return false;
   if (typeof process !== "undefined" && process.env?.NODE_ENV === "production")
     return true;
 
