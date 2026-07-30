@@ -54,9 +54,10 @@ export const ANIMATION_TYPES = [
 ];
 
 /**
- * Calculate rootMargin for IntersectionObserver from offset or custom rootMargin
+ * Calculate a percentage-based rootMargin for IntersectionObserver.
+ * This helper uses a 0-100 percentage offset; AnimateOptions.offset uses pixels.
  *
- * @param {number} [offset] - Viewport offset (0-100). 0 = bottom of viewport touches top of element, 100 = top of viewport touches top of element
+ * @param {number} [offset] - Percentage offset (0-100). 0 = bottom of viewport touches top of element, 100 = top of viewport touches top of element
  * @param {string} [rootMargin] - Custom rootMargin string (takes precedence over offset)
  * @returns {string} rootMargin string for IntersectionObserver
  */

@@ -143,7 +143,10 @@ interface AnimateOptions {
   easing?: string; // default: 'ease'
   repeat?: boolean; // default: false
   debug?: boolean; // default: false
-  offset?: number; // positive = earlier trigger
+  offset?: number; // pixels, positive = earlier trigger
+  threshold?: number | number[]; // IntersectionObserver threshold
+  rootMargin?: string; // explicit IntersectionObserver margin
+  observerTarget?: HTMLElement; // observe another element
   sentinelColor?: string; // debug indicator color
   sentinelId?: string; // debug indicator identifier
   debugLabel?: string; // debug indicator label
@@ -153,6 +156,12 @@ interface AnimateOptions {
 ```
 
 ---
+
+## Intersection behavior
+
+The `animate` action and core use pixel-based observer offsets. `offset: 120` adds `120px` to the viewport bottom margin and triggers earlier. `threshold` defaults to `0`, and `rootMargin` defaults to the margin derived from `offset` (`0px 0px 0px 0px` when no offset is provided).
+
+`calculateRootMargin()` is a separate percentage-based helper: its `offset` argument ranges from `0` to `100` and returns a percentage root margin. The Svelte intersection composables use their own defaults (`threshold: 0.5` and `rootMargin: '-10% 0px -10% 0px'`); their options are reactive when passed as a Svelte state object.
 
 ## 📚 API Reference
 
