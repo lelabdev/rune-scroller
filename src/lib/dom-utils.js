@@ -118,7 +118,9 @@ export function checkAndWarnIfCSSNotLoaded() {
     );
   }
 
-  // Cache the result for future calls
-  cssCheckResult = hasStylesheet;
+  // Cache only successes — a failed probe must not stick forever.
+  if (hasStylesheet) {
+    cssCheckResult = hasStylesheet;
+  }
   return hasStylesheet;
 }
