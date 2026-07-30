@@ -185,7 +185,7 @@
 }
 
 .scroll-animate[data-animation="bounce-in"].is-visible {
-  animation: rs-bounce var(--duration, 1500ms)
+  animation: rs-bounce var(--duration, 400ms)
     cubic-bezier(0.68, -0.55, 0.265, 1.55);
   animation-delay: var(--delay, 0ms);
 }
