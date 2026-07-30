@@ -89,14 +89,12 @@ describe("DOM Utilities", () => {
       global.getComputedStyle = () => {
         pass += 1;
         return {
-          transitionProperty:
-            pass === 1 ? "opacity" : "opacity, transform",
+          transitionProperty: pass === 1 ? "opacity" : "opacity, transform",
         };
       };
 
-      const { checkAndWarnIfCSSNotLoaded } = await import(
-        "../src/lib/dom-utils.js?css-recheck"
-      );
+      const { checkAndWarnIfCSSNotLoaded } =
+        await import("../src/lib/dom-utils.js?css-recheck");
 
       expect(checkAndWarnIfCSSNotLoaded()).toBe(false);
       expect(checkAndWarnIfCSSNotLoaded()).toBe(true);

@@ -23,15 +23,15 @@
 
 ## File map
 
-| File | Role |
-|------|------|
-| `src/lib/animate.js` | Task 1: latch one-shot when `repeat` turns off while intersecting. Task 2: capture caller `data-sentinel-id` at setup so destroy restore is honest without debug. |
-| `src/lib/dom-utils.js` | Task 3: CSS-load probe must not permanently cache a false miss. |
-| `src/lib/animations.js` | Task 4: type `ANIMATION_TYPES` as `readonly import('./types.js').AnimationType[]` (or equivalent JSDoc). |
-| `tests/animate.test.js` | Failing tests for Tasks 1–2. |
-| `tests/dom-utils.test.js` | Failing test for Task 3 (module query-cache pattern already used). |
-| `tests/animations.test.js` or `tests/public-contract.test.js` | Optional assert that emitted/runtime list stays length 36; type check via `bun run check` / tsc. |
-| `CHANGELOG.md` | Single bullet under `## [Unreleased]` summarizing fixes (no version bump). |
+| File                                                          | Role                                                                                                                                                              |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/lib/animate.js`                                          | Task 1: latch one-shot when `repeat` turns off while intersecting. Task 2: capture caller `data-sentinel-id` at setup so destroy restore is honest without debug. |
+| `src/lib/dom-utils.js`                                        | Task 3: CSS-load probe must not permanently cache a false miss.                                                                                                   |
+| `src/lib/animations.js`                                       | Task 4: type `ANIMATION_TYPES` as `readonly import('./types.js').AnimationType[]` (or equivalent JSDoc).                                                          |
+| `tests/animate.test.js`                                       | Failing tests for Tasks 1–2.                                                                                                                                      |
+| `tests/dom-utils.test.js`                                     | Failing test for Task 3 (module query-cache pattern already used).                                                                                                |
+| `tests/animations.test.js` or `tests/public-contract.test.js` | Optional assert that emitted/runtime list stays length 36; type check via `bun run check` / tsc.                                                                  |
+| `CHANGELOG.md`                                                | Single bullet under `## [Unreleased]` summarizing fixes (no version bump).                                                                                        |
 
 **Out of scope (explicit):** npm publish/tag, logo.png pack size, `IntersectionObserver` feature-detect polyfill, deep-import blocking of `dist/observer-utils.js`, e2e `{#each}` churn fixtures, AOS.
 
@@ -40,16 +40,19 @@
 ### Task 1: Latch one-shot when `repeat` turns off while visible
 
 **Files:**
+
 - Modify: `src/lib/animate.js` (~L429–435, intersection handler already sets `hasTriggered` only on enter with `!repeat`)
 - Test: `tests/animate.test.js` (update lifecycle describe)
 - Optional cross-check: `tests/animate.integration.test.js` only if unit coverage is insufficient
 
 **Interfaces:**
+
 - Consumes: existing `hasTriggered`, `isIntersecting`, `disconnectObserver`, `currentOptions.repeat`
 - Produces: after `update({ …, repeat: false })` while intersecting, element stays one-shot-complete: `hasTriggered === true`, observer disconnected, later option-only updates must **not** reconnect solely because `!hasTriggered`
 
 **Product decision (locked):**
 When `repeat` goes from `true` to not-`true` **and** `isIntersecting` is true:
+
 1. `disconnectObserver(managedObserver, state)` (already present)
 2. **Also** `hasTriggered = true`
 3. **Keep** `is-visible` (user already saw the enter animation; do not yank the class)
@@ -117,10 +120,12 @@ git commit -m "fix: latch one-shot when repeat turns off while visible"
 ### Task 2: Preserve caller `data-sentinel-id` without requiring debug
 
 **Files:**
+
 - Modify: `src/lib/animate.js` (setup path after ownership acquired; `disableDebug` already restores from `originalSentinelAttribute`)
 - Test: `tests/animate.test.js` (destroy / ownership describe)
 
 **Interfaces:**
+
 - Consumes: `originalSentinelAttribute` (`{ hasAttribute, value } | undefined`), `disableDebug()`
 - Produces: destroy (and debug-off) never strip a caller-owned `data-sentinel-id` that existed before `animate()` when debug never ran
 
@@ -181,14 +186,17 @@ git commit -m "fix: restore caller data-sentinel-id without requiring debug"
 ### Task 3: Stop sticky false CSS-load cache
 
 **Files:**
+
 - Modify: `src/lib/dom-utils.js` (`checkAndWarnIfCSSNotLoaded`, `cssCheckResult`)
 - Test: `tests/dom-utils.test.js` (`describe("checkAndWarnIfCSSNotLoaded")`)
 
 **Interfaces:**
+
 - Consumes: module-level `cssCheckResult`
 - Produces: a failed probe does not prevent a later successful probe after the consumer imports CSS; a successful probe may still be cached
 
 **Product decision (locked):**
+
 - Cache **only** `true` (stylesheet confirmed).
 - If the probe returns `false`, leave `cssCheckResult` as `null` (or set only on success) so the next `animate()` can re-check.
 - Still warn on each failed probe (dev-only path already skips production via `NODE_ENV`). Do not warn in a tight loop beyond once-per-`animate()` call (callers already invoke once per handle).
@@ -204,14 +212,12 @@ it("rechecks after a failed probe when CSS becomes available", async () => {
   global.getComputedStyle = () => {
     pass += 1;
     return {
-      transitionProperty:
-        pass === 1 ? "opacity" : "opacity, transform",
+      transitionProperty: pass === 1 ? "opacity" : "opacity, transform",
     };
   };
 
-  const { checkAndWarnIfCSSNotLoaded } = await import(
-    "../src/lib/dom-utils.js?css-recheck"
-  );
+  const { checkAndWarnIfCSSNotLoaded } =
+    await import("../src/lib/dom-utils.js?css-recheck");
 
   expect(checkAndWarnIfCSSNotLoaded()).toBe(false);
   expect(checkAndWarnIfCSSNotLoaded()).toBe(true);
@@ -258,11 +264,13 @@ git commit -m "fix: do not permanently cache failed CSS-load probes"
 ### Task 4: Type `ANIMATION_TYPES` as `AnimationType[]`
 
 **Files:**
+
 - Modify: `src/lib/animations.js` (JSDoc on `ANIMATION_TYPES`)
 - Verify: `bun run build` then inspect `dist/animations.d.ts`; `bun run check`
 - Test: no behavior change — existing length/content tests remain the contract
 
 **Interfaces:**
+
 - Consumes: `AnimationType` from `types.js` (typedef only)
 - Produces: emitted `dist/animations.d.ts` uses `readonly AnimationType[]` (or `readonly import("./types.js").AnimationType[]`) instead of `readonly string[]`
 
@@ -318,6 +326,7 @@ git commit -m "types: annotate ANIMATION_TYPES as AnimationType[]"
 ### Task 5: Unreleased changelog + full verification
 
 **Files:**
+
 - Modify: `CHANGELOG.md` (`## [Unreleased]` only)
 - No version bump (`package.json` stays `5.0.0` until a real release cut)
 
@@ -373,15 +382,15 @@ EOF
 
 ## Spec coverage (self-check)
 
-| Audit finding | Task |
-|---------------|------|
-| P2 repeat off while intersecting | Task 1 |
-| P3 caller sentinel-id without debug | Task 2 |
-| P3 CSS check sticky false | Task 3 |
-| P3 ANIMATION_TYPES `string[]` | Task 4 |
-| Changelog honesty | Task 5 |
-| Publish/tag | **Excluded** (user choice) |
-| AOS | **Excluded** |
+| Audit finding                                         | Task                               |
+| ----------------------------------------------------- | ---------------------------------- |
+| P2 repeat off while intersecting                      | Task 1                             |
+| P3 caller sentinel-id without debug                   | Task 2                             |
+| P3 CSS check sticky false                             | Task 3                             |
+| P3 ANIMATION_TYPES `string[]`                         | Task 4                             |
+| Changelog honesty                                     | Task 5                             |
+| Publish/tag                                           | **Excluded** (user choice)         |
+| AOS                                                   | **Excluded**                       |
 | logo.png size / IO feature-detect / deep dist imports | **Excluded** (YAGNI for this plan) |
 
 ## Placeholder scan

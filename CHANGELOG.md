@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **`repeat: true` → `false` while intersecting** — latches one-shot completion (`hasTriggered`) so later updates do not reopen the observer.
+- **Caller `data-sentinel-id`** — preserved on destroy even when `debug` never ran.
+- **CSS-load probe** — a failed dev-time stylesheet check is no longer cached forever.
+- **`ANIMATION_TYPES` typing** — public type is `AnimationType[]` instead of `string[]`.
+
 ## [5.0.0] - 2026-07-31
 
 ### Breaking Changes
