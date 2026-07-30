@@ -37,12 +37,26 @@ function optionsMatch(left, right) {
 
 /**
  * @param {IntersectionObserverInit} options
+ * @returns {IntersectionObserverInit}
+ */
+function snapshotOptions(options) {
+  return {
+    ...options,
+    threshold: Array.isArray(options.threshold)
+      ? [...options.threshold]
+      : options.threshold,
+  };
+}
+
+/**
+ * @param {IntersectionObserverInit} options
  */
 function getRegistryEntry(options) {
+  const observerOptions = snapshotOptions(options);
   const existing = observerRegistry.find(
     (entry) =>
       entry.ObserverConstructor === IntersectionObserver &&
-      optionsMatch(entry.options, options),
+      optionsMatch(entry.options, observerOptions),
   );
   if (existing) return existing;
 
@@ -60,12 +74,12 @@ function getRegistryEntry(options) {
         }
       }
     }
-  }, options);
+  }, observerOptions);
 
   entry = {
     ObserverConstructor: IntersectionObserver,
     observer,
-    options: { ...options },
+    options: observerOptions,
     subscribers: new Map(),
   };
   const nativeDisconnect = observer.disconnect.bind(observer);
