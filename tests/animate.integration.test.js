@@ -153,6 +153,41 @@ describe("animate integration", () => {
     action.destroy();
   });
 
+  it("isolates callback errors across shared observers", () => {
+    const first = document.createElement("div");
+    const second = document.createElement("div");
+    document.body.append(first, second);
+    const errors = [];
+    const originalError = console.error;
+    console.error = (error) => errors.push(error);
+    let secondVisible = false;
+
+    const firstAction = animate(first, {
+      animation: "fade",
+      onVisible: () => {
+        throw new Error("first callback failed");
+      },
+    });
+    const secondAction = animate(second, {
+      animation: "fade",
+      repeat: true,
+      onVisible: () => {
+        secondVisible = true;
+      },
+    });
+
+    mockIntersectionObserver.triggerAll(true);
+
+    expect(secondVisible).toBe(true);
+    expect(mockIntersectionObserver.getObserverFor(first)).toBeUndefined();
+    expect(mockIntersectionObserver.getObserverFor(second)).toBeDefined();
+    expect(errors).toHaveLength(1);
+
+    console.error = originalError;
+    firstAction.destroy();
+    secondAction.destroy();
+  });
+
   it("shares observers with matching options and releases each target independently", () => {
     const first = document.createElement("div");
     const second = document.createElement("div");

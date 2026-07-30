@@ -286,11 +286,11 @@ export function animate(element, options = {}) {
 
       activateWillChange();
       element.classList.add("is-visible");
-      if (!currentOptions.repeat) hasTriggered = true;
-      currentOptions.onVisible?.(element);
       if (!currentOptions.repeat) {
+        hasTriggered = true;
         disconnectObserver(managedObserver, state);
       }
+      currentOptions.onVisible?.(element);
     } else {
       isIntersecting = false;
       if (!currentOptions.repeat) return;

@@ -53,7 +53,11 @@ function getRegistryEntry(options) {
       const callbacks = entry?.subscribers.get(intersectionEntry.target);
       if (!callbacks) continue;
       for (const callback of callbacks) {
-        callback([intersectionEntry], activeObserver);
+        try {
+          callback([intersectionEntry], activeObserver);
+        } catch (error) {
+          console.error("[rune-scroller] Observer callback failed", error);
+        }
       }
     }
   }, options);
