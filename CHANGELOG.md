@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.0.0] - 2026-07-31
+
 ### Breaking Changes
 
 - **Restructured around a framework-neutral core.** The root entry now exports `animate(element, options)`, a plain DOM API with deterministic `update()` and `destroy()` lifecycle methods. It is free of Svelte runtime imports, so a core-only installation does not require Svelte at runtime.
@@ -19,16 +21,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **AOS compatibility layer removed entirely.** The `./aos` export, the AOS implementation, AOS-specific tests, fixtures, and documentation are gone. There is no more `data-aos-*` attribute support, global AOS lifecycle (`init` / `refresh` / `refreshHard` / `disable` / `destroy`), anchor placement, or `MutationObserver` watching.
 - Removed all AOS migration and compatibility claims from the public contract and README.
 
+### Added
+
+- **`onHidden` callback** — fires in `repeat` mode only, after `is-visible` is removed when the element leaves the viewport.
+
 ### Changed
 
 - `RuneScrollerOptions` type renamed to `AnimateOptions`; added `AnimateHandle` return type.
 - The published animations, explicit `./animations.css` export, SSR safety, observer sharing, cleanup, and reduced-motion behavior are preserved.
+- Intersection composables (`useIntersection` / `useIntersectionOnce`) remain on `./svelte` with defaults `threshold: 0.5`, `rootMargin: '-10% 0px -10% 0px'`.
 
 ## [4.0.0] - 2026-05-05
 
 ### Breaking Changes
 
-- **Offset sign inverted** — Positive offset now triggers earlier (expands viewport top via `rootMargin`), matching AOS convention. Previously positive offset delayed the trigger.
+- **Offset sign inverted** — Positive offset now triggers earlier (expands viewport bottom via `rootMargin` `0px 0px ${offset}px 0px`), matching AOS convention. Previously positive offset delayed the trigger.
 - **Sentinel removed from observation** — IntersectionObserver now watches the element directly instead of an internal sentinel. This fixes animations being invisible inside `overflow:hidden` containers (e.g. rounded cards with transforms like `fade-up`, `zoom-in-up`).
 - **Sentinel only in debug mode** — The invisible sentinel element is no longer created by default. It only appears when `debug: true` is set, serving as a visual indicator.
 
@@ -38,12 +45,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`easing` option** — `easing: 'ease-in-out'` sets `--easing` on the element
 - **`threshold` option** — Control IntersectionObserver threshold (default: 0)
 - **`rootMargin` support** — Offset is now applied as `rootMargin` on the observer for reliable triggering
-- **`anchorPlacement` in AOS layer** — `top-bottom`, `center-center`, `bottom-top` sentinel positioning
-- **`mirror` option in AOS layer** — Reverse animation when element exits viewport
-- **`disable()` function in AOS layer** — Remove AOS attributes and stop observers
-- **`destroy()` function in AOS layer** — Full cleanup for SPA navigation
-- **TypeScript types for `/aos` export** — `aos.d.ts` with proper typing
-- **57 Playwright E2E tests** — 49 API tests + 8 integration tests on the real landing page
+- **`anchorPlacement` in AOS layer** — At 4.0.0 release: `top-bottom`, `center-center`, `bottom-top` sentinel positioning
+- **`mirror` option in AOS layer** — At 4.0.0 release: reverse animation when element exits viewport
+- **`disable()` function in AOS layer** — At 4.0.0 release: remove AOS attributes and stop observers
+- **`destroy()` function in AOS layer** — At 4.0.0 release: full cleanup for SPA navigation
+- **TypeScript types for `/aos` export** — At 4.0.0 release: `aos.d.ts` with proper typing
+- **57 Playwright E2E tests** — At 4.0.0 release: 49 API tests + 8 integration tests on the real landing page
   - Action API: opacity, classes, duration, delay, easing, offset, repeat, onVisible, debug, destroy, 13 animation types, prefers-reduced-motion
   - AOS compat: init, data attributes, once, mirror, global options, disable, destroy, refreshHard, legacy names, multiple elements
   - Landing integration: hydration, hero visibility, scroll triggering, animation validation, no console errors

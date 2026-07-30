@@ -14,7 +14,7 @@ const observerRegistry = [];
  * @param {IntersectionObserverInit["threshold"]} left
  * @param {IntersectionObserverInit["threshold"]} right
  */
-function thresholdsMatch(left, right) {
+export function thresholdsMatch(left, right) {
   const leftValues = Array.isArray(left) ? left : [left ?? 0];
   const rightValues = Array.isArray(right) ? right : [right ?? 0];
   return (

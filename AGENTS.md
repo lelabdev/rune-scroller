@@ -15,7 +15,9 @@ bun run format              # Apply Prettier formatting
 bun run build               # Build publishable package files into dist/
 ```
 
-**Verification sequence:** `bun run check && bun run test && bun run lint && bun run build`
+**Verification sequence:** `bun run lint && bun run check && bun run build && bun run test && bunx playwright test`
+
+Playwright E2E needs a prior `bun run build` so `dist/` is present. Landing-page browser tests use `playwright.landing.config.js` / optional `landing.yml`.
 
 ## Architecture
 
@@ -87,6 +89,16 @@ destroy() {
 - Use conventional commits, e.g. `fix: clean up mutation observer on destroy`.
 - Do not commit generated output, secrets, `node_modules/`, `.svelte-kit/`, or test results.
 - Run the verification sequence before committing changes to library behavior or public APIs.
+
+## Release (maintainer)
+
+1. `main` CI green
+2. `package.json` version + CHANGELOG `## [5.0.0]` dated and accurate
+3. `bun run lint && bun run check && bun run build && bun run test && bunx playwright test`
+4. `npm pack --ignore-scripts --dry-run` — no `aos`; includes `dist/svelte.js`, `logo.png`, `CHANGELOG.md`
+5. `npm publish`
+6. `git tag v5.0.0 && git push origin v5.0.0`
+7. GitHub Release from tag
 
 ## Boundaries
 

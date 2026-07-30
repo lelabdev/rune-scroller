@@ -6,12 +6,23 @@ import { spawnSync } from "node:child_process";
 const BASE = "http://localhost:3210";
 const root = resolve(import.meta.dirname, "..");
 
+async function waitVisibleState(page) {
+  await page.waitForFunction(() => window.__api?.visible() === true, null, {
+    timeout: 5000,
+  });
+}
+
+async function waitHiddenState(page) {
+  await page.waitForFunction(() => window.__api?.visible() === false, null, {
+    timeout: 5000,
+  });
+}
+
 async function scrollToSelector(page, selector) {
   await page.evaluate((sel) => {
     const el = document.querySelector(sel);
     el?.scrollIntoView({ block: "center" });
   }, selector);
-  await page.waitForTimeout(300);
 }
 
 test.describe("useIntersection browser composables", () => {
@@ -50,6 +61,7 @@ test.describe("useIntersection browser composables", () => {
     });
 
     await scrollToSelector(page, "#target");
+    await waitVisibleState(page);
 
     const state = await page.evaluate(() => ({
       visible: window.__api.visible(),
@@ -75,8 +87,9 @@ test.describe("useIntersection browser composables", () => {
     });
 
     await scrollToSelector(page, "#target");
+    await waitVisibleState(page);
     await page.evaluate(() => window.scrollTo(0, 0));
-    await page.waitForTimeout(300);
+    await waitHiddenState(page);
 
     const state = await page.evaluate(() => ({
       visible: window.__api.visible(),
@@ -103,8 +116,9 @@ test.describe("useIntersection browser composables", () => {
     });
 
     await scrollToSelector(page, "#target");
+    await waitVisibleState(page);
     await page.evaluate(() => window.scrollTo(0, 0));
-    await page.waitForTimeout(300);
+    await waitHiddenState(page);
 
     await page.evaluate(() => {
       window.__api.setTarget(document.getElementById("target-b"));
@@ -116,6 +130,7 @@ test.describe("useIntersection browser composables", () => {
     const before = await page.evaluate(() => window.__api.onceVisible());
     // may still be true from previous; scroll target-b into view
     await scrollToSelector(page, "#target-b");
+    await waitVisibleState(page);
 
     const after = await page.evaluate(() => ({
       once: window.__api.onceVisible(),

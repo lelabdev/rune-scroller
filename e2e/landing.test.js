@@ -18,7 +18,11 @@ test.describe("Landing page integration", () => {
       if (msg.type() === "error") console.log("CONSOLE ERROR:", msg.text());
     });
     await page.goto(LANDING);
-    await page.waitForTimeout(1500);
+    await page.waitForFunction(
+      () => document.querySelectorAll("[data-animation]").length >= 30,
+      null,
+      { timeout: 10000 },
+    );
   });
 
   test("hydrates 40 animated elements", async ({ page }) => {

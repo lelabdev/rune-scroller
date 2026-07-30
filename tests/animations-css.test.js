@@ -45,6 +45,12 @@ describe("animations.css", () => {
     expect(css).toContain("animation: rs-bounce var(--duration, 400ms)");
   });
 
+  it("uses fixed cubic-bezier for bounce-in (ignores easing)", () => {
+    expect(css).toMatch(
+      /rs-bounce[\s\S]*cubic-bezier\(0\.68,\s*-0\.55,\s*0\.265,\s*1\.55\)/,
+    );
+  });
+
   it("contains prefers-reduced-motion media query", () => {
     expect(css.includes("prefers-reduced-motion")).toBe(true);
   });

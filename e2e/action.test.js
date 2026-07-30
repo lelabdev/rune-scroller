@@ -3,6 +3,34 @@ import { ANIMATION_TYPES } from "../dist/animations.js";
 
 const BASE = "http://localhost:3210";
 
+async function waitVisible(page, selector = "#target") {
+  await page.waitForFunction(
+    (sel) => document.querySelector(sel)?.classList.contains("is-visible"),
+    selector,
+    { timeout: 5000 },
+  );
+}
+
+async function waitNotVisible(page, selector = "#target") {
+  await page.waitForFunction(
+    (sel) => !document.querySelector(sel)?.classList.contains("is-visible"),
+    selector,
+    { timeout: 5000 },
+  );
+}
+
+async function waitOpacityAbove(page, selector = "#target", min = 0.9) {
+  await page.waitForFunction(
+    ({ sel, floor }) => {
+      const el = document.querySelector(sel);
+      if (!el) return false;
+      return Number(getComputedStyle(el).opacity) > floor;
+    },
+    { sel: selector, floor: min },
+    { timeout: 5000 },
+  );
+}
+
 /**
  * Navigate to action test page, optionally replace #content, then load module + run script
  */
@@ -44,7 +72,6 @@ async function setupActionPage(page, { html, script } = {}) {
  */
 async function scrollToTarget(page) {
   await page.evaluate(() => window.scrollTo(0, window.innerHeight));
-  await page.waitForTimeout(300);
 }
 
 // ============================================================
@@ -88,6 +115,7 @@ test.describe("runeScroller action", () => {
       script: `rs(document.getElementById('target'), { animation: 'fade-up' });`,
     });
     await scrollToTarget(page);
+    await waitVisible(page);
     const hasClass = await page.$eval("#target", (el) =>
       el.classList.contains("is-visible"),
     );
@@ -99,7 +127,8 @@ test.describe("runeScroller action", () => {
       script: `rs(document.getElementById('target'), { animation: 'fade-up' });`,
     });
     await scrollToTarget(page);
-    await page.waitForTimeout(500);
+    await waitVisible(page);
+    await waitOpacityAbove(page);
     const opacity = await page.$eval(
       "#target",
       (el) => getComputedStyle(el).opacity,
@@ -169,13 +198,14 @@ test.describe("repeat mode", () => {
     });
 
     await scrollToTarget(page);
+    await waitVisible(page);
     let hasClass = await page.$eval("#target", (el) =>
       el.classList.contains("is-visible"),
     );
     expect(hasClass).toBe(true);
 
     await page.evaluate(() => window.scrollTo(0, 0));
-    await page.waitForTimeout(300);
+    await waitNotVisible(page);
     hasClass = await page.$eval("#target", (el) =>
       el.classList.contains("is-visible"),
     );
@@ -188,8 +218,9 @@ test.describe("repeat mode", () => {
     });
 
     await scrollToTarget(page);
+    await waitVisible(page);
     await page.evaluate(() => window.scrollTo(0, 0));
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(100);
     const hasClass = await page.$eval("#target", (el) =>
       el.classList.contains("is-visible"),
     );
@@ -214,6 +245,7 @@ test.describe("onVisible callback", () => {
     });
 
     await scrollToTarget(page);
+    await waitVisible(page);
     const fired = await page.evaluate(() => window.__callbackFired);
     expect(fired).toBe(true);
   });
@@ -230,6 +262,7 @@ test.describe("onVisible callback", () => {
     });
 
     await scrollToTarget(page);
+    await waitVisible(page);
     const tag = await page.evaluate(() => window.__receivedTag);
     expect(tag).toBe("DIV");
   });
@@ -257,8 +290,9 @@ test.describe("onHidden callback", () => {
     });
 
     await scrollToTarget(page);
+    await waitVisible(page);
     await page.evaluate(() => window.scrollTo(0, 0));
-    await page.waitForTimeout(300);
+    await waitNotVisible(page);
     const result = await page.evaluate(() => ({
       fired: window.__hiddenFired,
       tag: window.__hiddenTag,
@@ -280,8 +314,9 @@ test.describe("onHidden callback", () => {
     });
 
     await scrollToTarget(page);
+    await waitVisible(page);
     await page.evaluate(() => window.scrollTo(0, 0));
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(100);
     const fired = await page.evaluate(() => window.__hiddenFired);
     expect(fired).toBe(false);
   });
@@ -299,7 +334,69 @@ test.describe("offset", () => {
 
     // Scroll partially — offset should make it trigger sooner
     await page.evaluate(() => window.scrollTo(0, window.innerHeight * 0.5));
-    await page.waitForTimeout(300);
+    await waitVisible(page);
+    const hasClass = await page.$eval("#target", (el) =>
+      el.classList.contains("is-visible"),
+    );
+    expect(hasClass).toBe(true);
+  });
+});
+
+// ============================================================
+// Observer options
+// ============================================================
+
+test.describe("observer options", () => {
+  test("observerTarget triggers without scrolling the animated element", async ({
+    page,
+  }) => {
+    await setupActionPage(page, {
+      html: `
+				<div id="target" style="width:200px;height:100px;background:teal;color:white">animated</div>
+				<div id="obs" style="position:fixed;top:0;left:0;width:10px;height:10px;background:red"></div>
+			`,
+      script: `rs(document.getElementById('target'), { animation: 'fade', observerTarget: document.getElementById('obs') });`,
+    });
+
+    await waitVisible(page, "#target");
+    const hasClass = await page.$eval("#target", (el) =>
+      el.classList.contains("is-visible"),
+    );
+    expect(hasClass).toBe(true);
+  });
+
+  test("without observerTarget stays hidden at scroll 0", async ({ page }) => {
+    await setupActionPage(page, {
+      script: `rs(document.getElementById('target'), { animation: 'fade' });`,
+    });
+
+    const hasClass = await page.$eval("#target", (el) =>
+      el.classList.contains("is-visible"),
+    );
+    expect(hasClass).toBe(false);
+  });
+
+  test("large rootMargin triggers off-screen target at scroll 0", async ({
+    page,
+  }) => {
+    await setupActionPage(page, {
+      script: `rs(document.getElementById('target'), { animation: 'fade', rootMargin: '10000px 0px 10000px 0px' });`,
+    });
+
+    await waitVisible(page, "#target");
+    const hasClass = await page.$eval("#target", (el) =>
+      el.classList.contains("is-visible"),
+    );
+    expect(hasClass).toBe(true);
+  });
+
+  test("threshold 0 still animates on scroll", async ({ page }) => {
+    await setupActionPage(page, {
+      script: `rs(document.getElementById('target'), { animation: 'fade', threshold: 0 });`,
+    });
+
+    await scrollToTarget(page);
+    await waitVisible(page);
     const hasClass = await page.$eval("#target", (el) =>
       el.classList.contains("is-visible"),
     );
@@ -352,7 +449,8 @@ test.describe("animation types", () => {
       expect(before.animation).toBe(anim);
 
       await scrollToTarget(page);
-      await page.waitForTimeout(anim === "bounce-in" ? 700 : 500);
+      await waitVisible(page);
+      await waitOpacityAbove(page);
 
       const after = await page.$eval("#target", (el) => ({
         hasVisible: el.classList.contains("is-visible"),
@@ -403,7 +501,8 @@ test.describe("prefers-reduced-motion", () => {
     });
 
     await scrollToTarget(page);
-    await page.waitForTimeout(200);
+    await waitVisible(page);
+    await waitOpacityAbove(page);
 
     const opacity = await page.$eval(
       "#target",
