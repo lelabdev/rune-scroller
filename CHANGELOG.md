@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Caller `data-sentinel-id`** — preserved on destroy even when `debug` never ran.
 - **CSS-load probe** — a failed dev-time stylesheet check is no longer cached forever.
 - **`ANIMATION_TYPES` typing** — public type is `AnimationType[]` instead of `string[]`.
+- **Published logo.png** — resized/compressed so the npm tarball is no longer dominated by a 600KB+ asset.
+- **E2E** — overflow:hidden card child visibility and dynamic multi-element destroy/sibling lifecycle.
 
 ## [5.0.0] - 2026-07-31
 

@@ -405,6 +405,117 @@ test.describe("observer options", () => {
 });
 
 // ============================================================
+// Real-world layout & lifecycle
+// ============================================================
+
+test.describe("real-world layout and lifecycle", () => {
+  test("animates inside overflow:hidden rounded container", async ({
+    page,
+  }) => {
+    await setupActionPage(page, {
+      html: `
+				<div id="card" style="overflow:hidden;border-radius:16px;width:220px;height:120px;background:#111">
+					<div id="target" style="width:200px;height:100px;margin:10px;background:teal;color:white">card child</div>
+				</div>
+			`,
+      script: `rs(document.getElementById('target'), { animation: 'fade', duration: 200 });`,
+    });
+
+    const before = await page.$eval("#target", (el) =>
+      el.classList.contains("is-visible"),
+    );
+    expect(before).toBe(false);
+
+    await scrollToTarget(page);
+    await waitVisible(page, "#target");
+    await waitOpacityAbove(page, "#target");
+
+    const after = await page.$eval("#target", (el) => ({
+      visible: el.classList.contains("is-visible"),
+      opacity: Number(getComputedStyle(el).opacity),
+      hasScrollAnimate: el.classList.contains("scroll-animate"),
+    }));
+    expect(after.visible).toBe(true);
+    expect(after.hasScrollAnimate).toBe(true);
+    expect(after.opacity).toBeGreaterThan(0.9);
+  });
+
+  test("dynamic multi-element create destroy leaves siblings healthy", async ({
+    page,
+  }) => {
+    await setupActionPage(page, {
+      html: `
+				<div id="target-a" style="width:200px;height:80px;background:teal;color:white;margin-bottom:24px">A</div>
+				<div id="target-b" style="width:200px;height:80px;background:purple;color:white;margin-bottom:24px">B</div>
+				<div id="target-c" style="width:200px;height:80px;background:orange;color:white">C</div>
+			`,
+      script: `
+				window.__handles = {
+					a: rs(document.getElementById('target-a'), { animation: 'fade', repeat: true }),
+					b: rs(document.getElementById('target-b'), { animation: 'fade-up', repeat: true }),
+					c: rs(document.getElementById('target-c'), { animation: 'zoom-in', repeat: true }),
+				};
+			`,
+    });
+
+    await page.evaluate(() => {
+      document.getElementById("target-b")?.scrollIntoView({ block: "center" });
+    });
+    await waitVisible(page, "#target-b");
+
+    // Tear down middle handle (dynamic list item removed)
+    await page.evaluate(() => {
+      window.__handles.b.destroy();
+      document.getElementById("target-b")?.remove();
+    });
+
+    await page.evaluate(() => {
+      document.getElementById("target-a")?.scrollIntoView({ block: "center" });
+    });
+    await waitVisible(page, "#target-a");
+
+    await page.evaluate(() => {
+      document.getElementById("target-c")?.scrollIntoView({ block: "center" });
+    });
+    await waitVisible(page, "#target-c");
+
+    const state = await page.evaluate(() => ({
+      a: document.getElementById("target-a")?.classList.contains("is-visible"),
+      c: document.getElementById("target-c")?.classList.contains("is-visible"),
+      bGone: !document.getElementById("target-b"),
+      aAnim: document
+        .getElementById("target-a")
+        ?.classList.contains("scroll-animate"),
+      cAnim: document
+        .getElementById("target-c")
+        ?.classList.contains("scroll-animate"),
+    }));
+    expect(state.bGone).toBe(true);
+    expect(state.a).toBe(true);
+    expect(state.c).toBe(true);
+    expect(state.aAnim).toBe(true);
+    expect(state.cAnim).toBe(true);
+
+    // Full cleanup of remaining handles
+    await page.evaluate(() => {
+      window.__handles.a.destroy();
+      window.__handles.c.destroy();
+    });
+
+    const cleaned = await page.evaluate(() => ({
+      aAnim: document
+        .getElementById("target-a")
+        ?.classList.contains("scroll-animate"),
+      cAnim: document
+        .getElementById("target-c")
+        ?.classList.contains("scroll-animate"),
+    }));
+    expect(cleaned.aAnim).toBe(false);
+    expect(cleaned.cAnim).toBe(false);
+  });
+});
+
+// ============================================================
 // Debug mode
 // ============================================================
 
