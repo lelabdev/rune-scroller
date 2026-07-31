@@ -7,15 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
-
-- **`repeat: true` → `false` while intersecting** — latches one-shot completion (`hasTriggered`) so later updates do not reopen the observer.
-- **Caller `data-sentinel-id`** — preserved on destroy even when `debug` never ran.
-- **CSS-load probe** — a failed dev-time stylesheet check is no longer cached forever.
-- **`ANIMATION_TYPES` typing** — public type is `AnimationType[]` instead of `string[]`.
-- **Published logo.png** — resized/compressed so the npm tarball is no longer dominated by a 600KB+ asset.
-- **E2E** — overflow:hidden card child visibility and dynamic multi-element destroy/sibling lifecycle.
-
 ## [5.0.0] - 2026-07-31
 
 ### Breaking Changes
@@ -39,6 +30,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `RuneScrollerOptions` type renamed to `AnimateOptions`; added `AnimateHandle` return type.
 - The published animations, explicit `./animations.css` export, SSR safety, observer sharing, cleanup, and reduced-motion behavior are preserved.
 - Intersection composables (`useIntersection` / `useIntersectionOnce`) remain on `./svelte` with defaults `threshold: 0.5`, `rootMargin: '-10% 0px -10% 0px'`.
+- **Published logo.png** — resized/compressed so the npm tarball is no longer dominated by a 600KB+ asset.
+
+### Fixed
+
+- **`repeat: true` → `false` while intersecting** — latches one-shot completion (`hasTriggered`) so later updates do not reopen the observer.
+- **Caller `data-sentinel-id`** — preserved on destroy even when `debug` never ran.
+- **CSS-load probe** — a failed dev-time stylesheet check is no longer cached forever.
+- **`ANIMATION_TYPES` typing** — public type is `AnimationType[]` instead of `string[]`.
+- **E2E coverage** — overflow:hidden card child visibility and dynamic multi-element destroy/sibling lifecycle.
 
 ## [4.0.0] - 2026-05-05
 
